@@ -13,11 +13,14 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import net.java.gotr4j.*;
+import net.java.gotr4j.crypto.*;
 import net.java.sip.communicator.plugin.desktoputil.*;
 import net.java.sip.communicator.service.contactlist.*;
 import net.java.sip.communicator.service.gui.*;
 import net.java.sip.communicator.service.gui.Container;
 import net.java.sip.communicator.service.protocol.*;
+import net.java.sip.communicator.util.Logger;
 
 /**
  * @author George Politis
@@ -29,11 +32,16 @@ public class OtrMetaContactMenu
                PopupMenuListener
 {
 
+    private static final Logger logger = Logger.getLogger(
+            OtrMetaContactMenu.class);
+
     /**
      * The last known <tt>MetaContact</tt> to be currently selected and to be
      * depicted by this instance and the <tt>OtrContactMenu</tt>s it contains.
      */
     private MetaContact currentContact;
+
+    private ScGotrSessionHost currentChatRoomSession;
 
     /**
      * The indicator which determines whether the <tt>JMenu</tt> of this
@@ -48,6 +56,8 @@ public class OtrMetaContactMenu
      */
     private JMenu menu;
 
+    private final ScGotrSessionManager gotrSessionManager;
+
     /**
      * The "What's this?" <tt>JMenuItem</tt> which launches help on the subject
      * of off-the-record messaging.
@@ -55,9 +65,11 @@ public class OtrMetaContactMenu
     private JMenuItem whatsThis;
 
     public OtrMetaContactMenu(Container container,
-                              PluginComponentFactory parentFactory)
+                              PluginComponentFactory parentFactory,
+                              ScGotrSessionManager gotrSessionManager)
     {
         super(container, parentFactory);
+        this.gotrSessionManager = gotrSessionManager;
 
         inMacOSXScreenMenuBar =
             Container.CONTAINER_CHAT_MENU_BAR.equals(container)
@@ -200,7 +212,7 @@ public class OtrMetaContactMenu
      */
     public void popupMenuCanceled(PopupMenuEvent e)
     {
-        createOtrContactMenus(null);
+        menu.removeAll();
     }
 
     /*
@@ -217,7 +229,14 @@ public class OtrMetaContactMenu
      */
     public void popupMenuWillBecomeVisible(PopupMenuEvent e)
     {
-        createOtrContactMenus(currentContact);
+        if(currentChatRoomSession != null)
+        {
+            createGotrMenu(currentChatRoomSession);
+        }
+        else if(currentContact != null)
+        {
+            createOtrContactMenus(currentContact);
+        }
 
         JMenu menu = getMenu();
 
@@ -240,6 +259,7 @@ public class OtrMetaContactMenu
     @Override
     public void setCurrentContact(MetaContact metaContact)
     {
+        currentChatRoomSession = null;
         if (this.currentContact != metaContact)
         {
             this.currentContact = metaContact;
@@ -248,6 +268,119 @@ public class OtrMetaContactMenu
                 popupMenuWillBecomeVisible(null);
             else if ((menu != null) && menu.isPopupMenuVisible())
                 createOtrContactMenus(currentContact);
+        }
+    }
+
+    @Override
+    public void setCurrentChatRoom(ChatRoom chatRoom) {
+        currentChatRoomSession = gotrSessionManager.getGotrSessionHost(chatRoom);
+        currentContact = null;
+
+        if(inMacOSXScreenMenuBar)
+        {
+            popupMenuWillBecomeVisible(null);
+        }
+        else if(menu != null && menu.isPopupMenuVisible())
+        {
+            createGotrMenu(currentChatRoomSession);
+        }
+    }
+
+    private void createGotrMenu(final ScGotrSessionHost currentChatRoomSession) {
+        final JMenu menu = getMenu();
+        menu.removeAll();
+
+        if(currentChatRoomSession.getSession().getState()
+                .equals(GotrSessionState.PLAINTEXT))
+        {
+            JMenuItem startItem = new JMenuItem();
+            startItem.setText(OtrActivator.resourceService
+                    .getI18NString("plugin.otr.menu.START_OTR"));
+            startItem.addActionListener(new ActionListener()
+            {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent)
+                {
+                    try
+                    {
+                        currentChatRoomSession.getSession().start();
+                    } catch (GotrException e)
+                    {
+                        logger.error("Unable to start session", e);
+                    }
+                }
+            });
+            menu.add(startItem);
+        }
+        else
+        {
+
+            final JMenu authenticatedMenu = new JMenu();
+            authenticatedMenu.setText("Authenticated");
+
+            for (ChatRoomMember member : currentChatRoomSession.getChatRoomMembers())
+
+            {
+                authenticatedMenu.add(
+                        new GotrUserMenuItem(currentChatRoomSession, member));
+            }
+            menu.add(authenticatedMenu);
+
+            JMenuItem finishItem = new JMenuItem();
+            finishItem.setText(OtrActivator.resourceService
+                    .getI18NString("plugin.otr.menu.END_OTR"));
+            finishItem.addActionListener(new ActionListener()
+            {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent)
+                {
+                    try
+                    {
+                        currentChatRoomSession.getSession().end();
+                    } catch (GotrException e)
+                    {
+                        logger.error("Unable to end session", e);
+                    }
+                }
+            });
+            menu.add(finishItem);
+        }
+    }
+
+    private class GotrUserMenuItem
+        extends JMenuItem
+        implements ActionListener
+    {
+
+        private final ScGotrSessionHost sessionHost;
+        private final ChatRoomMember member;
+
+        private GotrUserMenuItem(ScGotrSessionHost sessionHost,
+                                 ChatRoomMember member) {
+            this.sessionHost = sessionHost;
+            this.member = member;
+
+
+            this.setText(member.getName());
+
+            Icon icon;
+            if(sessionHost.authenticated(member))
+            {
+                icon = OtrActivator.resourceService.getImage(
+                        "plugin.otr.ENCRYPTED_ICON_16x16");
+            }
+            else
+            {
+                icon = OtrActivator.resourceService.getImage(
+                        "plugin.otr.ENCRYPTED_UNVERIFIED_ICON_16x16");
+            }
+            this.setIcon(icon);
+            this.addActionListener(this);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            SwingOtrActionHandler.openAuthDialog(sessionHost, member);
         }
     }
 }

@@ -172,7 +172,7 @@ public abstract class AbstractOperationSetBasicInstantMessaging
      * @param evt the <tt>EventObject</tt> that we'd like delivered to all
      *            registered message listeners.
      */
-    protected void fireMessageEvent(EventObject evt)
+    protected void fireMessageEvent(MessageEvent evt)
     {
         Collection<MessageListener> listeners = null;
         synchronized (this.messageListeners)
@@ -184,29 +184,9 @@ public abstract class AbstractOperationSetBasicInstantMessaging
             logger.debug("Dispatching Message Listeners=" + listeners.size()
             + " evt=" + evt);
 
-        /*
-         * TODO Create a super class like this MessageEventObject that would
-         * contain the MessageEventType. Also we could fire an event for the
-         * MessageDeliveryPending event type (modify MessageListener and
-         * OperationSetInstantMessageTransform).
-         */
-        MessageEventType eventType = MessageEventType.None;
-        if (evt instanceof MessageDeliveredEvent)
-        {
-            eventType = MessageEventType.MessageDelivered;
-        }
-        else if (evt instanceof MessageReceivedEvent)
-        {
-            eventType = MessageEventType.MessageReceived;
-        }
-        else if (evt instanceof MessageDeliveryFailedEvent)
-        {
-            eventType = MessageEventType.MessageDeliveryFailed;
-        }
-
         // Transform the event.
-        EventObject[] events = messageTransform(evt, eventType);
-        for (EventObject event : events)
+        MessageEvent[] events = messageTransform(evt);
+        for (MessageEvent event : events)
         {
             try
             {
@@ -215,24 +195,18 @@ public abstract class AbstractOperationSetBasicInstantMessaging
 
                 for (MessageListener listener : listeners)
                 {
-                    switch (eventType)
+                    if(event instanceof MessageDeliveredEvent)
                     {
-                    case MessageDelivered:
                         listener.messageDelivered((MessageDeliveredEvent) event);
-                        break;
-                    case MessageDeliveryFailed:
+                    }
+                    else if(event instanceof MessageDeliveryFailedEvent)
+                    {
                         listener
-                            .messageDeliveryFailed((MessageDeliveryFailedEvent) event);
-                        break;
-                    case MessageReceived:
+                                .messageDeliveryFailed((MessageDeliveryFailedEvent) event);
+                    }
+                    else if(event instanceof MessageReceivedEvent)
+                    {
                         listener.messageReceived((MessageReceivedEvent) event);
-                        break;
-                    default:
-                        /*
-                         * We either have nothing to do or we do not know what
-                         * to do. Anyway, we'll silence the compiler.
-                         */
-                        break;
                     }
                 }
             }
@@ -277,15 +251,14 @@ public abstract class AbstractOperationSetBasicInstantMessaging
      * @param evt the message delivery event
      * @return returns message delivery events
      */
-    public MessageDeliveredEvent[] messageDeliveryPendingTransform(
-            final MessageDeliveredEvent evt)
+    public MessageDeliveryPendingEvent[] messageDeliveryPendingTransform(
+            final MessageDeliveryPendingEvent evt)
     {
-        EventObject[] transformed = messageTransform(
-            evt, MessageEventType.MessageDeliveryPending);
+        MessageEvent[] transformed = messageTransform(evt);
 
         final int size = transformed.length;
-        MessageDeliveredEvent[] events =
-            new MessageDeliveredEvent[size];
+        MessageDeliveryPendingEvent[] events =
+            new MessageDeliveryPendingEvent[size];
         System.arraycopy(transformed, 0, events, 0, size);
         return events;
     }
@@ -295,124 +268,26 @@ public abstract class AbstractOperationSetBasicInstantMessaging
      * sequence.
      *
      * @param evt the source event to transform
-     * @param eventType the event type of the source event
      * @return returns the resulting (transformed) events, if any. (I.e. an
      *         array of 0 or more size containing events.)
      */
-    private EventObject[] messageTransform(final EventObject evt,
-                                           final MessageEventType eventType)
+    private MessageEvent[] messageTransform(final MessageEvent evt)
     {
         if (evt == null)
         {
-            return new EventObject[0];
+            return new MessageEvent[0];
         }
-        ProtocolProviderService protocolProvider;
-        switch (eventType)
-        {
-        case MessageDelivered:
-            protocolProvider
-                = ((MessageDeliveredEvent) evt)
-                    .getDestinationContact().getProtocolProvider();
-            break;
-        case MessageDeliveryFailed:
-            protocolProvider
-                = ((MessageDeliveryFailedEvent) evt)
-                    .getDestinationContact().getProtocolProvider();
-            break;
-        case MessageDeliveryPending:
-            protocolProvider
-                = ((MessageDeliveredEvent) evt)
-                    .getDestinationContact().getProtocolProvider();
-            break;
-        case MessageReceived:
-            protocolProvider
-                = ((MessageReceivedEvent) evt)
-                    .getSourceContact().getProtocolProvider();
-            break;
-        default:
-            return new EventObject[] {evt};
-        }
+        ProtocolProviderService protocolProvider = evt.getProtocolProvider();
 
-        OperationSetInstantMessageTransformImpl opSetMessageTransform
-            = (OperationSetInstantMessageTransformImpl) protocolProvider
-                .getOperationSet(OperationSetInstantMessageTransform.class);
+        OperationSetMessageTransform opSetMessageTransform =
+                protocolProvider
+                .getOperationSet(OperationSetMessageTransform.class);
 
         if (opSetMessageTransform == null)
-            return new EventObject[] {evt};
+            return new MessageEvent[] {evt};
+        else
+            return opSetMessageTransform.transform(evt);
 
-        // 'current' contains the events that need to be transformed. It should
-        // not contain null values.
-        final LinkedList<EventObject> current = new LinkedList<EventObject>();
-        // Add source event as start of transformation.
-        current.add(evt);
-        // 'next' contains the resulting events after transformation in the
-        // current iteration. It should not contain null values.
-        final LinkedList<EventObject> next = new LinkedList<EventObject>();
-        for (Map.Entry<Integer, Vector<TransformLayer>> entry
-                : opSetMessageTransform.transformLayers.entrySet())
-        {
-            for (TransformLayer transformLayer : entry.getValue())
-            {
-                next.clear();
-                while (!current.isEmpty())
-                {
-                    final EventObject event = current.remove();
-                    switch (eventType)
-                    {
-                    case MessageDelivered:
-                        MessageDeliveredEvent transformedDelivered =
-                            transformLayer.messageDelivered(
-                                (MessageDeliveredEvent) event);
-                        if (transformedDelivered != null)
-                        {
-                            next.add(transformedDelivered);
-                        }
-                        break;
-                    case MessageDeliveryPending:
-                        MessageDeliveredEvent[] evts = transformLayer
-                            .messageDeliveryPending(
-                                (MessageDeliveredEvent) event);
-                        for (MessageDeliveredEvent mde : evts)
-                        {
-                            if (mde != null)
-                            {
-                                next.add(mde);
-                            }
-                        }
-                        break;
-                    case MessageDeliveryFailed:
-                        MessageDeliveryFailedEvent transformedDeliveryFailed =
-                            transformLayer.messageDeliveryFailed(
-                                (MessageDeliveryFailedEvent) event);
-                        if (transformedDeliveryFailed != null)
-                        {
-                            next.add(transformedDeliveryFailed);
-                        }
-                        break;
-                    case MessageReceived:
-                        MessageReceivedEvent transformedReceived =
-                            transformLayer
-                                .messageReceived((MessageReceivedEvent) event);
-                        if (transformedReceived != null)
-                        {
-                            next.add(transformedReceived);
-                        }
-                        break;
-                    default:
-                        next.add(event);
-                        /*
-                         * We either have nothing to do or we do not know
-                         * what to do. Anyway, we'll silence the compiler.
-                         */
-                        break;
-                    }
-                }
-                // Set events for next round of transformations.
-                current.addAll(next);
-            }
-        }
-
-        return current.toArray(new EventObject[current.size()]);
     }
 
     /**

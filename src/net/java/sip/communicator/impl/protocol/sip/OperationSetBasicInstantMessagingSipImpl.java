@@ -476,10 +476,10 @@ public class OperationSetBasicInstantMessagingSipImpl
     private Message[] transformSIPMessage(final Contact to,
         final Message message)
     {
-        MessageDeliveredEvent msgDeliveryPendingEvt
-           = new MessageDeliveredEvent(message, to);
+        MessageDeliveryPendingEvent msgDeliveryPendingEvt
+           = new MessageDeliveryPendingEvent(message, to);
 
-        MessageDeliveredEvent[] msgDeliveryPendingEvts =
+        MessageDeliveryPendingEvent[] msgDeliveryPendingEvts =
             messageDeliveryPendingTransform(msgDeliveryPendingEvt);
 
         if (msgDeliveryPendingEvts == null
@@ -496,7 +496,7 @@ public class OperationSetBasicInstantMessagingSipImpl
             new Message[msgDeliveryPendingEvts.length];
         for (int i = 0; i < msgDeliveryPendingEvts.length; i++)
         {
-            MessageDeliveredEvent event = msgDeliveryPendingEvts[i];
+            MessageDeliveryPendingEvent event = msgDeliveryPendingEvts[i];
             String content = event.getSourceMessage().getContent();
             transformedMessages[i] =
                 opSetBasicIM.createMessage(content, message.getContentType(),

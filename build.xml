@@ -2547,8 +2547,10 @@ org.bouncycastle.util"/>
             <zipfileset dir="${dest}/net/java/sip/communicator/plugin/otr"
                 prefix="net/java/sip/communicator/plugin/otr"/>
             <zipfileset src="${lib.noinst}/otr4j.jar"/>
+            <zipfileset src="${lib.noinst}/gotr4j.jar"/>
         </jar>
     </target>
+	
     <!--BUNDLE-METAHISTORY-SLICK-->
     <target name="bundle-metahistory-slick">
         <jar compress="false" destfile="${bundles.dest}/metahistory-slick.jar"

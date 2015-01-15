@@ -67,7 +67,7 @@ public interface TransformLayer
      * determined that there are no message event that should be delivered to
      * the upper layers.
      */
-    public MessageDeliveredEvent[] messageDeliveryPending(MessageDeliveredEvent evt);
+    public MessageDeliveryPendingEvent[] messageDeliveryPending(MessageDeliveryPendingEvent evt);
 
     /**
      * Called when the underlying implementation has received an indication
@@ -111,4 +111,19 @@ public interface TransformLayer
      */
     public MessageDeliveryFailedEvent
                         messageDeliveryFailed(MessageDeliveryFailedEvent evt);
+
+    /**
+     * Called when a {@link Message} is received in a {@link ChatRoom}.
+     *
+     * @param evt the <tt>Message</tt> that was received.
+     * @return the transformed <tt>ChatRoomMessageReceivedEvent</tt> to pass on.
+     */
+    public ChatRoomMessageReceivedEvent chatRoomMessageReceived(
+            ChatRoomMessageReceivedEvent evt);
+
+    public ChatRoomMessageDeliveryPendingEvent chatRoomMessageDeliveryPending(
+            ChatRoomMessageDeliveryPendingEvent evt);
+
+    public ChatRoomMessageDeliveredEvent chatRoomMessageDelivered(
+            ChatRoomMessageDeliveredEvent evt);
 }

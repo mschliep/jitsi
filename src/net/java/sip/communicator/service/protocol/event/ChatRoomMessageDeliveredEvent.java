@@ -18,7 +18,7 @@ import net.java.sip.communicator.service.protocol.*;
  * @author Yana Stamcheva
  */
 public class ChatRoomMessageDeliveredEvent
-    extends EventObject
+    extends ChatRoomMessageEvent
 {
     /**
      * Serial version UID.
@@ -47,11 +47,6 @@ public class ChatRoomMessageDeliveredEvent
      private final Date timestamp;
 
      /**
-      * The received <tt>Message</tt>.
-      */
-     private Message message = null;
-
-     /**
       * The type of message event that this instance represents.
       */
      private int eventType = -1;
@@ -77,20 +72,10 @@ public class ChatRoomMessageDeliveredEvent
                                           Message   message,
                                           int       eventType)
      {
-         super(source);
+         super(source, message);
 
          this.timestamp = timestamp;
-         this.message = message;
          this.eventType = eventType;
-     }
-
-     /**
-      * Returns the received message.
-      * @return the <tt>Message</tt> that triggered this event.
-      */
-     public Message getMessage()
-     {
-         return message;
      }
 
      /**

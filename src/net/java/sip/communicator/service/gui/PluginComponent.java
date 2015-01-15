@@ -112,8 +112,18 @@ public interface PluginComponent
     public void setCurrentAccountID(AccountID accountID);
 
     /**
+     * Sets the current ChatRoom. Meant to be used by plugin components that are
+     * interested in the current ChatRoom. The current chat room is that chat room
+     * currently displayed, or null if the current chat is not a ChatRoom.
+     *
+     * @param chatRoom the current ChatRoom
+     */
+    public void setCurrentChatRoom(ChatRoom chatRoom);
+
+    /**
      * Returns the factory that has created the component.
      * @return the parent factory.
      */
     public PluginComponentFactory getParentFactory();
+
 }

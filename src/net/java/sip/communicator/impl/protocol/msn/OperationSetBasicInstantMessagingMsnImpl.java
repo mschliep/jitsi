@@ -123,8 +123,8 @@ public class OperationSetBasicInstantMessagingMsnImpl
                "The specified contact is not an MSN contact."
                + to);
 
-        MessageDeliveredEvent[] transformedEvents = messageDeliveryPendingTransform(
-            new MessageDeliveredEvent(message, to));
+        MessageDeliveryPendingEvent[] transformedEvents = messageDeliveryPendingTransform(
+            new MessageDeliveryPendingEvent(message, to));
 
         if (transformedEvents == null || transformedEvents.length == 0)
             return;
@@ -142,7 +142,7 @@ public class OperationSetBasicInstantMessagingMsnImpl
             senderThread.start();
         }
 
-        for (MessageDeliveredEvent event : transformedEvents)
+        for (MessageDeliveryPendingEvent event : transformedEvents)
         {
             senderThread.sendMessage((ContactMsnImpl) to, event
                 .getSourceMessage().getContent());

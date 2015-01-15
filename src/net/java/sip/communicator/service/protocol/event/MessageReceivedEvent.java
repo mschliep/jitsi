@@ -16,7 +16,7 @@ import net.java.sip.communicator.service.protocol.*;
  * @author Emil Ivov
  */
 public class MessageReceivedEvent
-    extends EventObject
+    extends MessageEvent
 {
     /**
      * Serial version UID.
@@ -370,4 +370,9 @@ public class MessageReceivedEvent
     }
 
 
+    @Override
+    public ProtocolProviderService getProtocolProvider()
+    {
+        return from.getProtocolProvider();
+    }
 }

@@ -600,8 +600,8 @@ public class ProtocolProviderServiceSipImpl
                         opSetTypingNotif);
 
                     addSupportedOperationSet(
-                        OperationSetInstantMessageTransform.class,
-                        new OperationSetInstantMessageTransformImpl());
+                        OperationSetMessageTransform.class,
+                        new OperationSetMessageTransformImpl());
                 }
 
                 this.opSetSSAccountInfo =

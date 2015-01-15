@@ -1638,6 +1638,11 @@ public class ChatWritePanel
                                 contact,
                                 currentTransport.getResourceName());
                     }
+                    else if(currentDescriptor instanceof ChatRoom)
+                    {
+                        ChatRoom chatRoom = (ChatRoom) currentDescriptor;
+                        component.setCurrentChatRoom(chatRoom);
+                    }
                 }
 
                 Object c = component.getComponent();
@@ -1690,6 +1695,11 @@ public class ChatWritePanel
 
                 component.setCurrentContact(
                     contact, currentTransport.getResourceName());
+            }
+            else if(currentDescriptor instanceof ChatRoom)
+            {
+                ChatRoom chatRoom = (ChatRoom) currentDescriptor;
+                component.setCurrentChatRoom(chatRoom);
             }
         }
 

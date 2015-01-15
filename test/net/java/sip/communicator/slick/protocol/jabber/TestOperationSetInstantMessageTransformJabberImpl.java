@@ -22,9 +22,9 @@ public class TestOperationSetInstantMessageTransformJabberImpl
 
     private OperationSetBasicInstantMessaging opSetBasicIM2 = null;
 
-    private OperationSetInstantMessageTransform opSetTransform1 = null;
+    private OperationSetMessageTransform opSetTransform1 = null;
 
-    private OperationSetInstantMessageTransform opSetTransform2 = null;
+    private OperationSetMessageTransform opSetTransform2 = null;
 
     private OperationSetPresence opSetPresence1 = null;
 
@@ -63,8 +63,8 @@ public class TestOperationSetInstantMessageTransformJabberImpl
 
         // we also need the presence op set in order to retrieve contacts.
         opSetTransform1 =
-            (OperationSetInstantMessageTransform) supportedOperationSets1
-                .get(OperationSetInstantMessageTransform.class.getName());
+            (OperationSetMessageTransform) supportedOperationSets1
+                .get(OperationSetMessageTransform.class.getName());
 
         // if the op set is null show that we're not happy.
         if (opSetTransform1 == null)
@@ -107,8 +107,8 @@ public class TestOperationSetInstantMessageTransformJabberImpl
         }
 
         opSetTransform2 =
-            (OperationSetInstantMessageTransform) supportedOperationSets2
-                .get(OperationSetInstantMessageTransform.class.getName());
+            (OperationSetMessageTransform) supportedOperationSets2
+                .get(OperationSetMessageTransform.class.getName());
 
         // if the op set is null show that we're not happy.
         if (opSetTransform2 == null)

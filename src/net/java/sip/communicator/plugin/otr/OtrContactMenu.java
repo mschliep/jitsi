@@ -220,14 +220,26 @@ class OtrContactMenu
     }
 
     /*
-     * Implements ScOtrKeyManagerListener#contactVerificationStatusChanged(
+     * Implements ScOtrKeyManagerListener#verificationStatusChanged(
      * Contact).
      */
-    public void contactVerificationStatusChanged(OtrContact otrContact)
+    public void verificationStatusChanged(String fingerprint)
     {
-        if (otrContact.equals(OtrContactMenu.this.contact))
+        PublicKey currentRemotePubKey = OtrActivator.scOtrEngine
+                .getRemotePublicKey(contact);
+        if(currentRemotePubKey == null)
+        {
+            return;
+        }
+
+        String currentFingerprint = OtrActivator.scOtrKeyManager
+                .getFingerprintFromPublicKey(currentRemotePubKey);
+
+        if (currentFingerprint.equals(fingerprint))
+        {
             setSessionStatus(
-                OtrActivator.scOtrEngine.getSessionStatus(otrContact));
+                    OtrActivator.scOtrEngine.getSessionStatus(contact));
+        }
     }
 
     /**

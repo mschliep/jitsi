@@ -9,6 +9,7 @@ package net.java.sip.communicator.plugin.otr;
 import java.util.*;
 
 import net.java.sip.communicator.plugin.otr.authdialog.*;
+import net.java.sip.communicator.plugin.otr.gui.*;
 import net.java.sip.communicator.service.contactlist.*;
 import net.java.sip.communicator.service.gui.*;
 import net.java.sip.communicator.service.msghistory.*;
@@ -107,7 +108,16 @@ public class OtrActivator
      * The {@link OtrContactManager} of the {@link OtrActivator}.
      */
     private static OtrContactManager otrContactManager;
-    
+
+    /**
+     * The {@link ScGotrSessionManager} for all GOTR sessions of this client.
+     */
+    public static final ScGotrSessionManager gotrSessionManager =
+            new ScGotrSessionManager();
+
+    public static final GotrComponentServiceImpl gotrComponentService =
+            new GotrComponentServiceImpl();
+
     /**
      * Gets an {@link AccountID} by its UID.
      *
@@ -200,14 +210,15 @@ public class OtrActivator
         return UIService.class;
     }
 
-    private void handleProviderAdded(ProtocolProviderService provider)
-    {
-        OperationSetInstantMessageTransform opSetMessageTransform
+    private void handleProviderAdded(ProtocolProviderService provider) {
+        OperationSetMessageTransform opSetMessageTransform
             = provider.getOperationSet(
-                    OperationSetInstantMessageTransform.class);
+                    OperationSetMessageTransform.class);
 
-        if (opSetMessageTransform != null)
+        if (opSetMessageTransform != null) {
             opSetMessageTransform.addTransformLayer(this.otrTransformLayer);
+            gotrSessionManager.protocolProviderAdded(provider);
+        }
         else if (logger.isTraceEnabled())
             logger.trace("Service did not have a transform op. set.");
     }
@@ -215,12 +226,18 @@ public class OtrActivator
     private void handleProviderRemoved(ProtocolProviderService provider)
     {
         // check whether the provider has a basic im operation set
-        OperationSetInstantMessageTransform opSetMessageTransform
+        OperationSetMessageTransform opSetMessageTransform
             = provider.getOperationSet(
-                    OperationSetInstantMessageTransform.class);
+                    OperationSetMessageTransform.class);
+
+        OperationSetMultiUserChat opMUC = provider.getOperationSet(
+                OperationSetMultiUserChat.class);
 
         if (opSetMessageTransform != null)
+        {
             opSetMessageTransform.removeTransformLayer(this.otrTransformLayer);
+            gotrSessionManager.protocolProviderRemoved(provider);
+        }
     }
 
     /*
@@ -300,7 +317,7 @@ public class OtrActivator
         // Init static variables, don't proceed without them.
         scOtrEngine = new ScOtrEngineImpl();
         otrContactManager = new OtrContactManager();
-        otrTransformLayer = new OtrTransformLayer();
+        otrTransformLayer = new OtrTransformLayer(gotrSessionManager);
 
         // Register Transformation Layer
         bundleContext.addServiceListener(this);
@@ -369,6 +386,11 @@ public class OtrActivator
             bundleContext.registerService(
                 OtrActionHandler.class.getName(),
                 new SwingOtrActionHandler(), null);
+
+            //Register GOTR Component Service
+            bundleContext.registerService(
+                    GotrComponentService.class.getName(),
+                    gotrComponentService, null);
 
             containerFilter.put(Container.CONTAINER_ID,
                                 Container.CONTAINER_CHAT_WRITE_PANEL.getID());
@@ -496,9 +518,9 @@ public class OtrActivator
         {
             Container container = getContainer();
             if(container.equals(Container.CONTAINER_CHAT_TOOL_BAR))
-                return new OtrMetaContactButton(container, this);
+                return new OtrToolBarButton(container, this, gotrSessionManager);
             else
-                return new OtrMetaContactMenu(container, this);
+                return new OtrMetaContactMenu(container, this, gotrSessionManager);
         }
     }
 }

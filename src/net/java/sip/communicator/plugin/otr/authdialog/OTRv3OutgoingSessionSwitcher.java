@@ -277,20 +277,39 @@ public class OTRv3OutgoingSessionSwitcher
     public void setCurrentAccountID(AccountID accountID) {}
 
     @Override
+    public void setCurrentChatRoom(ChatRoom chatRoom) {
+
+    }
+
+    @Override
     public PluginComponentFactory getParentFactory()
     {
         return parentFactory;
     }
 
     /**
-     * Implements ScOtrKeyManagerListener#contactVerificationStatusChanged(
+     * Implements ScOtrKeyManagerListener#verificationStatusChanged(
      * Contact).
      */
-    public void contactVerificationStatusChanged(OtrContact contact)
+    public void verificationStatusChanged(String fingerprint)
     {
-        buildMenu(contact);
-        if (this.menu.isVisible())
-            this.menu.fadeAnimation();
+
+        PublicKey currentRemotePubKey = OtrActivator.scOtrEngine
+                .getRemotePublicKey(contact);
+        if(currentRemotePubKey == null)
+        {
+            return;
+        }
+
+        String currentFingerprint = OtrActivator.scOtrKeyManager
+                .getFingerprintFromPublicKey(currentRemotePubKey);
+
+        if (currentFingerprint.equals(fingerprint))
+        {
+            buildMenu(contact);
+            if (this.menu.isVisible())
+                this.menu.fadeAnimation();
+        }
     }
 
     /**

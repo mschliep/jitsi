@@ -108,8 +108,8 @@ public class ProtocolProviderServiceIrcImpl
             this.accountID = accountID;
 
             //Initialize instant message transform support.
-            addSupportedOperationSet(OperationSetInstantMessageTransform.class,
-                new OperationSetInstantMessageTransformImpl());
+            addSupportedOperationSet(OperationSetMessageTransform.class,
+                new OperationSetMessageTransformImpl());
 
             //Initialize the multi user chat support
             multiUserChat = new OperationSetMultiUserChatIrcImpl(this);

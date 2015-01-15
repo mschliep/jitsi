@@ -618,4 +618,11 @@ public interface ChatRoom
      * @param members the ids of user to have member role.
      */
     public void setMembersWhiteList(List<String> members);
+
+    /**
+     * Fire a <tt>ChatRoomMessageEvent</tt> for the <tt>MessageListener</tt>s.
+     *
+     * @param evt event to fire
+     */
+    public void fireMessageEvent(ChatRoomMessageEvent evt);
 }

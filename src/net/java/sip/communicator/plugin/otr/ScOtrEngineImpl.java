@@ -612,14 +612,14 @@ public class ScOtrEngineImpl
 
                     List<String> allFingerprintsOfContact =
                         OtrActivator.scOtrKeyManager.
-                            getAllRemoteFingerprints(contact);
+                            getAllRemoteFingerprints();
                     if (allFingerprintsOfContact != null)
                     {
                         if (!allFingerprintsOfContact.contains(
                                 remoteFingerprint))
                         {
                             OtrActivator.scOtrKeyManager.saveFingerprint(
-                                contact, remoteFingerprint);
+                                contact.getDisplayName(), remoteFingerprint);
                         }
                     }
 

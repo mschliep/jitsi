@@ -32,16 +32,23 @@ public interface ScOtrKeyManager
 
     public abstract String getFingerprintFromPublicKey(PublicKey pubKey);
 
-    public abstract List<String> getAllRemoteFingerprints(Contact contact);
+    public abstract List<String> getAllRemoteFingerprints();
 
     public abstract String getLocalFingerprint(AccountID account);
 
     public abstract byte[] getLocalFingerprintRaw(AccountID account);
 
-    public abstract void saveFingerprint(Contact contact, String fingerprint);
+    public abstract void saveFingerprint(String petname, String fingerprint);
 
     public abstract KeyPair loadKeyPair(AccountID accountID);
 
     public abstract void generateKeyPair(AccountID accountID);
 
+    public String getPetname(String fingerprint);
+
+    public boolean isVerified(String fingerprint);
+
+    public void verify(String petname, String fingerprint);
+
+    public void unverify(String petname, String fingerprint);
 }

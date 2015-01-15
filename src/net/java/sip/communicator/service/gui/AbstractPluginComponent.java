@@ -122,6 +122,14 @@ public abstract class AbstractPluginComponent
     }
 
     /**
+     * Implements the PluginComponent#setCurrentChatRoom(ChatRoom).
+     * @param chatRoom the current ChatRoom
+     */
+    public void setCurrentChatRoom(ChatRoom chatRoom)
+    {
+    }
+
+    /**
      * Returns the factory that has created the component.
      * @return the parent factory.
      */

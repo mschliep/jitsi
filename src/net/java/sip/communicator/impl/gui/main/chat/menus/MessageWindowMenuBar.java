@@ -8,6 +8,7 @@ package net.java.sip.communicator.impl.gui.main.chat.menus;
 import java.awt.*;
 
 import javax.swing.*;
+import javax.swing.text.html.ObjectView;
 
 import net.java.sip.communicator.impl.gui.*;
 import net.java.sip.communicator.impl.gui.main.chat.*;
@@ -17,6 +18,8 @@ import net.java.sip.communicator.plugin.desktoputil.*;
 import net.java.sip.communicator.service.contactlist.*;
 import net.java.sip.communicator.service.gui.*;
 import net.java.sip.communicator.service.gui.Container;
+import net.java.sip.communicator.service.muc.ChatRoomWrapper;
+import net.java.sip.communicator.service.protocol.ChatRoom;
 // disambiguation
 
 /**
@@ -98,11 +101,19 @@ public class MessageWindowMenuBar
         {
             public void chatChanged(ChatPanel panel)
             {
-                MetaContact contact
-                    = GuiActivator.getUIService().getChatContact(panel);
+                Object descriptor = panel.getChatSession().getDescriptor();
+                if(descriptor instanceof MetaContact) {
+                    MetaContact contact = (MetaContact) descriptor;
 
-                for (PluginComponent c : pluginContainer.getPluginComponents())
-                    c.setCurrentContact(contact);
+                    for (PluginComponent c : pluginContainer.getPluginComponents())
+                        c.setCurrentContact(contact);
+                }
+                else if(descriptor instanceof ChatRoomWrapper)
+                {
+                    ChatRoom chatRoom = ((ChatRoomWrapper) descriptor).getChatRoom();
+                    for (PluginComponent c : pluginContainer.getPluginComponents())
+                        c.setCurrentChatRoom(chatRoom);
+                }
             }
         });
     }

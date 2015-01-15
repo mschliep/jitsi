@@ -338,8 +338,8 @@ public class ProtocolProviderServiceMsnImpl
             this.accountID = accountID;
 
             addSupportedOperationSet(
-                OperationSetInstantMessageTransform.class,
-                new OperationSetInstantMessageTransformImpl());
+                OperationSetMessageTransform.class,
+                new OperationSetMessageTransformImpl());
 
             //initialize the presence operationset
             persistentPresence = new OperationSetPersistentPresenceMsnImpl(this);

@@ -267,6 +267,11 @@ public class LanguageMenuBar
 
     }
 
+    @Override
+    public void setCurrentChatRoom(ChatRoom chatRoom) {
+
+    }
+
     private static ImageIcon getLocaleIcon(Parameters.Locale locale,
         boolean isAvailable)
     {

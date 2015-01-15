@@ -14,6 +14,7 @@ import net.java.sip.communicator.impl.protocol.jabber.extensions.messagecorrecti
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.Message;
 import net.java.sip.communicator.service.protocol.event.*;
+import net.java.sip.communicator.service.protocol.event.MessageEvent;
 import net.java.sip.communicator.service.protocol.jabberconstants.*;
 import net.java.sip.communicator.util.*;
 
@@ -438,15 +439,15 @@ public class OperationSetBasicInstantMessagingJabberImpl
             logger.trace("Will send a message to:" + toJID
                         + " chat.jid=" + toJID);
 
-        MessageDeliveredEvent msgDeliveryPendingEvt
-            = new MessageDeliveredEvent(message, to, toResource);
+        MessageDeliveryPendingEvent msgDeliveryPendingEvt
+            = new MessageDeliveryPendingEvent(message, to, toResource);
 
-        MessageDeliveredEvent[] transformedEvents = messageDeliveryPendingTransform(msgDeliveryPendingEvt);
+        MessageDeliveryPendingEvent[] transformedEvents = messageDeliveryPendingTransform(msgDeliveryPendingEvt);
 
         if (transformedEvents == null || transformedEvents.length == 0)
             return null;
 
-        for (MessageDeliveredEvent event : transformedEvents)
+        for (MessageDeliveryPendingEvent event : transformedEvents)
         {
             String content = event.getSourceMessage().getContent();
 
@@ -999,7 +1000,7 @@ public class OperationSetBasicInstantMessagingJabberImpl
             ContactResource resource = ((ContactJabberImpl) sourceContact)
                     .getResourceFromJid(userFullId);
 
-            EventObject msgEvt = null;
+            MessageEvent msgEvt = null;
             if(!isForwardedSentMessage)
                 msgEvt
                     = new MessageReceivedEvent( newMessage,

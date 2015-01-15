@@ -83,6 +83,12 @@ public abstract class AbstractChatRoom
         return cachedConferenceDescriptions.size();
     }
 
+    @Override
+    public void fireMessageEvent(ChatRoomMessageEvent evt)
+    {
+        //TODO Move from jabber impl to here.
+    }
+
     /**
      * Creates the corresponding <tt>ChatRoomConferencePublishedEvent</tt> and
      * notifies all <tt>ChatRoomConferencePublishedListener</tt>s that
