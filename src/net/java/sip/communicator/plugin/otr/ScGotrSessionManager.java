@@ -21,24 +21,26 @@ public class ScGotrSessionManager
 
     public ScGotrSessionHost getGotrSessionHost(ChatRoom chatRoom)
     {
-        return chatRoom2SessionHost.get(chatRoom);
+        synchronized (chatRoom2SessionHost) {
+            return chatRoom2SessionHost.get(chatRoom);
+        }
     }
 
     public ScGotrSessionHost getGotrSessionHost(ProtocolProviderService provider,
                                                 SessionID sessionID)
     {
-        for(Map.Entry<ChatRoom, ScGotrSessionHost> entry:
-                chatRoom2SessionHost.entrySet())
-        {
-            ScGotrSessionHost host = entry.getValue();
-            if(host.getSessionID() != null
-                && host.getSessionID().equals(sessionID)
-                    && host.getProtocolProvider().equals(provider))
-            {
-                return host;
+        synchronized (chatRoom2SessionHost) {
+            for (Map.Entry<ChatRoom, ScGotrSessionHost> entry :
+                    chatRoom2SessionHost.entrySet()) {
+                ScGotrSessionHost host = entry.getValue();
+                if (host.getSessionID() != null
+                        && host.getSessionID().equals(sessionID)
+                        && host.getProtocolProvider().equals(provider)) {
+                    return host;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     /**
@@ -53,7 +55,6 @@ public class ScGotrSessionManager
      */
     public void protocolProviderAdded(ProtocolProviderService provider)
     {
-
         OperationSetMultiUserChat opMUC = provider.getOperationSet(
                 OperationSetMultiUserChat.class);
         if(opMUC != null)
@@ -91,10 +92,11 @@ public class ScGotrSessionManager
      */
     private void chatRoomJoined(ChatRoom chatRoom)
     {
-        chatRoom2SessionHost.put(chatRoom, new ScGotrSessionHost(chatRoom));
-        if(logger.isDebugEnabled())
-        {
-            logger.debug(String.format("%s chat rooms", chatRoom2SessionHost.size()));
+        synchronized (chatRoom2SessionHost) {
+            chatRoom2SessionHost.put(chatRoom, new ScGotrSessionHost(chatRoom));
+            if (logger.isDebugEnabled()) {
+                logger.debug(String.format("%s chat rooms", chatRoom2SessionHost.size()));
+            }
         }
     }
 
@@ -105,9 +107,11 @@ public class ScGotrSessionManager
      */
     private void chatRoomClosed(ChatRoom chatRoom)
     {
-        ScGotrSessionHost host = chatRoom2SessionHost.remove(chatRoom);
-        if(host != null){
-            host.close();
+        synchronized (chatRoom2SessionHost) {
+            ScGotrSessionHost host = chatRoom2SessionHost.remove(chatRoom);
+            if (host != null) {
+                host.close();
+            }
         }
     }
 

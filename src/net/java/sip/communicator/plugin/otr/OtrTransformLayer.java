@@ -8,6 +8,7 @@ package net.java.sip.communicator.plugin.otr;
 
 import net.java.gotr4j.*;
 import net.java.gotr4j.crypto.*;
+import net.java.gotr4j.io.SerializationUtil;
 import net.java.gotr4j.util.*;
 import net.java.otr4j.*;
 import net.java.otr4j.io.*;
@@ -319,6 +320,12 @@ public class OtrTransformLayer
             return evt;
         }
 
+        if(evt.isHistoryMessage()
+                && GotrUtil.isGotrBroadcast( evt.getMessage().getContent()))
+        {
+            return null;
+        }
+
         final ChatRoom chatRoom = evt.getSourceChatRoom();
         final ScGotrSessionHost host = gotrSessionManager
                 .getGotrSessionHost(chatRoom);
@@ -384,6 +391,12 @@ public class OtrTransformLayer
                 ChatRoomMessageDeliveredEvent.CONVERSATION_MESSAGE_DELIVERED)
         {
             return evt;
+        }
+
+        if(evt.isHistoryMessage()
+                && GotrUtil.isGotrBroadcast( evt.getMessage().getContent()))
+        {
+            return null;
         }
 
         final ScGotrSessionHost host =
