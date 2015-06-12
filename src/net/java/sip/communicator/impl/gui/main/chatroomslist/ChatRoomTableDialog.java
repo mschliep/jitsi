@@ -201,7 +201,13 @@ public class ChatRoomTableDialog
         chatRoomNameField = new JTextField();
 
         valuesPanel.add(providersCombo);
-        valuesPanel.add(chatRoomNameField);
+        //valuesPanel.add(chatRoomNameField);
+
+        JPanel namePanel = new TransparentPanel(new GridLayout(1, 0));
+        JLabel gotr = new JLabel("_gotr");
+        namePanel.add(chatRoomNameField);
+        namePanel.add(gotr);
+        valuesPanel.add(namePanel);
 
         northPanel.add(labels, BorderLayout.WEST);
         northPanel.add(valuesPanel, BorderLayout.CENTER);

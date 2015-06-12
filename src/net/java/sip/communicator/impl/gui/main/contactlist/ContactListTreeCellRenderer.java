@@ -15,6 +15,8 @@ import javax.swing.*;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.tree.*;
 
+import net.java.sip.communicator.impl.muc.ChatRoomSourceContactImpl;
+import net.java.sip.communicator.util.Logger;
 import org.jitsi.util.*;
 
 import net.java.sip.communicator.impl.gui.*;
@@ -51,6 +53,8 @@ public class ContactListTreeCellRenderer
                 Icon,
                 Skinnable
 {
+
+    private static final Logger logger = Logger.getLogger(ContactListTreeCellRenderer.class);
     /**
      * Serial version UID.
      */
@@ -558,6 +562,15 @@ public class ContactListTreeCellRenderer
                                 ImageLoader.getImage(
                                         ImageLoader
                                             .CONTACT_LIST_MOBILE_INDICATOR)));
+                nameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+            }
+            else if (contact.getDescriptor() instanceof ChatRoomSourceContact
+                    && ((ChatRoomSourceContact) contact.getDescriptor()).isGOTR()){
+                nameLabel.setIcon(
+                        new ImageIcon(
+                                ImageLoader.getImage(
+                                        ImageLoader
+                                                .CHAT_ROOM_GOTR_ICON)));
                 nameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
             }
 

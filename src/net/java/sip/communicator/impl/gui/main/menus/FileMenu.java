@@ -68,6 +68,11 @@ public class FileMenu
     private JMenuItem myChatRoomsItem;
 
     /**
+     * Secure chat room menu item.
+     */
+    private JMenuItem addSecureChatRoomItem;
+
+    /**
      * Close menu item.
      */
     private JMenuItem closeMenuItem;
@@ -105,6 +110,8 @@ public class FileMenu
             resources.getI18NString("service.gui.CREATE_GROUP"));
         myChatRoomsItem = new JMenuItem(
             resources.getI18NString("service.gui.MY_CHAT_ROOMS"));
+        addSecureChatRoomItem = new JMenuItem(
+                resources.getI18NString("service.gui.ADD_GOTR_ROOM"));
 
         this.parentWindow = parentWindow;
 
@@ -178,6 +185,7 @@ public class FileMenu
                     .getBoolean(MUCService.DISABLED_PROPERTY, false))
         {
             this.add(myChatRoomsItem);
+            this.add(addSecureChatRoomItem);
             endsWithSeparator = false;
         }
 
@@ -191,9 +199,11 @@ public class FileMenu
 
         createGroupItem.setName("createGroup");
         myChatRoomsItem.setName("myChatRooms");
+        addSecureChatRoomItem.setName("addGotrRoom");
 
         createGroupItem.addActionListener(this);
         myChatRoomsItem.addActionListener(this);
+        addSecureChatRoomItem.addActionListener(this);
 
         this.setMnemonic(resources
             .getI18nMnemonic("service.gui.FILE"));
@@ -202,6 +212,8 @@ public class FileMenu
             .getI18nMnemonic("service.gui.CREATE_GROUP"));
         myChatRoomsItem.setMnemonic(resources
             .getI18nMnemonic("service.gui.MY_CHAT_ROOMS"));
+        addSecureChatRoomItem.setMnemonic(resources
+                .getI18nMnemonic("service.gui.ADD_GOTR_ROOM"));
     }
 
     /**
@@ -225,6 +237,10 @@ public class FileMenu
         myChatRoomsItem.setIcon(
             new ImageIcon(ImageLoader.getImage(
                 ImageLoader.CHAT_ROOM_MENU_ICON)));
+
+        addSecureChatRoomItem.setIcon(
+                new ImageIcon(ImageLoader.getImage(
+                        ImageLoader.CHAT_ROOM_GOTR_ICON)));
 
         if(closeMenuItem != null)
         {
@@ -264,6 +280,10 @@ public class FileMenu
             closeActionPerformed();
         }
         else if (itemName.equals("myChatRooms"))
+        {
+            ChatRoomTableDialog.showChatRoomTableDialog();
+        }
+        else if (itemName.equals("addGotrRoom"))
         {
             ChatRoomTableDialog.showChatRoomTableDialog();
         }

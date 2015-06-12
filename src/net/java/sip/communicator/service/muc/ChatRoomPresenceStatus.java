@@ -53,7 +53,7 @@ public class ChatRoomPresenceStatus extends PresenceStatus
         = new ChatRoomPresenceStatus(
                 87,
                 OFFLINE_STATUS);
-    
+
     /**
      * Creates a status with the specified connectivity coeff and name for the 
      * chat rooms.
@@ -70,5 +70,5 @@ public class ChatRoomPresenceStatus extends PresenceStatus
     {
         return getStatus() == CHAT_ROOM_ONLINE_THRESHOLD;
     }
-    
+
 }

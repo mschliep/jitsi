@@ -23,6 +23,8 @@ public class ScGotrSessionHost
         ChatRoomMemberPresenceListener
 {
 
+    private static final String ITS_A_LIE = "ITS A LIE";
+
     private static final Logger logger = Logger.getLogger(ScGotrSessionHost.class);
 
     private final ChatRoom chatRoom;
@@ -63,7 +65,7 @@ public class ScGotrSessionHost
         this.localUser = new GotrUser(chatRoom.getPrivateContactByNickname(
                 chatRoom.getUserNickname()).getAddress());
         try {
-            this.gotrSession = new GotrSessionManager(this, localUser, true);
+            this.gotrSession = new GotrSessionManager(this, localUser, chatRoom.getName(), true);
         } catch (GotrException e) {
             this.gotrSession = null;
             errorInSession = true;
@@ -118,6 +120,11 @@ public class ScGotrSessionHost
         if(logger.isDebugEnabled()){
             logger.debug(String.format("%s: %s", source, broadcast));
             logger.debug(String.format("size %s: %d", localUser, gotrSession.getSize()));
+        }
+
+        if(broadcast.startsWith(ITS_A_LIE)){
+            receivedUnsentMessage(broadcast.substring(ITS_A_LIE.length()));
+            return;
         }
 
         ChatRoomMessageEvent event;
@@ -187,33 +194,54 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public void sessionFinished(GotrUser user) {
-        ChatRoomMember member = userToMemberMap.get(user);
+    public void sessionFinished(GotrUser user)
+    {
         String finished = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.FINISHED", new String[]{member.getName()});
+                .getI18NString("plugin.otr.gotr.FINISHED", new String[]{getName(user)});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
     }
 
     @Override
-    public void unrecoverableError(GotrUser user) {
-        ChatRoomMember member = userToMemberMap.get(user);
+    public void unrecoverableError(GotrUser user)
+    {
         String finished = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.UNRECOVERABLE_ERROR", new String[]{member.getName()});
+                .getI18NString("plugin.otr.gotr.UNRECOVERABLE_ERROR", new String[]{getName(user)});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
     }
 
     @Override
-    public void recoverableError(GotrUser user) {
-        ChatRoomMember member = userToMemberMap.get(user);
+    public void recoverableError(GotrUser user)
+    {
         String finished = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.RECOVERABLE_ERROR", new String[]{member.getName()});
+                .getI18NString("plugin.otr.gotr.RECOVERABLE_ERROR", new String[]{getName(user)});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+    }
+
+    @Override
+    public void receivedUnsentMessage(String message) {
+        String finished = OtrActivator.resourceService
+                .getI18NString("plugin.otr.gotr.RECEIVED_UNSENT_MSG", new String[]{message});
+        OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
+                Chat.ERROR_MESSAGE, finished,
+                OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+    }
+
+    private String getName(GotrUser user)
+    {
+        if(user.equals(localUser))
+        {
+            return chatRoom.getUserNickname();
+        }
+        else{
+            ChatRoomMember member = userToMemberMap.get(user);
+            return member.getName();
+        }
     }
 
     public GotrSessionManager getSession()
