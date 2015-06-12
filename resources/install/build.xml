@@ -45,11 +45,11 @@
             Provide access to the environment variables via the prefix "env."
             because we will modify at least the PATH where is needed.
         -->
-        <property environment="env" />
+        <property environment="env"/>
 
         <condition property="application.company.name" value="jitsi.org">
             <not>
-                <isset property="application.company.name" />
+                <isset property="application.company.name"/>
             </not>
         </condition>
     </target>
@@ -58,13 +58,13 @@
          error when izpack properties are not set-->
     <target name="define-izpack-task">
         <taskdef name="izpack" classpath="${izpack.dir}/lib/compiler.jar"
-                               classname="com.izforge.izpack.ant.IzPackTask"/>
+                 classname="com.izforge.izpack.ant.IzPackTask"/>
     </target>
 
     <!-- include ant-contrib tasks-->
     <target name="define-ant-contrib-task">
         <taskdef resource="net/sf/antcontrib/antlib.xml"
-            classpath="${inst.resrc}/lib/ant-contrib-1.0b3.jar"/>
+                 classpath="${inst.resrc}/lib/ant-contrib-1.0b3.jar"/>
     </target>
 
     <!-- Put here the Windows release directory -->
@@ -103,27 +103,27 @@
     <!-- The release directory for Debian packages -->
     <property name="debian.dir" value="${release}/debian"/>
     <property name="debian.binary.dir" value="${debian.dir}/binary"/>
-    <property name="debian.tmp.dir" value="${debian.dir}/tmp" />
+    <property name="debian.tmp.dir" value="${debian.dir}/tmp"/>
     <!-- Can we build debian packages? -->
     <condition property="dpkg.build.present">
-      <and>
-        <available file="${dpkg-buildpackage}"/>
-        <available file="${dh_testdir}"/>
-      </and>
+        <and>
+            <available file="${dpkg-buildpackage}"/>
+            <available file="${dh_testdir}"/>
+        </and>
     </condition>
     <!-- Can we deploy debian packages? -->
     <condition property="dpkg.scan.present">
-      <available file="${dpkg-scanpackages}"/>
+        <available file="${dpkg-scanpackages}"/>
     </condition>
 
     <!-- default Ant target does nothing except print helpful options -->
     <target name="ant-usage"
             description="simply execute 'ant' to discover the most useful targets.">
-        <echo message="Useful ant commands for the Jitsi Build Installer..." />
-        <echo message="'ant build-installation-generic' for building generic installator jar" />
-        <echo message="'ant build-installation-linux' for building linux instalation file" />
-        <echo message="'ant build-installation-wix' for building Windows MSI instalation file using WiX" />
-        <echo message="'ant build-installation-wix-64' for building Windows x64 MSI instalation file using WiX" />
+        <echo message="Useful ant commands for the Jitsi Build Installer..."/>
+        <echo message="'ant build-installation-generic' for building generic installator jar"/>
+        <echo message="'ant build-installation-linux' for building linux instalation file"/>
+        <echo message="'ant build-installation-wix' for building Windows MSI instalation file using WiX"/>
+        <echo message="'ant build-installation-wix-64' for building Windows x64 MSI instalation file using WiX"/>
     </target>
 
     <target name="clean-install-generic">
@@ -135,38 +135,38 @@
             depends="clean-install-generic,define-izpack-task,version,load-properties">
 
         <propertyfile file="${generic.app.dir}/versionupdate.properties"
-            comment="Last Build Version">
-            <entry  key="last_version" value="${sip-communicator.version}"/>
-            <entry  key="download_link"
-                    value="${link.download.generic}"/>
+                      comment="Last Build Version">
+            <entry key="last_version" value="${sip-communicator.version}"/>
+            <entry key="download_link"
+                   value="${link.download.generic}"/>
         </propertyfile>
 
-        <filter token="VERSION" value="${sip-communicator.version}" />
-        <filter token="BUILDDATE" value="${build.date}" />
-        <filter token="PKG_NAME" value="${package.name}" />
-        <filter token="APP_NAME" value="${application.name}" />
-        <filter token="APP_EMAIL" value="${application.email}" />
-        <filter token="APP_WEB" value="${application.web}" />
-        <filter token="DEST_DIR" value="${release}" />
-        <filter token="WelcomeText1" value="${installer.welcome.wtext1}" />
-        <filter token="WelcomeText2" value="${installer.welcome.wtext2}" />
-        <filter token="WelcomeText3" value="${installer.welcome.wtext3}" />
+        <filter token="VERSION" value="${sip-communicator.version}"/>
+        <filter token="BUILDDATE" value="${build.date}"/>
+        <filter token="PKG_NAME" value="${package.name}"/>
+        <filter token="APP_NAME" value="${application.name}"/>
+        <filter token="APP_EMAIL" value="${application.email}"/>
+        <filter token="APP_WEB" value="${application.web}"/>
+        <filter token="DEST_DIR" value="${release}"/>
+        <filter token="WelcomeText1" value="${installer.welcome.wtext1}"/>
+        <filter token="WelcomeText2" value="${installer.welcome.wtext2}"/>
+        <filter token="WelcomeText3" value="${installer.welcome.wtext3}"/>
 
         <copy
-            tofile="${generic.app.dir}/tmp-installer-generic.xml"
-            file="${inst.resrc}/generic/installer-generic.xml"
-            filtering="yes" />
+                tofile="${generic.app.dir}/tmp-installer-generic.xml"
+                file="${inst.resrc}/generic/installer-generic.xml"
+                filtering="yes"/>
         <copy
-            tofile="${generic.app.dir}/tmp-linux_shortcut_specification.xml"
-            file="${inst.resrc}/linux/linux_shortcut_specification.xml"
-            filtering="yes" />
+                tofile="${generic.app.dir}/tmp-linux_shortcut_specification.xml"
+                file="${inst.resrc}/linux/linux_shortcut_specification.xml"
+                filtering="yes"/>
 
         <izpack
-               input="${generic.app.dir}/tmp-installer-generic.xml"
-               output="${generic.app.dir}/${package.name}-${sip-communicator.version}.jar"
-               installerType="standard"
-               izPackDir="${izpack.dir}/"
-               basedir="${sc.basedir}"/>
+                input="${generic.app.dir}/tmp-installer-generic.xml"
+                output="${generic.app.dir}/${package.name}-${sip-communicator.version}.jar"
+                installerType="standard"
+                izPackDir="${izpack.dir}/"
+                basedir="${sc.basedir}"/>
 
         <delete quiet="yes" failonerror="false">
             <fileset dir="${generic.app.dir}">
@@ -185,31 +185,31 @@
             depends="clean-install-linux,define-izpack-task,version,load-properties">
 
         <propertyfile file="${linux.app.dir}/versionupdate.properties"
-            comment="Last Build Version">
-            <entry  key="last_version" value="${sip-communicator.version}"/>
-            <entry  key="download_link"
-                    value="${link.download.linux}"/>
+                      comment="Last Build Version">
+            <entry key="last_version" value="${sip-communicator.version}"/>
+            <entry key="download_link"
+                   value="${link.download.linux}"/>
         </propertyfile>
 
-        <filter token="VERSION" value="${sip-communicator.version}" />
-        <filter token="BUILDDATE" value="${build.date}" />
-        <filter token="PKG_NAME" value="${package.name}" />
-        <filter token="APP_NAME" value="${application.name}" />
-        <filter token="APP_EMAIL" value="${application.email}" />
-        <filter token="APP_WEB" value="${application.web}" />
-        <filter token="DEST_DIR" value="${release}" />
-        <filter token="WelcomeText1" value="${installer.welcome.wtext1}" />
-        <filter token="WelcomeText2" value="${installer.welcome.wtext2}" />
-        <filter token="WelcomeText3" value="${installer.welcome.wtext3}" />
+        <filter token="VERSION" value="${sip-communicator.version}"/>
+        <filter token="BUILDDATE" value="${build.date}"/>
+        <filter token="PKG_NAME" value="${package.name}"/>
+        <filter token="APP_NAME" value="${application.name}"/>
+        <filter token="APP_EMAIL" value="${application.email}"/>
+        <filter token="APP_WEB" value="${application.web}"/>
+        <filter token="DEST_DIR" value="${release}"/>
+        <filter token="WelcomeText1" value="${installer.welcome.wtext1}"/>
+        <filter token="WelcomeText2" value="${installer.welcome.wtext2}"/>
+        <filter token="WelcomeText3" value="${installer.welcome.wtext3}"/>
 
-        <copy todir="${linux.app.dir}/tmp" filtering="yes" >
+        <copy todir="${linux.app.dir}/tmp" filtering="yes">
             <fileset dir="${inst.resrc}/linux">
                 <include name="setup.sh"/>
                 <include name="inst_path"/>
             </fileset>
         </copy>
         <!-- copy the jre -->
-        <mkdir dir="${linux.app.dir}/tmp/jre" />
+        <mkdir dir="${linux.app.dir}/tmp/jre"/>
         <copy todir="${linux.app.dir}/tmp/jre">
             <fileset dir="${linux.jre.path}">
                 <include name="**/*"/>
@@ -217,20 +217,20 @@
         </copy>
 
         <copy
-            tofile="${linux.app.dir}/tmp/tmp-installer-linux.xml"
-            file="${inst.resrc}/linux/installer-linux.xml"
-            filtering="yes" />
+                tofile="${linux.app.dir}/tmp/tmp-installer-linux.xml"
+                file="${inst.resrc}/linux/installer-linux.xml"
+                filtering="yes"/>
         <copy
-            tofile="${linux.app.dir}/tmp-linux_shortcut_specification.xml"
-            file="${inst.resrc}/linux/linux_shortcut_specification.xml"
-            filtering="yes" />
+                tofile="${linux.app.dir}/tmp-linux_shortcut_specification.xml"
+                file="${inst.resrc}/linux/linux_shortcut_specification.xml"
+                filtering="yes"/>
 
         <!-- Prepare felix.client.run.properties and put some specific bundles -->
         <copy file="${lib}/felix.client.run.properties"
-            tofile="${inst.resrc}/linux/felix.client.run.properties"
-            overwrite="true"/>
+              tofile="${inst.resrc}/linux/felix.client.run.properties"
+              overwrite="true"/>
         <replace file="${inst.resrc}/linux/felix.client.run.properties"
-            token="reference:file:sc-bundles/swingnotification.jar \">
+                 token="reference:file:sc-bundles/swingnotification.jar \">
             <replacevalue><![CDATA[reference:file:sc-bundles/galagonotification.jar \
  reference:file:sc-bundles/swingnotification.jar \]]></replacevalue>
         </replace>
@@ -279,14 +279,14 @@
         <property name="windows_native_path" value="${sc.basedir}\lib\native\windows"/>
         <property name="windows.jre.arch.file" value="${windows.jre.file}"/>
         <condition property="windows.jre.arch.zip" value="${windows.jre.zip}">
-            <isset property="windows.jre.zip" />
+            <isset property="windows.jre.zip"/>
         </condition>
         <property name="windows.download.link" value="${link.download.windows32}"/>
         <property name="windows.package.name.suffix" value="x86.exe"/>
         <property name="windows.msi.package.name.suffix" value="x86.msi"/>
         <property name="windows.arch" value="32"/>
-        <property name="mingw.home" value="C:/mingw/x86" />
-        <antcall target="build-installation-wix-base" />
+        <property name="mingw.home" value="C:/mingw/x86"/>
+        <antcall target="build-installation-wix-base"/>
     </target>
 
     <target name="build-installation-wix-64"
@@ -294,95 +294,95 @@
         <property name="windows_native_path" value="${sc.basedir}\lib\native\windows-64"/>
         <property name="windows.jre.arch.file" value="${windows.jre64.file}"/>
         <condition property="windows.jre.arch.zip" value="${windows.jre64.zip}">
-            <isset property="windows.jre64.zip" />
+            <isset property="windows.jre64.zip"/>
         </condition>
         <property name="windows.download.link" value="${link.download.windows64}"/>
         <property name="windows.package.name.suffix" value="x64.exe"/>
         <property name="windows.msi.package.name.suffix" value="x64.msi"/>
         <property name="windows.arch" value="64"/>
-        <property name="mingw.home" value="C:/mingw/x64" />
-        <antcall target="build-installation-wix-base" />
+        <property name="mingw.home" value="C:/mingw/x64"/>
+        <antcall target="build-installation-wix-base"/>
     </target>
 
     <target name="unzip-windows-jre" if="windows.jre.arch.zip.isset">
         <unzip
                 src="${unzip.windows.jre.src}"
-                dest="${unzip.windows.jre.dest}" />
-        <property name="unzip.windows.jre.dir" value="" />
+                dest="${unzip.windows.jre.dest}"/>
+        <property name="unzip.windows.jre.dir" value=""/>
         <delete failonerror="false" includeemptydirs="true" quiet="true">
             <fileset
                     casesensitive="false"
                     defaultexcludes="false"
                     dir="${unzip.windows.jre.dest}/jre">
-                <include name="bin/rmid.exe" />
-                <include name="bin/rmiregistry.exe" />
-                <include name="bin/tnameserv.exe" />
-                <include name="bin/keytool.exe" />
-                <include name="bin/kinit.exe" />
-                <include name="bin/klist.exe" />
-                <include name="bin/ktab.exe" />
-                <include name="bin/policytool.exe" />
-                <include name="bin/orbd.exe" />
-                <include name="bin/servertool.exe" />
-                <include name="bin/javaws.exe" />
-                <include name="lib/javaws.jar" />
-                <include name="lib/javaws/**" />
-                <include name="lib/jfr/**" />
-                <include name="lib/jfr.jar" />
+                <include name="bin/rmid.exe"/>
+                <include name="bin/rmiregistry.exe"/>
+                <include name="bin/tnameserv.exe"/>
+                <include name="bin/keytool.exe"/>
+                <include name="bin/kinit.exe"/>
+                <include name="bin/klist.exe"/>
+                <include name="bin/ktab.exe"/>
+                <include name="bin/policytool.exe"/>
+                <include name="bin/orbd.exe"/>
+                <include name="bin/servertool.exe"/>
+                <include name="bin/javaws.exe"/>
+                <include name="lib/javaws.jar"/>
+                <include name="lib/javaws/**"/>
+                <include name="lib/jfr/**"/>
+                <include name="lib/jfr.jar"/>
 
-                <include name="bin/javacpl.exe" />
-                <include name="bin/jucheck.exe" />
-                <include name="bin/jusched.exe" />
-                <include name="bin/dtplugin/**" />
-                <include name="bin/jabswitch.exe" />
-                <include name="bin/JavaAccessBridge-32.dll" />
-                <include name="bin/JavaAccessBridge.dll" />
-                <include name="bin/JAWTAccessBridge-32.dll" />
-                <include name="bin/JAWTAccessBridge.dll" />
-                <include name="bin/WindowsAccessBridge-32.dll" />
-                <include name="bin/WindowsAccessBridge.dll" />
-                <include name="bin/wsdetect.dll" />
-                <include name="bin/plugin2/**" />
-                <include name="bin/deploy.dll" />
-                <include name="bin/jfr.dll" />
-                <include name="bin/javacpl.cpl" />
-                <include name="bin/deploy.jar" />
-                <include name="bin/plugin.jar" />
-                <include name="lib/deploy/**" />
+                <include name="bin/javacpl.exe"/>
+                <include name="bin/jucheck.exe"/>
+                <include name="bin/jusched.exe"/>
+                <include name="bin/dtplugin/**"/>
+                <include name="bin/jabswitch.exe"/>
+                <include name="bin/JavaAccessBridge-32.dll"/>
+                <include name="bin/JavaAccessBridge.dll"/>
+                <include name="bin/JAWTAccessBridge-32.dll"/>
+                <include name="bin/JAWTAccessBridge.dll"/>
+                <include name="bin/WindowsAccessBridge-32.dll"/>
+                <include name="bin/WindowsAccessBridge.dll"/>
+                <include name="bin/wsdetect.dll"/>
+                <include name="bin/plugin2/**"/>
+                <include name="bin/deploy.dll"/>
+                <include name="bin/jfr.dll"/>
+                <include name="bin/javacpl.cpl"/>
+                <include name="bin/deploy.jar"/>
+                <include name="bin/plugin.jar"/>
+                <include name="lib/deploy/**"/>
 
-                <include name="bin/decora-sse.dll" />
-                <include name="bin/fxplugins.dll" />
-                <include name="bin/glass.dll" />
-                <include name="bin/glib-lite.dll" />
-                <include name="bin/gstreamer-lite.dll" />
-                <include name="bin/javafx-font.dll" />
-                <include name="bin/javafx_font_t2k.dll" />
-                <include name="bin/javafx-iio.dll" />
-                <include name="bin/jfxmedia.dll" />
-                <include name="bin/jfxwebkit.dll" />
-                <include name="bin/prism_common.dll" />
-                <include name="bin/prism-d3d.dll" />
-                <include name="bin/prism_es2.dll" />
-                <include name="bin/prism_sw.dll" />
+                <include name="bin/decora-sse.dll"/>
+                <include name="bin/fxplugins.dll"/>
+                <include name="bin/glass.dll"/>
+                <include name="bin/glib-lite.dll"/>
+                <include name="bin/gstreamer-lite.dll"/>
+                <include name="bin/javafx-font.dll"/>
+                <include name="bin/javafx_font_t2k.dll"/>
+                <include name="bin/javafx-iio.dll"/>
+                <include name="bin/jfxmedia.dll"/>
+                <include name="bin/jfxwebkit.dll"/>
+                <include name="bin/prism_common.dll"/>
+                <include name="bin/prism-d3d.dll"/>
+                <include name="bin/prism_es2.dll"/>
+                <include name="bin/prism_sw.dll"/>
 
-                <include name="bin/jp2*.exe" />
+                <include name="bin/jp2*.exe"/>
 
-                <include name="lib/javafx.properties" />
-                <include name="lib/jfxswt.jar" />
-                <include name="bin/decora-sse.dll" />
-                <include name="bin/fxplugins.dll" />
-                <include name="bin/glass.dll" />
-                <include name="bin/glib-lite.dll" />
-                <include name="bin/gstreamer-lite.dll" />
-                <include name="bin/javafx-font.dll" />
-                <include name="bin/javafx_font_t2k.dll" />
-                <include name="bin/javafx-iio.dll" />
-                <include name="bin/jfxmedia.dll" />
-                <include name="bin/jfxwebkit.dll" />
-                <include name="bin/prism_common.dll" />
-                <include name="bin/prism-d3d.dll" />
-                <include name="bin/prism_es2.dll" />
-                <include name="bin/prism_sw.dll" />
+                <include name="lib/javafx.properties"/>
+                <include name="lib/jfxswt.jar"/>
+                <include name="bin/decora-sse.dll"/>
+                <include name="bin/fxplugins.dll"/>
+                <include name="bin/glass.dll"/>
+                <include name="bin/glib-lite.dll"/>
+                <include name="bin/gstreamer-lite.dll"/>
+                <include name="bin/javafx-font.dll"/>
+                <include name="bin/javafx_font_t2k.dll"/>
+                <include name="bin/javafx-iio.dll"/>
+                <include name="bin/jfxmedia.dll"/>
+                <include name="bin/jfxwebkit.dll"/>
+                <include name="bin/prism_common.dll"/>
+                <include name="bin/prism-d3d.dll"/>
+                <include name="bin/prism_es2.dll"/>
+                <include name="bin/prism_sw.dll"/>
 
             </fileset>
         </delete>
@@ -391,37 +391,37 @@
     <target name="build-installation-wix-base"
             depends="clean-install-windows,define-ant-contrib-task">
         <property name="windows.package.name"
-            value="${package.name}-${sip-communicator.version}-${windows.package.name.suffix}"/>
+                  value="${package.name}-${sip-communicator.version}-${windows.package.name.suffix}"/>
         <property name="windows.msi.package.name"
-            value="${package.name}-${sip-communicator.version}-${windows.msi.package.name.suffix}"/>
+                  value="${package.name}-${sip-communicator.version}-${windows.msi.package.name.suffix}"/>
 
         <!--
             This versionupdate.properties file isn't of interest to the MSI but
             is necessary for the site.
         -->
         <propertyfile file="${windows.app.dir}/versionupdate.properties">
-            <entry key="last_version" value="${sip-communicator.version}" />
+            <entry key="last_version" value="${sip-communicator.version}"/>
             <entry key="download_link"
-                   value="${windows.download.link}" />
-            <entry key="changes_html" value="updates/index.html" />
+                   value="${windows.download.link}"/>
+            <entry key="changes_html" value="updates/index.html"/>
         </propertyfile>
 
         <!-- removes spaces from application name if any -->
         <propertyregex property="app.exe.filename"
-            input="${application.name}"
-            regexp=" "
-            replace=""
-            override="true"
-            global="true"
-            defaultValue="${application.name}"/>
+                       input="${application.name}"
+                       regexp=" "
+                       replace=""
+                       override="true"
+                       global="true"
+                       defaultValue="${application.name}"/>
         <!-- removes -,_ from app.exe.filename if any -->
         <propertyregex property="app.exe.filename"
-            input="${app.exe.filename}"
-            regexp="[-_]"
-            replace=""
-            override="true"
-            global="true"
-            defaultValue="${app.exe.filename}"/>
+                       input="${app.exe.filename}"
+                       regexp="[-_]"
+                       replace=""
+                       override="true"
+                       global="true"
+                       defaultValue="${app.exe.filename}"/>
         <!-- if wix.app.launcher.name is not set use app.exe.filename
             If using wix.app.launcher.name make sure not to use spaces,-,_
             in the name.
@@ -429,7 +429,7 @@
         <condition property="wix.app.launcher.name"
                    value="${app.exe.filename}">
             <not>
-                <isset property="wix.app.launcher.name" />
+                <isset property="wix.app.launcher.name"/>
             </not>
         </condition>
 
@@ -437,35 +437,35 @@
             Prepare for the execution of heat.exe (which is part of the
             preparation for the execution of candle.exe).
         -->
-        <property name="light.dir" value="${windows.app.dir}/tmp/light" />
-        <mkdir dir="${light.dir}" />
+        <property name="light.dir" value="${windows.app.dir}/tmp/light"/>
+        <mkdir dir="${light.dir}"/>
 
         <!-- Build run.exe (which is the launcher of the application). -->
         <exec
                 dir="${src}/native/windows/run"
                 executable="make.exe"
                 failonerror="true">
-            <env key="PATH" path="${mingw.home}/bin;${env.PATH}" />
-            <arg value="PRODUCTNAME=${application.name}" />
-            <arg value="COMPANYNAME=${application.company.name}" />
-            <arg value="MINGW_HOME=${mingw.home}" />
-            <arg value="TARGET_DIR=${light.dir}" />
-            <arg value="PRODUCTBUILDVERSION=${sip-communicator.version}" />
-            <arg value="TARGET_BASENAME=${wix.app.launcher.name}" />
+            <env key="PATH" path="${mingw.home}/bin;${env.PATH}"/>
+            <arg value="PRODUCTNAME=${application.name}"/>
+            <arg value="COMPANYNAME=${application.company.name}"/>
+            <arg value="MINGW_HOME=${mingw.home}"/>
+            <arg value="TARGET_DIR=${light.dir}"/>
+            <arg value="PRODUCTBUILDVERSION=${sip-communicator.version}"/>
+            <arg value="TARGET_BASENAME=${wix.app.launcher.name}"/>
         </exec>
         <antcall target="wix-sign-file">
             <param name="file.to.sign" value="${light.dir}/${wix.app.launcher.name}.exe"/>
         </antcall>
         <delete>
             <fileset dir="${light.dir}">
-                <include name="config.h" />
-                <include name="run.res" />
+                <include name="config.h"/>
+                <include name="run.res"/>
             </fileset>
         </delete>
 
         <copy todir="${light.dir}" overwrite="true">
             <fileset dir="${inst.resrc}/windows">
-                <include name="sc-logo.ico" />
+                <include name="sc-logo.ico"/>
             </fileset>
         </copy>
 
@@ -473,59 +473,59 @@
             <param name="target.dir" value="${light.dir}"/>
         </antcall>
 
-        <mkdir dir="${light.dir}/lib" />
+        <mkdir dir="${light.dir}/lib"/>
         <copy todir="${light.dir}/lib" overwrite="true">
             <fileset dir="${sc.basedir}/lib">
-                <include name="*.jar" />
+                <include name="*.jar"/>
             </fileset>
             <fileset dir="${sc.basedir}/lib/os-specific/windows"
                      erroronmissingdir="false">
-                <include name="*.jar" />
+                <include name="*.jar"/>
                 <exclude name="jmf.jar"/>
                 <exclude name="sound.jar"/>
             </fileset>
             <fileset dir="${sc.basedir}/lib">
-                <include name="felix.client.run.properties" />
+                <include name="felix.client.run.properties"/>
             </fileset>
             <fileset dir="${sc.basedir}/lib">
-                <include name="jitsi-defaults.properties" />
-                <include name="jitsi-default-overrides.properties" />
+                <include name="jitsi-defaults.properties"/>
+                <include name="jitsi-default-overrides.properties"/>
             </fileset>
             <fileset dir="${sc.basedir}/resources/install">
-                <include name="logging.properties" />
+                <include name="logging.properties"/>
             </fileset>
         </copy>
 
         <!-- Add the windows specific bundle path in the felix.client.run.properties file -->
         <echo file="${light.dir}/lib/felix.client.run.properties"
-            append="true">felix.auto.start.14= reference:file:sc-bundles/windows-clean-shutdown.jar
+              append="true">felix.auto.start.14= reference:file:sc-bundles/windows-clean-shutdown.jar
         </echo>
 
-        <mkdir dir="${light.dir}/lib/bundle" />
+        <mkdir dir="${light.dir}/lib/bundle"/>
         <copy todir="${light.dir}/lib/bundle" overwrite="true">
             <fileset dir="${sc.basedir}/lib/bundle">
-                <include name="*.jar" />
-                <exclude name="junit.jar" />
+                <include name="*.jar"/>
+                <exclude name="junit.jar"/>
             </fileset>
         </copy>
-        <mkdir dir="${light.dir}/native" />
+        <mkdir dir="${light.dir}/native"/>
         <copy todir="${light.dir}/native" overwrite="true">
             <fileset dir="${windows_native_path}">
-                <include name="*" />
+                <include name="*"/>
             </fileset>
         </copy>
         <antcall target="wix-sign-dlls">
             <param name="folder.to.sign" value="${light.dir}/native"/>
         </antcall>
-        <mkdir dir="${light.dir}/sc-bundles" />
+        <mkdir dir="${light.dir}/sc-bundles"/>
         <copy todir="${light.dir}/sc-bundles" overwrite="true">
             <fileset dir="${sc.basedir}/sc-bundles">
-                <include name="*.jar" />
-                <exclude name="*slick.jar" />
+                <include name="*.jar"/>
+                <exclude name="*slick.jar"/>
             </fileset>
             <fileset dir="${sc.basedir}/sc-bundles/os-specific/windows">
-                <include name="*.jar" />
-                <exclude name="*slick.jar" />
+                <include name="*.jar"/>
+                <exclude name="*slick.jar"/>
             </fileset>
         </copy>
 
@@ -534,15 +534,15 @@
         -->
         <condition property="windows.jre.arch.zip.isset">
             <and>
-                <isset property="windows.jre.arch.zip" />
+                <isset property="windows.jre.arch.zip"/>
                 <not>
-                    <equals arg1="${windows.jre.arch.zip}" arg2="" />
+                    <equals arg1="${windows.jre.arch.zip}" arg2=""/>
                 </not>
             </and>
         </condition>
         <antcall target="unzip-windows-jre">
-            <param name="unzip.windows.jre.src" value="${windows.jre.arch.zip}" />
-            <param name="unzip.windows.jre.dest" value="${light.dir}" />
+            <param name="unzip.windows.jre.src" value="${windows.jre.arch.zip}"/>
+            <param name="unzip.windows.jre.dest" value="${light.dir}"/>
         </antcall>
         <!-- Include any additional files if provided. -->
         <copy todir="${light.dir}">
@@ -550,7 +550,7 @@
                     casesensitive="false"
                     dir="${inst.resrc}/windows/installer-windows.wxs_FILES"
                     erroronmissingdir="false"
-                    includes="**" />
+                    includes="**"/>
         </copy>
 
         <!--
@@ -560,65 +560,65 @@
         <copy
                 file="${inst.resrc}/windows/update-location.properties"
                 todir="${light.dir}"
-                overwrite="true" />
+                overwrite="true"/>
 
-        <property name="wix.home" value="C:\Program Files\WiX" />
+        <property name="wix.home" value="C:\Program Files\WiX"/>
 
         <!-- Execute heat.exe -->
         <exec
                 executable="${wix.home}\heat.exe"
                 dir="${light.dir}"
                 failonerror="true">
-            <arg value="dir" />
-            <arg value="." />
-            <arg value="-nologo" />
-            <arg value="-ag" />
-            <arg value="-cg" />
-            <arg value="ComponentGroup_HeatExe" />
-            <arg value="-out" />
-            <arg value="${windows.app.dir}\tmp\heat.wxs" />
-            <arg value="-sfrag" />
-            <arg value="-suid" />
+            <arg value="dir"/>
+            <arg value="."/>
+            <arg value="-nologo"/>
+            <arg value="-ag"/>
+            <arg value="-cg"/>
+            <arg value="ComponentGroup_HeatExe"/>
+            <arg value="-out"/>
+            <arg value="${windows.app.dir}\tmp\heat.wxs"/>
+            <arg value="-sfrag"/>
+            <arg value="-suid"/>
             <!--
                 Suppress SelfReg because we do not have files that need it and
                 we do not want the private Java Runtime Environment to end up
                 registering such files.
             -->
-            <arg value="-scom" />
-            <arg value="-sreg" />
-            <arg value="-svb6" />
-            <arg value="-var" />
-            <arg value="var.SourceDir" />
+            <arg value="-scom"/>
+            <arg value="-sreg"/>
+            <arg value="-svb6"/>
+            <arg value="-var"/>
+            <arg value="var.SourceDir"/>
         </exec>
 
         <xslt
                 in="${windows.app.dir}/tmp/heat.wxs"
                 out="${windows.app.dir}/tmp/component-defines.wxi"
-                style="${inst.resrc}/windows/heat-component-defines.xsl" />
+                style="${inst.resrc}/windows/heat-component-defines.xsl"/>
         <xslt
                 in="${windows.app.dir}/tmp/heat.wxs"
                 out="${windows.app.dir}/tmp/component-refs.wxi"
-                style="${inst.resrc}/windows/heat-component-refs.xsl" />
+                style="${inst.resrc}/windows/heat-component-refs.xsl"/>
         <xslt
                 in="${windows.app.dir}/tmp/heat.wxs"
                 out="${windows.app.dir}/tmp/lib-dir-id.properties"
-                style="${inst.resrc}/windows/heat-component-libsearch.xsl" />
+                style="${inst.resrc}/windows/heat-component-libsearch.xsl"/>
 
         <property file="${windows.app.dir}/tmp/lib-dir-id.properties"/>
         <copy
-            file="${inst.resrc}/windows/DefaultOverridesProps.wxi.template"
-            tofile="${windows.app.dir}/tmp/DefaultOverridesProps.wxi">
-            <globmapper from="*.wxi.template" to="*.wxi" />
+                file="${inst.resrc}/windows/DefaultOverridesProps.wxi.template"
+                tofile="${windows.app.dir}/tmp/DefaultOverridesProps.wxi">
+            <globmapper from="*.wxi.template" to="*.wxi"/>
             <filterchain>
                 <tokenfilter>
-                    <replacestring from="@@lib" to="${wix.heat.jitsi.lib.dir}" />
-                    <replacestring from="@APP_NAME@" to="${application.name}" />
+                    <replacestring from="@@lib" to="${wix.heat.jitsi.lib.dir}"/>
+                    <replacestring from="@APP_NAME@" to="${application.name}"/>
                 </tokenfilter>
             </filterchain>
         </copy>
 
         <condition property="windows.is.64" value="yes" else="no">
-            <equals arg1="${windows.arch}" arg2="64" />
+            <equals arg1="${windows.arch}" arg2="64"/>
         </condition>
 
         <!--
@@ -629,43 +629,43 @@
                 dir="${src}/native/windows/setup/cleansweep"
                 executable="make.exe"
                 failonerror="true">
-            <env key="PATH" path="${mingw.home}/bin;${env.PATH}" />
-            <arg value="PRODUCTNAME=${application.name}" />
-            <arg value="MINGW_HOME=${mingw.home}" />
-            <arg value="TARGET_DIR=${light.dir}" />
+            <env key="PATH" path="${mingw.home}/bin;${env.PATH}"/>
+            <arg value="PRODUCTNAME=${application.name}"/>
+            <arg value="MINGW_HOME=${mingw.home}"/>
+            <arg value="TARGET_DIR=${light.dir}"/>
         </exec>
         <antcall target="wix-sign-file">
             <param name="file.to.sign" value="${light.dir}/cleansweep.exe"/>
         </antcall>
         <delete>
             <fileset dir="${light.dir}">
-                <include name="config.h" />
-                <include name="cleansweep.res" />
+                <include name="config.h"/>
+                <include name="cleansweep.res"/>
             </fileset>
         </delete>
 
         <!-- prepare properties for executing candle.exe -->
         <condition property="candle.var.Platform" value="x64" else="x86">
-            <equals arg1="${windows.arch}" arg2="64" />
+            <equals arg1="${windows.arch}" arg2="64"/>
         </condition>
         <condition
                 property="candle.arg.var.JRESetup"
                 value="-dJRESetup=${windows.jre.arch.file}"
                 else="-nologo">
             <and>
-                <isset property="windows.jre.arch.file" />
+                <isset property="windows.jre.arch.file"/>
                 <not>
-                    <equals arg1="${windows.jre.arch.file}" arg2="" />
+                    <equals arg1="${windows.jre.arch.file}" arg2=""/>
                 </not>
                 <not>
-                    <isset property="windows.jre.arch.zip.isset" />
+                    <isset property="windows.jre.arch.zip.isset"/>
                 </not>
             </and>
         </condition>
 
         <!-- should we create a separate msi target -->
         <condition property="msi.var.store" value="true" else="false">
-            <equals arg1="${wix.store.msi}" arg2="true" />
+            <equals arg1="${wix.store.msi}" arg2="true"/>
         </condition>
         <antcall target="build-installation-wix-msi">
             <param name="msi.var.compress" value="high"/>
@@ -674,7 +674,7 @@
                 failonerror="false"
                 file="${windows.app.dir}/tmp/setup.msi"
                 preservelastmodified="true"
-                tofile="${windows.app.dir}\${windows.msi.package.name}" />
+                tofile="${windows.app.dir}\${windows.msi.package.name}"/>
 
         <!-- now build msi needed for the exe distribution without compression -->
         <antcall target="build-installation-wix-msi">
@@ -687,17 +687,17 @@
                 dir="${windows.app.dir}/tmp"
                 executable="${inst.resrc}/windows/xz.exe"
                 failonerror="true">
-            <arg value="-zk9ev" />
-            <arg value="setup.msi" />
+            <arg value="-zk9ev"/>
+            <arg value="setup.msi"/>
         </exec>
         <exec
                 dir="${src}/native/windows/setup"
                 executable="make.exe"
                 failonerror="true">
-            <env key="PATH" path="${mingw.home}/bin;${env.PATH}" />
-            <arg value="MINGW_HOME=${mingw.home}" />
-            <arg value="TARGET_DIR=${windows.app.dir}/tmp" />
-            <arg value="PRODUCTBUILDVERSION=${sip-communicator.version}" />
+            <env key="PATH" path="${mingw.home}/bin;${env.PATH}"/>
+            <arg value="MINGW_HOME=${mingw.home}"/>
+            <arg value="TARGET_DIR=${windows.app.dir}/tmp"/>
+            <arg value="PRODUCTBUILDVERSION=${sip-communicator.version}"/>
         </exec>
         <antcall target="wix-sign-file">
             <param name="file.to.sign" value="${windows.app.dir}\tmp\setup.exe"/>
@@ -705,7 +705,7 @@
         <move
                 file="${windows.app.dir}/tmp/setup.exe"
                 preservelastmodified="true"
-                tofile="${windows.app.dir}\${windows.package.name}" />
+                tofile="${windows.app.dir}\${windows.package.name}"/>
 
         <!-- before deleting try building the deltas -->
         <antcall target="build-wix-delta-updates"/>
@@ -713,8 +713,8 @@
         <!-- Creates updates files -->
         <antcall target="build-wix-updates-files"/>
 
-        <delete dir="${light.dir}" />
-        <delete dir="${windows.app.dir}/tmp" />
+        <delete dir="${light.dir}"/>
+        <delete dir="${windows.app.dir}/tmp"/>
     </target>
 
     <target name="build-installation-wix-msi" if="wix.store.msi">
@@ -723,33 +723,33 @@
         <condition property="application.publisher"
                    value="${application.name}">
             <not>
-                <isset property="application.publisher" />
+                <isset property="application.publisher"/>
             </not>
         </condition>
 
         <!-- Finish the preparation for the execution of candle.exe -->
-        <filter token="APP_EMAIL" value="${application.email}" />
-        <filter token="APP_NAME" value="${application.name}" />
-        <filter token="APP_LAUNCHER_NAME" value="${wix.app.launcher.name}" />
-        <filter token="APP_WEB" value="${application.web}" />
-        <filter token="APP_PUBLISHER" value="${application.publisher}" />
-        <filter token="PRODUCTBUILDVERSION" value="${sip-communicator.version}" />
-        <filter token="WelcomeText1" value="${installer.welcome.wtext1}" />
-        <filter token="WelcomeText2" value="${installer.welcome.wtext2}" />
-        <filter token="WelcomeText3" value="${installer.welcome.wtext3}" />
-        <filter token="WINDOWS_IS_64" value="${windows.is.64}" />
-        <filter token="WIX_PRODUCT_ID" value="${wix.product.id}" />
-        <filter token="WIX_UPGRADE_CODE" value="${wix.upgrade.code}" />
-        <filter token="WIX_COMPRESS_LEVEL" value="${msi.var.compress}" />
+        <filter token="APP_EMAIL" value="${application.email}"/>
+        <filter token="APP_NAME" value="${application.name}"/>
+        <filter token="APP_LAUNCHER_NAME" value="${wix.app.launcher.name}"/>
+        <filter token="APP_WEB" value="${application.web}"/>
+        <filter token="APP_PUBLISHER" value="${application.publisher}"/>
+        <filter token="PRODUCTBUILDVERSION" value="${sip-communicator.version}"/>
+        <filter token="WelcomeText1" value="${installer.welcome.wtext1}"/>
+        <filter token="WelcomeText2" value="${installer.welcome.wtext2}"/>
+        <filter token="WelcomeText3" value="${installer.welcome.wtext3}"/>
+        <filter token="WINDOWS_IS_64" value="${windows.is.64}"/>
+        <filter token="WIX_PRODUCT_ID" value="${wix.product.id}"/>
+        <filter token="WIX_UPGRADE_CODE" value="${wix.upgrade.code}"/>
+        <filter token="WIX_COMPRESS_LEVEL" value="${msi.var.compress}"/>
         <copy
                 todir="${windows.app.dir}/tmp"
                 overwrite="true"
                 filtering="yes">
             <fileset dir="${inst.resrc}/windows">
-                <include name="*.wxl" />
-                <include name="installer-windows.wxs" />
-                <include name="SCRegistrySpec.wxi" />
-                <include name="windows_shortcut_specification.wxi" />
+                <include name="*.wxl"/>
+                <include name="installer-windows.wxs"/>
+                <include name="SCRegistrySpec.wxi"/>
+                <include name="windows_shortcut_specification.wxi"/>
             </fileset>
         </copy>
 
@@ -758,25 +758,25 @@
                 executable="${wix.home}\candle.exe"
                 dir="${windows.app.dir}/tmp"
                 failonerror="true">
-            <arg value="-nologo" />
-            <arg value="-dcodepage=1252" />
-            <arg value="-dPlatform=${candle.var.Platform}" />
-            <arg value="-ext" />
-            <arg value="WixUIExtension" />
-            <arg value="-ext" />
-            <arg value="WixUtilExtension" />
-            <arg value="-dSourceDir=light" />
-            <arg value="${candle.arg.var.JRESetup}" />
-            <arg value="installer-windows.wxs" />
+            <arg value="-nologo"/>
+            <arg value="-dcodepage=1252"/>
+            <arg value="-dPlatform=${candle.var.Platform}"/>
+            <arg value="-ext"/>
+            <arg value="WixUIExtension"/>
+            <arg value="-ext"/>
+            <arg value="WixUtilExtension"/>
+            <arg value="-dSourceDir=light"/>
+            <arg value="${candle.arg.var.JRESetup}"/>
+            <arg value="installer-windows.wxs"/>
         </exec>
 
         <!-- Finish the preparation for the execution of light.exe -->
         <copy todir="${light.dir}" overwrite="true">
             <fileset dir="${inst.resrc}/doc">
-                <include name="License.rtf" />
+                <include name="License.rtf"/>
             </fileset>
             <fileset dir="${inst.resrc}/windows">
-                <include name="wix-*.jpg" />
+                <include name="wix-*.jpg"/>
             </fileset>
         </copy>
 
@@ -785,17 +785,17 @@
                 executable="${wix.home}\light.exe"
                 dir="${light.dir}"
                 failonerror="true">
-            <arg value="-nologo" />
-            <arg value="-ext" />
-            <arg value="WixUIExtension" />
-            <arg value="-ext" />
-            <arg value="WixUtilExtension" />
-            <arg value="-cultures:en-us" />
-            <arg value="-loc" />
-            <arg value="${windows.app.dir}\tmp\en-us.wxl" />
-            <arg value="-out" />
-            <arg value="${windows.app.dir}\tmp\setup.msi" />
-            <arg value="${windows.app.dir}\tmp\installer-windows.wixobj" />
+            <arg value="-nologo"/>
+            <arg value="-ext"/>
+            <arg value="WixUIExtension"/>
+            <arg value="-ext"/>
+            <arg value="WixUtilExtension"/>
+            <arg value="-cultures:en-us"/>
+            <arg value="-loc"/>
+            <arg value="${windows.app.dir}\tmp\en-us.wxl"/>
+            <arg value="-out"/>
+            <arg value="${windows.app.dir}\tmp\setup.msi"/>
+            <arg value="${windows.app.dir}\tmp\installer-windows.wixobj"/>
         </exec>
 
         <!-- create transform files for the supported setup locales -->
@@ -823,10 +823,10 @@
                 executable="cscript.exe"
                 dir="${light.dir}"
                 failonerror="true">
-            <arg value="${inst.resrc}\windows\WiSubStg.vbs" />
-            <arg value="${windows.app.dir}\tmp\setup.msi" />
-            <arg value="${windows.app.dir}\tmp\fr-fr.mst" />
-            <arg value="1036" />
+            <arg value="${inst.resrc}\windows\WiSubStg.vbs"/>
+            <arg value="${windows.app.dir}\tmp\setup.msi"/>
+            <arg value="${windows.app.dir}\tmp\fr-fr.mst"/>
+            <arg value="1036"/>
         </exec>
         <!--exec
                 executable="cscript.exe"
@@ -852,46 +852,46 @@
                 executable="${wix.home}\candle.exe"
                 dir="${windows.app.dir}/tmp"
                 failonerror="true">
-            <arg value="-nologo" />
-            <arg value="-dcodepage=${locale.codepage}" />
-            <arg value="-dPlatform=${candle.var.Platform}" />
-            <arg value="-ext" />
-            <arg value="WixUIExtension" />
-            <arg value="-ext" />
-            <arg value="WixUtilExtension" />
-            <arg value="-dSourceDir=light" />
-            <arg value="${candle.arg.var.JRESetup}" />
-            <arg value="installer-windows.wxs" />
+            <arg value="-nologo"/>
+            <arg value="-dcodepage=${locale.codepage}"/>
+            <arg value="-dPlatform=${candle.var.Platform}"/>
+            <arg value="-ext"/>
+            <arg value="WixUIExtension"/>
+            <arg value="-ext"/>
+            <arg value="WixUtilExtension"/>
+            <arg value="-dSourceDir=light"/>
+            <arg value="${candle.arg.var.JRESetup}"/>
+            <arg value="installer-windows.wxs"/>
         </exec>
         <!-- Execute light.exe for locale.name -->
         <exec
                 executable="${wix.home}\light.exe"
                 dir="${light.dir}"
                 failonerror="true">
-            <arg value="-nologo" />
-            <arg value="-ext" />
-            <arg value="WixUIExtension" />
-            <arg value="-ext" />
-            <arg value="WixUtilExtension" />
-            <arg value="-cultures:${locale.name}" />
-            <arg value="-loc" />
-            <arg value="${windows.app.dir}\tmp\${locale.name}.wxl" />
-            <arg value="-out" />
-            <arg value="${windows.app.dir}\tmp\setup_${locale.name}.msi" />
-            <arg value="${windows.app.dir}\tmp\installer-windows.wixobj" />
+            <arg value="-nologo"/>
+            <arg value="-ext"/>
+            <arg value="WixUIExtension"/>
+            <arg value="-ext"/>
+            <arg value="WixUtilExtension"/>
+            <arg value="-cultures:${locale.name}"/>
+            <arg value="-loc"/>
+            <arg value="${windows.app.dir}\tmp\${locale.name}.wxl"/>
+            <arg value="-out"/>
+            <arg value="${windows.app.dir}\tmp\setup_${locale.name}.msi"/>
+            <arg value="${windows.app.dir}\tmp\installer-windows.wixobj"/>
         </exec>
-        
+
         <exec
                 executable="${wix.home}\torch.exe"
                 dir="${light.dir}"
                 failonerror="true">
-            <arg value="-p" />
-            <arg value="-t" />
-            <arg value="language" />
-            <arg value="${windows.app.dir}\tmp\setup.msi" />
-            <arg value="${windows.app.dir}\tmp\setup_${locale.name}.msi" />
-            <arg value="-out" />
-            <arg value="${windows.app.dir}\tmp\${locale.name}.mst" />
+            <arg value="-p"/>
+            <arg value="-t"/>
+            <arg value="language"/>
+            <arg value="${windows.app.dir}\tmp\setup.msi"/>
+            <arg value="${windows.app.dir}\tmp\setup_${locale.name}.msi"/>
+            <arg value="-out"/>
+            <arg value="${windows.app.dir}\tmp\${locale.name}.mst"/>
         </exec>
     </target>
 
@@ -952,25 +952,25 @@
                 dir="${light.dir}"
                 outputproperty="old.packagecode"
                 failonerror="true">
-            <arg value="//NoLogo" />
-            <arg value="${inst.resrc}\windows\WiSumInf.vbs" />
-            <arg value="${build-location}\${windows.arch}\setup.msi" />
+            <arg value="//NoLogo"/>
+            <arg value="${inst.resrc}\windows\WiSumInf.vbs"/>
+            <arg value="${build-location}\${windows.arch}\setup.msi"/>
         </exec>
         <echo message="Old package code is: ${old.packagecode}"/>
-    	<length
-    	        file="${build-location}/${windows.arch}/setup.msi"
-    	        property="old.packagesize" />
+        <length
+                file="${build-location}/${windows.arch}/setup.msi"
+                property="old.packagesize"/>
         <echo message="Old package size is: ${old.packagesize}"/>
         <exec
                 dir="${src}/native/windows/setup"
                 executable="make.exe"
                 failonerror="true">
-            <env key="PATH" path="${mingw.home}/bin;${env.PATH}" />
-            <arg value="MINGW_HOME=${mingw.home}" />
-            <arg value="TARGET_DIR=${windows.app.dir}/tmp" />
-            <arg value="PACKAGECODE=${old.packagecode}" />
-            <arg value="PACKAGESIZE=${old.packagesize}" />
-            <arg value="PRODUCTBUILDVERSION=${sip-communicator.version}" />
+            <env key="PATH" path="${mingw.home}/bin;${env.PATH}"/>
+            <arg value="MINGW_HOME=${mingw.home}"/>
+            <arg value="TARGET_DIR=${windows.app.dir}/tmp"/>
+            <arg value="PACKAGECODE=${old.packagecode}"/>
+            <arg value="PACKAGESIZE=${old.packagesize}"/>
+            <arg value="PRODUCTBUILDVERSION=${sip-communicator.version}"/>
         </exec>
         <antcall target="wix-sign-file">
             <param name="file.to.sign" value="${windows.app.dir}\tmp\setup.exe"/>
@@ -978,22 +978,22 @@
         <move
                 file="${windows.app.dir}/tmp/setup.exe"
                 preservelastmodified="true"
-                tofile="${windows.app.dir}\${package.name}-${sip-communicator.version}-delta-${old.wix.build}-${windows.package.name.suffix}" />
+                tofile="${windows.app.dir}\${package.name}-${sip-communicator.version}-delta-${old.wix.build}-${windows.package.name.suffix}"/>
     </target>
 
     <target name="wix-sign-file" if="sign.cert.file">
         <exec executable="${inst.resrc}/windows/signtool.exe"
               failonerror="false">
-            <arg value="sign" />
-            <arg value="/d" />
-            <arg value="${application.name}" />
-            <arg value="/t" />
-            <arg value="http://tsa.starfieldtech.com" />
-            <arg value="/f" />
-            <arg value="${sign.cert.file}" />
-            <arg value="/p" />
-            <arg value="${sign.cert.password}" />
-            <arg value="${file.to.sign}" />
+            <arg value="sign"/>
+            <arg value="/d"/>
+            <arg value="${application.name}"/>
+            <arg value="/t"/>
+            <arg value="http://tsa.starfieldtech.com"/>
+            <arg value="/f"/>
+            <arg value="${sign.cert.file}"/>
+            <arg value="/p"/>
+            <arg value="${sign.cert.password}"/>
+            <arg value="${file.to.sign}"/>
         </exec>
     </target>
 
@@ -1026,9 +1026,9 @@
                     locale="en,US"/>
         </tstamp>
 
-        <filter token="BUILD" value="${label}" />
-        <filter token="DATE" value="${current.tstamp}" />
-        <filter token="APP_NAME" value="${application.name}" />
+        <filter token="BUILD" value="${label}"/>
+        <filter token="DATE" value="${current.tstamp}"/>
+        <filter token="APP_NAME" value="${application.name}"/>
         <copy file="${inst.resrc}\windows\updates\index-top.html"
               todir="${windows.app.dir}\updates"
               overwrite="true" filtering="yes"/>
@@ -1099,160 +1099,166 @@
     <target name="macosx" depends="version,load-properties,define-ant-contrib-task"
             description="Create an .app package for MACOSX">
 
-      <taskdef name="jarbundler"
-               classname="net.sourceforge.jarbundler.JarBundler"/>
+        <taskdef name="jarbundler"
+                 classname="net.sourceforge.jarbundler.JarBundler"/>
 
-      <mkdir dir="${macosx.app.dir}"/>
+        <mkdir dir="${macosx.app.dir}"/>
 
-      <property name="macosx.stubfile"
-                value="${macosx.resrc.dir}/JavaApplicationStub"/>
-      <condition property="macosx.stubfile"
-                 value="/System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub">
-        <equals arg1="${os.name}"
-                arg2="Mac OS X"
-                casesensitive="false"
-                trim="true"/>
-      </condition>
+        <property name="macosx.stubfile"
+                  value="${macosx.resrc.dir}/JavaApplicationStub"/>
+        <condition property="macosx.stubfile"
+                   value="/System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub">
+            <equals arg1="${os.name}"
+                    arg2="Mac OS X"
+                    casesensitive="false"
+                    trim="true"/>
+        </condition>
 
-      <!-- We copy macosx-specific bundles from
-           sc-bundles/os-specific/macosx to sc-bundles -->
-      <copy todir="${bundles.dest}">
+        <!-- We copy macosx-specific bundles from
+             sc-bundles/os-specific/macosx to sc-bundles -->
+        <copy todir="${bundles.dest}">
             <fileset dir="${bundles.dest.mac}">
                 <include name="**/*.jar"/>
             </fileset>
-      </copy>
+        </copy>
 
-      <!-- Delete the old .app if it exists -->
-      <delete dir="${macosx.app.dir}/${application.name}.app"
-              quiet="yes" failonerror="false"/>
-      <!-- Delete the old tmp if it exists -->
-      <delete dir="${macosx.app.dir}/tmp"
-              quiet="yes" failonerror="false"/>
-      <mkdir dir="${macosx.app.dir}/tmp"/>
+        <!-- Delete the old .app if it exists -->
+        <delete dir="${macosx.app.dir}/${application.name}.app"
+                quiet="yes" failonerror="false"/>
+        <!-- Delete the old tmp if it exists -->
+        <delete dir="${macosx.app.dir}/tmp"
+                quiet="yes" failonerror="false"/>
+        <mkdir dir="${macosx.app.dir}/tmp"/>
 
-      <!-- Sparkle needs the build number. If it is not
-           available, we use the normal build label -->
-      <condition property="sparkle.build"
-                 value="${sparkle}"
-                 else="${build.label}">
-          <isset property="sparkle"/>
-      </condition>
+        <!-- Sparkle needs the build number. If it is not
+             available, we use the normal build label -->
+        <condition property="sparkle.build"
+                   value="${sparkle}"
+                   else="${build.label}">
+            <isset property="sparkle"/>
+        </condition>
 
-      <condition property="jvmarg"
-            value="-client -Xmx256m"
-            else="" >
-           <os arch="i386" />
-      </condition>
+        <condition property="jvmarg"
+                   value="-client -Xmx256m"
+                   else="">
+            <os arch="i386"/>
+        </condition>
 
-      <!-- removes any spaces from application name if any -->
-      <propertyregex property="macosx.stub.filename"
-            input="${application.name}"
-            regexp=" "
-            replace=""
-            override="true"
-            global="true"
-            defaultValue="${application.name}"/>
+        <!-- removes any spaces from application name if any -->
+        <propertyregex property="macosx.stub.filename"
+                       input="${application.name}"
+                       regexp=" "
+                       replace=""
+                       override="true"
+                       global="true"
+                       defaultValue="${application.name}"/>
 
-      <copy file="${macosx.stubfile}"
-            tofile="${macosx.app.dir}/tmp/${macosx.stub.filename}"/>
+        <copy file="${macosx.stubfile}"
+              tofile="${macosx.app.dir}/tmp/${macosx.stub.filename}"/>
 
-      <!-- This creates the .app for MacOSX -->
-      <jarbundler dir="${macosx.app.dir}"
-                  name="${application.name}"
-                  shortname="${application.name}"
-                  signature="sipc"
-                  mainclass="net.java.sip.communicator.launcher.SIPCommunicator"
-                  icon="resources/images/logo/sc_logo_128x128.icns"
-                  jvmversion="1.7+"
-                  version="${sip-communicator.version}"
-                  build="${sparkle.build}"
-                  infostring="${application.name}"
-                  bundleid="org.${package.name}"
-                  stubfile="${macosx.app.dir}/tmp/${macosx.stub.filename}"
-                  extraclasspath="/System/Library/Java,$JAVAROOT"
-                  workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
-                  vmoptions="-agentlib:AEGetURLEventHandlerAgent -splash:splash.gif ${jvmarg}">
+        <!-- This creates the .app for MacOSX -->
+        <jarbundler dir="${macosx.app.dir}"
+                    name="${application.name}"
+                    shortname="${application.name}"
+                    signature="sipc"
+                    mainclass="net.java.sip.communicator.launcher.SIPCommunicator"
+                    icon="resources/images/logo/sc_logo_128x128.icns"
+                    jvmversion="1.7+"
+                    version="${sip-communicator.version}"
+                    build="${sparkle.build}"
+                    infostring="${application.name}"
+                    bundleid="org.${package.name}"
+                    stubfile="${macosx.app.dir}/tmp/${macosx.stub.filename}"
+                    extraclasspath="/System/Library/Java,$JAVAROOT"
+                    workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
+                    vmoptions="-agentlib:AEGetURLEventHandlerAgent -splash:splash.gif ${jvmarg}">
 
-        <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
-        <javaproperty name="apple.awt.brushMetalRounded" value="true"/>
-        <javaproperty name="apple.awt.showGrowBox" value="true"/>
-        <javaproperty name="java.library.path"
-                      value="$JAVAROOT/lib/native/mac:${system.DYLD_LIBRARY_PATH}"/>
-        <javaproperty name="jna.library.path"
+            <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+            <javaproperty name="apple.awt.brushMetalRounded" value="true"/>
+            <javaproperty name="apple.awt.showGrowBox" value="true"/>
+            <javaproperty name="java.library.path"
+                          value="$JAVAROOT/lib/native/mac:${system.DYLD_LIBRARY_PATH}"/>
+            <javaproperty name="jna.library.path"
                           value="$JAVAROOT/lib/native/mac:${system.DYLD_LIBRARY_PATH}"/>
 
-        <javaproperty name="net.java.sip.communicator.SC_HOME_DIR_NAME"
-                      value="${application.name}"/>
+            <javaproperty name="net.java.sip.communicator.SC_HOME_DIR_NAME"
+                          value="${application.name}"/>
 
-        <!-- Tell felix to run sip-communicator -->
-        <javaproperty name="felix.config.properties"
-                      value="file:felix.client.run.properties"/>
-        <!-- Tell java.util.logging about our logging preferences -->
-        <javaproperty name="java.util.logging.config.file"
-                      value="logging.properties"/>
+            <!-- Tell felix to run sip-communicator -->
+            <javaproperty name="felix.config.properties"
+                          value="file:felix.client.run.properties"/>
+            <!-- Tell java.util.logging about our logging preferences -->
+            <javaproperty name="java.util.logging.config.file"
+                          value="logging.properties"/>
 
-        <jarfileset dir=".">
-            <include name="lib/*.jar" />
-            <include name="lib/os-specific/mac/*.jar" />
-            <include name="lib/bundle/*.jar" />
-            <exclude name="lib/bundle/junit.jar" />
-            <include name="lib/native/mac/*.jnilib" />
-            <include name="lib/native/mac/*.dylib" />
-            <exclude name="lib/native/mac/libgrowl4j.dylib" />
-            <exclude name="lib/native/mac/libsparkle_init.dylib" />
-            <include name="${bundles.dest}/*.jar" />
-            <exclude name="${bundles.dest}/*-slick.jar" />
-            <exclude name="${bundles.dest}/sparkle.jar" />
-            <exclude name="${bundles.dest}/update.jar" />
-            <include name="resources/images/logo/sc_logo_128x128.icns" />
-        </jarfileset>
-        <javafilelist dir="${inst.resrc}"
-                      files="logging.properties"/>
-        <javafilelist dir="${lib}"
-                      files="felix.client.run.properties"/>
-        <javafilelist dir="${lib}"
-                      files="jitsi-defaults.properties"/>
-        <javafilelist dir="${lib}"
-                      files="jitsi-default-overrides.properties"/>
-      </jarbundler>
+            <jarfileset dir=".">
+                <include name="lib/*.jar"/>
+                <include name="lib/os-specific/mac/*.jar"/>
+                <include name="lib/bundle/*.jar"/>
+                <exclude name="lib/bundle/junit.jar"/>
+                <include name="lib/native/mac/*.jnilib"/>
+                <include name="lib/native/mac/*.dylib"/>
+                <exclude name="lib/native/mac/libgrowl4j.dylib"/>
+                <exclude name="lib/native/mac/libsparkle_init.dylib"/>
+                <include name="${bundles.dest}/*.jar"/>
+                <exclude name="${bundles.dest}/*-slick.jar"/>
+                <exclude name="${bundles.dest}/sparkle.jar"/>
+                <exclude name="${bundles.dest}/update.jar"/>
+                <include name="resources/images/logo/sc_logo_128x128.icns"/>
+            </jarfileset>
+            <javafilelist dir="${inst.resrc}"
+                          files="logging.properties"/>
+            <javafilelist dir="${lib}"
+                          files="felix.client.run.properties"/>
+            <javafilelist dir="${lib}"
+                          files="jitsi-defaults.properties"/>
+            <javafilelist dir="${lib}"
+                          files="jitsi-default-overrides.properties"/>
+        </jarbundler>
 
-      <!-- -->
-      <replace file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
-               token="swingnotification.jar">
-            <replacevalue><![CDATA[swingnotification.jar reference\:file\:sc-bundles/growlnotification.jar]]></replacevalue>
-      </replace>
+        <!-- -->
+        <replace file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
+                 token="swingnotification.jar">
+            <replacevalue>
+                <![CDATA[swingnotification.jar reference\:file\:sc-bundles/growlnotification.jar]]></replacevalue>
+        </replace>
 
-      <!-- Remove the reference to the update bundle -->
-      <replace file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
-               token="reference:file:sc-bundles/update.jar"
-               value=""/>
-      <!-- colons can be escaped after some modifications -->
-      <replace file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
-               token="reference\:file\:sc-bundles/update.jar"
-               value=""/>
-      <replaceregexp file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
+        <!-- Remove the reference to the update bundle -->
+        <replace file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
+                 token="reference:file:sc-bundles/update.jar"
+                 value=""/>
+        <!-- colons can be escaped after some modifications -->
+        <replace file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
+                 token="reference\:file\:sc-bundles/update.jar"
+                 value=""/>
+        <replaceregexp
+                file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
                 match="^org.osgi.framework.storage=\$\{user.home\}/.sip-communicator/sip-communicator.bin"
                 replace="org.osgi.framework.storage=$\{user.home\}/Library/Application Support/${application.name}/sip-communicator.bin"
                 flags="m"/>
 
-      <!-- Install the Growl Framework in the application package -->
-      <mkdir dir="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
-      <unzip src="${macosx.resrc.dir}/GrowlFramework.zip"
-             dest="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
-      <!-- Ant unzip tasks does not preserve symlinks, so we recreate them -->
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Versions/Current"
-               resource="./A"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Headers"
-               resource="./Versions/Current/Headers"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Resources"
-               resource="./Versions/Current/Resources"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Growl"
-               resource="./Versions/Current/Growl"/>
+        <!-- Install the Growl Framework in the application package -->
+        <mkdir dir="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
+        <unzip src="${macosx.resrc.dir}/GrowlFramework.zip"
+               dest="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
+        <!-- Ant unzip tasks does not preserve symlinks, so we recreate them -->
+        <symlink
+                link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Versions/Current"
+                resource="./A"/>
+        <symlink
+                link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Headers"
+                resource="./Versions/Current/Headers"/>
+        <symlink
+                link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Resources"
+                resource="./Versions/Current/Resources"/>
+        <symlink
+                link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/GrowlFramework/Growl.framework/Growl"
+                resource="./Versions/Current/Growl"/>
 
-      <!-- Add the url types in the Info.plist file -->
-      <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
-        <replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>
-        <replacevalue><![CDATA[<key>CFBundleURLTypes</key>
+        <!-- Add the url types in the Info.plist file -->
+        <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
+            <replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>
+            <replacevalue><![CDATA[<key>CFBundleURLTypes</key>
       <array>
         <dict>
             <key>CFBundleURLName</key>
@@ -1272,37 +1278,37 @@
         </dict>
       </array>
       <key>CFBundleName</key>]]></replacevalue>
-      </replace>
+        </replace>
 
-      <!-- Rename Java dict to Javax to prevent OSX asking for the old Apple JVM -->
+        <!-- Rename Java dict to Javax to prevent OSX asking for the old Apple JVM -->
         <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
-          <replacetoken><![CDATA[<key>Java</key>]]></replacetoken>
-          <replacevalue><![CDATA[<key>Javax</key>]]></replacevalue>
-      </replace>
+            <replacetoken><![CDATA[<key>Java</key>]]></replacetoken>
+            <replacevalue><![CDATA[<key>Javax</key>]]></replacevalue>
+        </replace>
 
-      <!-- Add property for high resolution displays -->
-      <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
-        <replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>
-        <replacevalue><![CDATA[<key>NSHighResolutionCapable</key>
+        <!-- Add property for high resolution displays -->
+        <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
+            <replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>
+            <replacevalue><![CDATA[<key>NSHighResolutionCapable</key>
       <true/>
       <key>CFBundleName</key>]]></replacevalue>
-      </replace>
-      <symlink resource="lib/native/mac/libAEGetURLEventHandlerAgent.dylib"
-               link="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/libAEGetURLEventHandlerAgent.dylib"/>
+        </replace>
+        <symlink resource="lib/native/mac/libAEGetURLEventHandlerAgent.dylib"
+                 link="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/libAEGetURLEventHandlerAgent.dylib"/>
 
-      <copy file="${macosx.resrc.dir}/libgrowl4j.dylib"
-            todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/lib/native/mac/"/>
+        <copy file="${macosx.resrc.dir}/libgrowl4j.dylib"
+              todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/lib/native/mac/"/>
 
-      <antcall target="-macosx-include-jre"/>
+        <antcall target="-macosx-include-jre"/>
 
-      <antcall target="enable-splash">
-          <param name="target.dir"
-             value="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java"/>
-      </antcall>
+        <antcall target="enable-splash">
+            <param name="target.dir"
+                   value="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java"/>
+        </antcall>
 
-      <!-- Delete the tmp if it exists -->
-      <delete dir="${macosx.app.dir}/tmp"
-              quiet="yes" failonerror="false"/>
+        <!-- Delete the tmp if it exists -->
+        <delete dir="${macosx.app.dir}/tmp"
+                quiet="yes" failonerror="false"/>
     </target>
 
     <!-- if folder for a macosx jdk is supplied we embed it in the distributed
@@ -1316,52 +1322,52 @@
 
         <mkdir dir="${macosx.app.dir}/${application.name}.app/Contents/PlugIns"/>
         <copy todir="${macosx.app.dir}/${application.name}.app/Contents/PlugIns">
-              <fileset dir="${jre.parent.folder}">
-                  <include name="${jre.folder.name}/Contents/Info.plist"/>
-                  <include name="${jre.folder.name}/Contents/Home/jre/"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/bin/"/>
+            <fileset dir="${jre.parent.folder}">
+                <include name="${jre.folder.name}/Contents/Info.plist"/>
+                <include name="${jre.folder.name}/Contents/Home/jre/"/>
+                <exclude name="${jre.folder.name}/Contents/Home/bin/"/>
 
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/rmid"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/rmiregistry"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/tnameserv"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/keytool"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/kinit"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/klist"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/ktab"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/policytool"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/orbd"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/servertool"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/javaws"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/bin/java"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/rmid"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/rmiregistry"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/tnameserv"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/keytool"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/kinit"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/klist"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/ktab"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/policytool"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/orbd"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/servertool"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/javaws"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/bin/java"/>
 
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/javaws.jar"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/jfr/"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/jfr.jar"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/deploy/"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/deploy.jar"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/plugin.jar"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/javaws.jar"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/jfr/"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/jfr.jar"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/deploy/"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/deploy.jar"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/plugin.jar"/>
 
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libdeploy.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libdeploy.dylib"/>
 
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/javafx.properties"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/jfxswt.jar"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/fxplugins.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libdecora_sse.so"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libdecora-sse.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libfxplugins.so"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libglass.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libglib-lite.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libgstreamer-lite.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjavafx_font_t2k.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjavafx-font.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjavafx-iio.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjfxmedia.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjfxwebkit.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libprism_common.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libprism_sw.dylib"/>
-                  <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libprism-es2.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/javafx.properties"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/jfxswt.jar"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/fxplugins.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libdecora_sse.so"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libdecora-sse.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libfxplugins.so"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libglass.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libglib-lite.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libgstreamer-lite.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjavafx_font_t2k.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjavafx-font.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjavafx-iio.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjfxmedia.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libjfxwebkit.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libprism_common.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libprism_sw.dylib"/>
+                <exclude name="${jre.folder.name}/Contents/Home/jre/lib/libprism-es2.dylib"/>
 
-              </fileset>
+            </fileset>
         </copy>
 
         <!-- and now the entry in Info.plist-->
@@ -1383,25 +1389,25 @@
             if="sparkle"
             description="Create an .app package for MACOSX with Sparkle support">
 
-      <!-- Add the sparkle bundle path in the felix.client.run.properties file -->
-      <echo file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
-            append="true">felix.auto.start.71= reference:file:sc-bundles/sparkle.jar
-      </echo>
+        <!-- Add the sparkle bundle path in the felix.client.run.properties file -->
+        <echo file="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/felix.client.run.properties"
+              append="true">felix.auto.start.71= reference:file:sc-bundles/sparkle.jar
+        </echo>
 
-      <!-- Add the Sparkle bundle and JNI to the application package -->
-      <copy file="${bundles.dest}/sparkle.jar"
-            todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/sc-bundles/"/>
-      <copy file="lib/native/mac/libsparkle_init.dylib"
-            todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/lib/native/mac/"/>
+        <!-- Add the Sparkle bundle and JNI to the application package -->
+        <copy file="${bundles.dest}/sparkle.jar"
+              todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/sc-bundles/"/>
+        <copy file="lib/native/mac/libsparkle_init.dylib"
+              todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/Java/lib/native/mac/"/>
 
-      <!-- Add public key file to the application bundle -->
-      <copy file="${macosx.resrc.dir}/sparkle_dsa_pub.pem"
-            todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/"/>
+        <!-- Add public key file to the application bundle -->
+        <copy file="${macosx.resrc.dir}/sparkle_dsa_pub.pem"
+              todir="${macosx.app.dir}/${application.name}.app/Contents/Resources/"/>
 
-      <!-- Add the Sparkle properties in the Info.plist file -->
-      <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
-        <replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>
-        <replacevalue><![CDATA[<key>SUCheckAtStartup</key>
+        <!-- Add the Sparkle properties in the Info.plist file -->
+        <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
+            <replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>
+            <replacevalue><![CDATA[<key>SUCheckAtStartup</key>
     <string>YES</string>
     <key>SUScheduledCheckInterval</key>
     <string>86400</string>
@@ -1412,37 +1418,39 @@
     <key>SUShowReleaseNotes</key>
     <string>YES</string>
     <key>CFBundleName</key>]]></replacevalue>
-      </replace>
+        </replace>
 
-      <!-- Now replace the download link-->
-      <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
-        <replacefilter token="_DOWNLOAD_LINK_" value="${link.updates.macosx}"/>
-      </replace>
+        <!-- Now replace the download link-->
+        <replace file="${macosx.app.dir}/${application.name}.app/Contents/Info.plist">
+            <replacefilter token="_DOWNLOAD_LINK_" value="${link.updates.macosx}"/>
+        </replace>
 
-      <!-- Install the Sparkle Framework in the application package -->
-      <mkdir dir="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
-      <unzip src="${macosx.resrc.dir}/Sparkle.framework.zip"
-            dest="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
-      <!-- Ant unzip tasks does not preserve symlinks, so we recreate them -->
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Versions/Current"
-            resource="./A"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Headers"
-            resource="./Versions/Current/Headers"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources"
-            resource="./Versions/Current/Resources"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Sparkle"
-            resource="./Versions/Current/Sparkle"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources/fr_CA.lproj"
-            resource="./fr.lproj"/>
-      <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources/pt.lproj"
-            resource="./pt_BR.lproj" failonerror="false"/>
+        <!-- Install the Sparkle Framework in the application package -->
+        <mkdir dir="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
+        <unzip src="${macosx.resrc.dir}/Sparkle.framework.zip"
+               dest="${macosx.app.dir}/${application.name}.app/Contents/Frameworks"/>
+        <!-- Ant unzip tasks does not preserve symlinks, so we recreate them -->
+        <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Versions/Current"
+                 resource="./A"/>
+        <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Headers"
+                 resource="./Versions/Current/Headers"/>
+        <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources"
+                 resource="./Versions/Current/Resources"/>
+        <symlink link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Sparkle"
+                 resource="./Versions/Current/Sparkle"/>
+        <symlink
+                link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources/fr_CA.lproj"
+                resource="./fr.lproj"/>
+        <symlink
+                link="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources/pt.lproj"
+                resource="./pt_BR.lproj" failonerror="false"/>
 
-      <!-- Restore the file permissions to the Sparke relaunch tool -->
-      <chmod file="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources/relaunch"
+        <!-- Restore the file permissions to the Sparke relaunch tool -->
+        <chmod file="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Resources/relaunch"
                perm="ugo+rx"/>
-      <chmod file="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Versions/A/Sparkle"
+        <chmod file="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Versions/A/Sparkle"
                perm="ugo+rx"/>
-      <chmod file="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/finish_installation.app/Contents/MacOS/finish_installation"
+        <chmod file="${macosx.app.dir}/${application.name}.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/finish_installation.app/Contents/MacOS/finish_installation"
                perm="ugo+rx"/>
     </target>
 
@@ -1462,11 +1470,11 @@
     </target>
     <target name="dmg-language-folder">
         <propertyregex property="jitsi.available.lang.resource"
-                      input="${file.language.resource}"
-                      regexp="resources_(.*)\.properties"
-                      select="\1"
-                      casesensitive="false"
-                      defaultValue="en"/>
+                       input="${file.language.resource}"
+                       regexp="resources_(.*)\.properties"
+                       select="\1"
+                       casesensitive="false"
+                       defaultValue="en"/>
         <mkdir dir="${macosx.app.dir}/${application.name}.app/Contents/Resources/${jitsi.available.lang.resource}.lproj"/>
     </target>
 
@@ -1475,84 +1483,84 @@
             if="is.running.macos"
             description="Create a .dmg package for MACOSX (only works on MACOSX)">
 
-      <property name="macosx.dmg.name"
-                value="${package.name}-${sip-communicator.version}.dmg"/>
-      <property name="macosx.dmg.tmpname"
-                value="${package.name}-tmp.dmg"/>
-      <delete file="${macosx.app.dir}/${macosx.dmg.name}"
-              quiet="yes" failonerror="false"/>
+        <property name="macosx.dmg.name"
+                  value="${package.name}-${sip-communicator.version}.dmg"/>
+        <property name="macosx.dmg.tmpname"
+                  value="${package.name}-tmp.dmg"/>
+        <delete file="${macosx.app.dir}/${macosx.dmg.name}"
+                quiet="yes" failonerror="false"/>
 
-      <!-- Creates empty folders in Contents/Resources for
-      available languages, so macosx can switch languages -->
-      <antcall target="dmg-create-language-folders" />
+        <!-- Creates empty folders in Contents/Resources for
+        available languages, so macosx can switch languages -->
+        <antcall target="dmg-create-language-folders"/>
 
-      <!-- sign before creating the image, so the signed app goes into it -->
-      <antcall target="macosx-sign-app"/>
+        <!-- sign before creating the image, so the signed app goes into it -->
+        <antcall target="macosx-sign-app"/>
 
-      <!-- Create a temporary Disk Image -->
-      <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-        <arg value="create"/>
-        <arg value="-srcfolder"/>
-        <arg value="${macosx.app.dir}/${application.name}.app"/>
-        <arg value="-volname"/>
-        <arg value="${application.name}"/>
-        <arg value="-ov"/>
-        <arg value="${macosx.app.dir}/${macosx.dmg.tmpname}"/>
-        <arg value="-format"/>
-        <arg value="UDRW"/>
-      </exec>
-      <!-- Attach the temporary image -->
-      <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-        <arg value="attach"/>
-        <arg value="${macosx.app.dir}/${macosx.dmg.tmpname}"/>
-        <arg value="-mountroot"/>
-        <arg value="${release}/"/>
-      </exec>
-      <!-- Copy the background, icon and DS_Store files -->
-      <mkdir dir="${release}/${application.name}/.background"/>
-      <copy file="${macosx.resrc.dir}/dmg-background.png"
+        <!-- Create a temporary Disk Image -->
+        <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+            <arg value="create"/>
+            <arg value="-srcfolder"/>
+            <arg value="${macosx.app.dir}/${application.name}.app"/>
+            <arg value="-volname"/>
+            <arg value="${application.name}"/>
+            <arg value="-ov"/>
+            <arg value="${macosx.app.dir}/${macosx.dmg.tmpname}"/>
+            <arg value="-format"/>
+            <arg value="UDRW"/>
+        </exec>
+        <!-- Attach the temporary image -->
+        <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+            <arg value="attach"/>
+            <arg value="${macosx.app.dir}/${macosx.dmg.tmpname}"/>
+            <arg value="-mountroot"/>
+            <arg value="${release}/"/>
+        </exec>
+        <!-- Copy the background, icon and DS_Store files -->
+        <mkdir dir="${release}/${application.name}/.background"/>
+        <copy file="${macosx.resrc.dir}/dmg-background.png"
               tofile="${release}/${application.name}/.background/background.png"
               overwrite="true"/>
-      <copy file="${macosx.resrc.dir}/dmg-VolumeIcon.icns"
+        <copy file="${macosx.resrc.dir}/dmg-VolumeIcon.icns"
               tofile="${release}/${application.name}/.VolumeIcon.icns"
               overwrite="true"/>
-      <copy file="${macosx.resrc.dir}/dmg-DS_Store"
+        <copy file="${macosx.resrc.dir}/dmg-DS_Store"
               tofile="${release}/${application.name}/.DS_Store"
               overwrite="true"/>
-      <exec executable="/Developer/Tools/SetFile" os="Mac OS X">
-        <arg value="-a"/>
-        <arg value="C"/>
-        <arg value="${release}/${application.name}"/>
-      </exec>
-      <!-- Add a symbolic link to the Applications directory -->
-      <symlink link="${release}/${application.name}" resource="/Applications"/>
+        <exec executable="/Developer/Tools/SetFile" os="Mac OS X">
+            <arg value="-a"/>
+            <arg value="C"/>
+            <arg value="${release}/${application.name}"/>
+        </exec>
+        <!-- Add a symbolic link to the Applications directory -->
+        <symlink link="${release}/${application.name}" resource="/Applications"/>
 
-      <!-- Detach the temporary image -->
-      <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-        <arg value="detach"/>
-        <arg value="${release}/${application.name}"/>
-      </exec>
-      <!-- Compress it to a new image -->
-      <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-        <arg value="convert"/>
-        <arg value="${macosx.app.dir}/${macosx.dmg.tmpname}"/>
-        <arg value="-format"/>
-        <arg value="UDZO"/>
-        <arg value="-o"/>
-        <arg value="${macosx.app.dir}/${macosx.dmg.name}"/>
-      </exec>
-      <!-- Delete the temporary image -->
-      <delete file="${macosx.app.dir}/${macosx.dmg.tmpname}"
-              quiet="yes" failonerror="false"/>
+        <!-- Detach the temporary image -->
+        <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+            <arg value="detach"/>
+            <arg value="${release}/${application.name}"/>
+        </exec>
+        <!-- Compress it to a new image -->
+        <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+            <arg value="convert"/>
+            <arg value="${macosx.app.dir}/${macosx.dmg.tmpname}"/>
+            <arg value="-format"/>
+            <arg value="UDZO"/>
+            <arg value="-o"/>
+            <arg value="${macosx.app.dir}/${macosx.dmg.name}"/>
+        </exec>
+        <!-- Delete the temporary image -->
+        <delete file="${macosx.app.dir}/${macosx.dmg.tmpname}"
+                quiet="yes" failonerror="false"/>
 
-      <!-- creates the sparkle xmls -->
-      <antcall target="macosx-sparkle-files"/>
-      <antcall target="macosx-sparkle-delta-updates"/>
-      <antcall target="macosx-sparkle-files-finish"/>
+        <!-- creates the sparkle xmls -->
+        <antcall target="macosx-sparkle-files"/>
+        <antcall target="macosx-sparkle-delta-updates"/>
+        <antcall target="macosx-sparkle-files-finish"/>
 
-      <!-- remove folder we are done -->
-      <delete dir="${macosx.app.dir}/${application.name}.app"
-              quiet="yes" failonerror="false"/>
+        <!-- remove folder we are done -->
+        <delete dir="${macosx.app.dir}/${application.name}.app"
+                quiet="yes" failonerror="false"/>
     </target>
 
     <!-- Signs the specified path in param path-to-sign, using force -->
@@ -1602,8 +1610,8 @@
                  inheritall="true" inheritrefs="true">
             <path>
                 <dirset
-                    dir="${macosx.app.dir}/${application.name}.app/Contents">
-                        <include name="PlugIns/*"/>
+                        dir="${macosx.app.dir}/${application.name}.app/Contents">
+                    <include name="PlugIns/*"/>
                 </dirset>
             </path>
         </foreach>
@@ -1650,8 +1658,8 @@
      -->
     <target name="macosx-sparkle-params"
             depends="version-params,load-props-params">
-        <property   name="macosx.dmg.name"
-                    value="${package.name}-${sip-communicator.version}.dmg"/>
+        <property name="macosx.dmg.name"
+                  value="${package.name}-${sip-communicator.version}.dmg"/>
     </target>
     <target name="version-params"
             unless="sip-communicator.version">
@@ -1675,7 +1683,7 @@
         </exec>
 
         <length file="${macosx.app.dir}/${macosx.dmg.name}"
-                property="dmg.file.length" />
+                property="dmg.file.length"/>
 
         <copy todir="${macosx.app.dir}/sparkle">
             <fileset dir="${macosx.resrc.dir}/sparkle-files/sparkle"/>
@@ -1686,20 +1694,20 @@
                     locale="en,US"/>
         </tstamp>
 
-        <filter token="BUILD" value="${sparkle.build}" />
-        <filter token="DATE" value="${current.tstamp}" />
-        <filter token="APP_NAME" value="${application.name}" />
-        <filter token="SPARKLE_UPDATES" value="${link.updates.macosx}" />
-        <filter token="SPARKLE_INDEX" value="${link.sparkle.updates.index}" />
-        <filter token="LEN" value="${dmg.file.length}" />
-        <filter token="SIGNATURE" value="${signature.base64}" />
-        <filter token="DOWNLOAD_DMG_LINK" value="${link.download.macosx}" />
+        <filter token="BUILD" value="${sparkle.build}"/>
+        <filter token="DATE" value="${current.tstamp}"/>
+        <filter token="APP_NAME" value="${application.name}"/>
+        <filter token="SPARKLE_UPDATES" value="${link.updates.macosx}"/>
+        <filter token="SPARKLE_INDEX" value="${link.sparkle.updates.index}"/>
+        <filter token="LEN" value="${dmg.file.length}"/>
+        <filter token="SIGNATURE" value="${signature.base64}"/>
+        <filter token="DOWNLOAD_DMG_LINK" value="${link.download.macosx}"/>
         <copy file="${macosx.resrc.dir}/sparkle-files/updates.xml"
-                tofile="${macosx.app.dir}/sparkle/updates-tmp.xml"
-                overwrite="true" filtering="yes"/>
+              tofile="${macosx.app.dir}/sparkle/updates-tmp.xml"
+              overwrite="true" filtering="yes"/>
         <copy file="${macosx.resrc.dir}/sparkle-files/index-top.html"
               todir="${macosx.app.dir}/sparkle"
-                overwrite="true" filtering="yes"/>
+              overwrite="true" filtering="yes"/>
 
         <get src="${link.update.changelog.prefix}/extended-changelog-${label}.html"
              dest="changelog-${label}.html"
@@ -1739,7 +1747,7 @@
             puting deltas (no matter if there were any at all if option
             is not enabled) we must remove the SPARKLE_DELTAS token if left.
         -->
-        <filter token="SPARKLE_DELTAS" value="" />
+        <filter token="SPARKLE_DELTAS" value=""/>
         <move file="${macosx.app.dir}/sparkle/updates-tmp.xml"
               tofile="${macosx.app.dir}/sparkle/updates.xml"
               overwrite="true" filtering="yes"/>
@@ -1861,16 +1869,16 @@
         </exec>
 
         <length file="${macosx.app.dir}/${application.name}-${old.sparkle.build}-to-${sparkle.build}.delta"
-                property="delta.file.length" />
+                property="delta.file.length"/>
 
         <copy file="${macosx.app.dir}/sparkle/updates-tmp.xml"
               tofile="${macosx.app.dir}/sparkle/updates-tmp1.xml"/>
         <move file="${macosx.app.dir}/sparkle/updates-tmp1.xml"
-                tofile="${macosx.app.dir}/sparkle/updates-tmp.xml"
-                overwrite="true" filtering="yes">
+              tofile="${macosx.app.dir}/sparkle/updates-tmp.xml"
+              overwrite="true" filtering="yes">
 
-        <filterset recurse="false">
-            <filter token="SPARKLE_DELTAS" value="
+            <filterset recurse="false">
+                <filter token="SPARKLE_DELTAS" value="
 
         &lt;enclosure type=&quot;application/octet-stream&quot;
       sparkle:version=&quot;${sparkle.build}&quot; length=&quot;${delta.file.length}&quot;
@@ -1878,9 +1886,9 @@
       sparkle:deltaFrom=&quot;${old.sparkle.build}&quot;
       url=&quot;${sparkle.delta.download.location}/${application.name}-${old.sparkle.build}-to-${sparkle.build}.delta&quot;/&gt;
           @SPARKLE_DELTAS@
-        " />
-        </filterset>
-      </move>
+        "/>
+            </filterset>
+        </move>
 
     </target>
 
@@ -1897,19 +1905,19 @@
             </dirset>
         </resourcecount>
         <math result="build.history.to.delete"
-            operand1="${build.history.current.size}"
-            operation="-"
-            operand2="${delta.history.size}"
-            datatype="int"/>
+              operand1="${build.history.current.size}"
+              operation="-"
+              operand2="${delta.history.size}"
+              datatype="int"/>
 
         <timestampselector outputsetid="oldest.builds"
-                        count="${build.history.to.delete}"
-                        age="eldest">
-          <path>
-             <dirset dir="${delta.history.location}">
-               <include name="*" />
-             </dirset>
-          </path>
+                           count="${build.history.to.delete}"
+                           age="eldest">
+            <path>
+                <dirset dir="${delta.history.location}">
+                    <include name="*"/>
+                </dirset>
+            </path>
         </timestampselector>
 
         <foreach param="build.to.delete"
@@ -1918,14 +1926,14 @@
         </foreach>
     </target>
     <target name="-delete-oldest-delta-data-folder">
-        <echo message="!!! Deleting old data dir ${build.to.delete} !!! " />
+        <echo message="!!! Deleting old data dir ${build.to.delete} !!! "/>
         <delete dir="${build.to.delete}" failonerror="false"/>
     </target>
 
     <!-- Outputs a warning notifying the user that a dpkg tool is missing. -->
     <target name="dpkg-build-warning" unless="dpkg.build.present">
-      <echo message="Either the ${dpkg-buildpackage} tool or the debhelper tools was not found on your system."/>
-      <echo message="Try installing the 'dpkg-dev' and 'debhelper' packages"/>
+        <echo message="Either the ${dpkg-buildpackage} tool or the debhelper tools was not found on your system."/>
+        <echo message="Try installing the 'dpkg-dev' and 'debhelper' packages"/>
     </target>
 
     <!-- Create a Debian package - This needs dpkg utilities
@@ -1945,7 +1953,7 @@
 
         <!-- create jitsi copy to work on it -->
         <property name="debian.target.dir"
-                  value="${debian.tmp.dir}/${package.name}" />
+                  value="${debian.tmp.dir}/${package.name}"/>
         <mkdir dir="${debian.target.dir}"/>
 
         <antcall target="deb-copy-jitsi">
@@ -1956,12 +1964,12 @@
             <param name="target.dir" value="${debian.target.dir}"/>
         </antcall>
 
-        <property name="debianize.dir" value="${debian.target.dir}/debian" />
+        <property name="debianize.dir" value="${debian.target.dir}/debian"/>
         <!-- the target we will use to build the package,
             depends whether we are building source package or just a deb -->
-        <property name="debianize.build.target" value="make-and-deploy" />
+        <property name="debianize.build.target" value="make-and-deploy"/>
 
-        <antcall target="dpkg-debianize" />
+        <antcall target="dpkg-debianize"/>
 
         <!-- Build binary .deb package -->
         <exec executable="${dpkg-buildpackage}" dir="${debian.target.dir}">
@@ -1985,11 +1993,11 @@
             Copy changelogs before deleting them, these changelogs are used by
             tools like Update Manager in Ubuntu distribution. -->
         <copy file="${debianize.dir}/changelog"
-            tofile="${debian.dir}/${package.name}_${sip-communicator.version}_${deb-arch}.changelog"/>
+              tofile="${debian.dir}/${package.name}_${sip-communicator.version}_${deb-arch}.changelog"/>
 
         <delete dir="${debian.tmp.dir}"/>
     </target>
-    
+
     <target name="deb-32">
         <antcall target="-make-deb-package">
             <param name="deb-arch" value="i386"/>
@@ -2001,7 +2009,7 @@
             <param name="deb-arch" value="amd64"/>
         </antcall>
     </target>
-    
+
     <target name="deb" depends="deb-32,deb-64"/>
 
     <!-- Outputs a warning notifying the user that dpkg-scanpackages is not installed. -->
@@ -2097,8 +2105,8 @@
         <antcall target="-deb-build-target-replace"/>
 
         <replace file="${debianize.dir}/rules"
-             token="_PACKAGE_NAME_"
-             value="${package.name}"/>
+                 token="_PACKAGE_NAME_"
+                 value="${package.name}"/>
         <chmod file="${debianize.dir}/rules" perm="+x"/>
 
         <!-- update the rules file if invoked from within deb target -->
@@ -2207,8 +2215,8 @@
             if="debianize.src.pkg">
         <replace file="${debianize.dir}/../lib/felix.client.run.properties"
                  token=" reference:file:sc-bundles/httpclient.jar \${line.separator}">
-            <replacevalue> reference:file:sc-bundles/httpclient.jar \
- reference:file:sc-bundles/httpmime.jar \
+            <replacevalue>reference:file:sc-bundles/httpclient.jar \
+                reference:file:sc-bundles/httpmime.jar \
             </replacevalue>
         </replace>
     </target>
@@ -2222,9 +2230,9 @@
 
         <!-- append to -->
         <concat destfile="${debianize.dir}/${package.name}.install"
-            append="true"
-            eol="lf"
-            fixlastline="true">lib/jitsi-default-overrides.properties  usr/share/${package.name}/lib/&#010;</concat>
+                append="true"
+                eol="lf"
+                fixlastline="true">lib/jitsi-default-overrides.properties usr/share/${package.name}/lib/&#010;</concat>
 
     </target>
 
@@ -2236,31 +2244,31 @@
     <target name="-deb-build-replace-custom"
             if="debianize.build.target.custom">
         <replace file="${debianize.dir}/rules"
-             token="_BUILD_TARGET_"
-             value="copy-ready-scbundles -Dsc.basedir=${sc.basedir} -Dtarget.dir=${debian.target.dir}"/>
+                 token="_BUILD_TARGET_"
+                 value="copy-ready-scbundles -Dsc.basedir=${sc.basedir} -Dtarget.dir=${debian.target.dir}"/>
     </target>
     <!-- target that sets the build target that is in the property:
         -deb-build-replace -->
     <target name="-deb-build-replace">
         <replace file="${debianize.dir}/rules"
-             token="_BUILD_TARGET_"
-             value="${debianize.build.target}"/>
+                 token="_BUILD_TARGET_"
+                 value="${debianize.build.target}"/>
     </target>
     <!-- copies already build scbundles to the target.dir folder -->
     <target name="copy-ready-scbundles">
         <mkdir dir="${target.dir}/sc-bundles"/>
         <copy todir="${target.dir}/sc-bundles">
-              <fileset dir="${sc.basedir}/sc-bundles">
-                    <include name="**/*"/>
-              </fileset>
+            <fileset dir="${sc.basedir}/sc-bundles">
+                <include name="**/*"/>
+            </fileset>
         </copy>
     </target>
 
     <target name="-deb-sh-update-homedir"
             if="application.home.dirname">
         <replace file="${debianize.dir}/sh/${package.name}"
-             token="net.java.sip.communicator.launcher.SIPCommunicator"
-             value="-Dnet.java.sip.communicator.SC_HOME_DIR_NAME=${application.home.dirname} net.java.sip.communicator.launcher.SIPCommunicator"/>
+                 token="net.java.sip.communicator.launcher.SIPCommunicator"
+                 value="-Dnet.java.sip.communicator.SC_HOME_DIR_NAME=${application.home.dirname} net.java.sip.communicator.launcher.SIPCommunicator"/>
     </target>
 
     <target name="-deb-control-file"
@@ -2334,11 +2342,11 @@
 
         <!-- removes the rule override_dh_auto_clean -->
         <replace file="${debianize.dir}/rules"
-                         token="override_dh_auto_clean"
-                         value="#override_dh_auto_clean"/>
+                 token="override_dh_auto_clean"
+                 value="#override_dh_auto_clean"/>
         <replace file="${debianize.dir}/rules"
-                         token="&#009;dh_auto_clean --"
-                         value="#&#009;dh_auto_clean --"/>
+                 token="&#009;dh_auto_clean --"
+                 value="#&#009;dh_auto_clean --"/>
 
     </target>
     <!-- copies links file only if used in the context of deb-src target -->
@@ -2365,7 +2373,8 @@
         <concat destfile="${debianize.dir}/${package.name}.install"
                 append="true"
                 eol="lf"
-                fixlastline="true">lib/bundle/commons-logging.jar usr/share/${package.name}/lib/bundle/&#010;lib/bundle/log4j.jar usr/share/${package.name}/lib/bundle/&#010;</concat>
+                fixlastline="true">lib/bundle/commons-logging.jar usr/share/${package.name}/lib/bundle/&#010;lib/bundle/log4j.jar
+            usr/share/${package.name}/lib/bundle/&#010;</concat>
         <antcall target="-deb-package.install-file-update-splash"/>
     </target>
     <target name="-deb-package.install-file-update-splash"
@@ -2399,7 +2408,7 @@
     </target>
     <!-- use postinst and postrm files only if used from deb target -->
     <target name="-deb-post-files-update"
-                unless="debianize.src.pkg">
+            unless="debianize.src.pkg">
         <copy file="${inst.resrc}/debian/postinst"
               tofile="${debianize.dir}/postinst"
               overwrite="true"/>
@@ -2413,37 +2422,37 @@
             if="dpkg.scan.present"
             description="Prepare to deploy Debian package (needs dpkg utilities)">
 
-      <mkdir dir="${debian.binary.dir}"/>
-      <move todir="${debian.binary.dir}">
-        <fileset dir="${debian.dir}">
-          <include name="sip-communicator*386*"/>
-        </fileset>
-      </move>
+        <mkdir dir="${debian.binary.dir}"/>
+        <move todir="${debian.binary.dir}">
+            <fileset dir="${debian.dir}">
+                <include name="sip-communicator*386*"/>
+            </fileset>
+        </move>
 
-      <exec executable="${dpkg-scanpackages}"
-          dir="${debian.dir}"
-          output="${debian.binary.dir}/dpkg-scanpackages.out"
-          errorproperty="dpkg-scanpackages.err">
-        <arg value="binary"/>
-        <arg value="/dev/null"/>
-      </exec>
+        <exec executable="${dpkg-scanpackages}"
+              dir="${debian.dir}"
+              output="${debian.binary.dir}/dpkg-scanpackages.out"
+              errorproperty="dpkg-scanpackages.err">
+            <arg value="binary"/>
+            <arg value="/dev/null"/>
+        </exec>
 
-      <exec executable="/bin/gzip"
-          dir="${debian.dir}"
-          input="${debian.binary.dir}/dpkg-scanpackages.out"
-          output="${debian.binary.dir}/Packages.gz">
-        <arg value="-9c"/>
-      </exec>
+        <exec executable="/bin/gzip"
+              dir="${debian.dir}"
+              input="${debian.binary.dir}/dpkg-scanpackages.out"
+              output="${debian.binary.dir}/Packages.gz">
+            <arg value="-9c"/>
+        </exec>
 
-      <!-- Delete the temporary file -->
-      <delete file="${debian.binary.dir}/dpkg-scanpackages.out"
-              quiet="yes" failonerror="false"/>
+        <!-- Delete the temporary file -->
+        <delete file="${debian.binary.dir}/dpkg-scanpackages.out"
+                quiet="yes" failonerror="false"/>
 
     </target>
 
     <!-- clean for deb-src -->
     <target name="clean-deb-src">
-        <delete dir="${debian.tmp.dir}/${package.name}-${sip-communicator.version}" />
+        <delete dir="${debian.tmp.dir}/${package.name}-${sip-communicator.version}"/>
     </target>
 
     <!-- copies jitsi source to ${target.dir},
@@ -2519,7 +2528,7 @@
             description="Create a .deb package for Debian (needs dpkg utilities)">
 
         <property name="debian.src.dir"
-                  value="${debian.tmp.dir}/${package.name}-${sip-communicator.version}" />
+                  value="${debian.tmp.dir}/${package.name}-${sip-communicator.version}"/>
 
         <mkdir dir="${debian.src.dir}"/>
 
@@ -2528,19 +2537,19 @@
             <param name="extra.exclude" value="**/impl/googlecontacts/**"/>
         </antcall>
 
-        <property name="debianize.dir" value="${debian.src.dir}/debian" />
+        <property name="debianize.dir" value="${debian.src.dir}/debian"/>
         <!-- the target we will use to build the package,
             depends whether we are building source package or just a deb -->
         <property name="debianize.build.target"
-                  value="init deb-src-rebuild" />
+                  value="init deb-src-rebuild"/>
 
         <!-- property indicating we are building a debian source package -->
         <property name="debianize.src.pkg"
-                  value="true" />
+                  value="true"/>
         <!--
             debianize the folder, using the files from resources/install/debian
         -->
-        <antcall target="dpkg-debianize" />
+        <antcall target="dpkg-debianize"/>
 
         <!-- Now create some links -->
         <mkdir dir="${debian.src.dir}/lib/os-specific/linux"/>
@@ -2629,7 +2638,7 @@
 
         <!-- jfontchooser -->
         <unzip src="${sc.basedir}/../libsrc/jfontchooser-src.zip"
-                       dest="${debian.src.dir}/lib/src/jfontchooser"/>
+               dest="${debian.src.dir}/lib/src/jfontchooser"/>
 
         <!-- gdata
         <unzip src="${sc.basedir}/../libsrc/gdata-src.java-1.43.0.zip"
@@ -2657,37 +2666,37 @@
 
     <!-- clean for debuild -->
     <target name="clean-debuild" depends="load-properties">
-        <property name="debian.src.dir" value="." />
+        <property name="debian.src.dir" value="."/>
 
         <!-- main build of jitsi -->
         <ant dir="${debian.src.dir}/lib/src/swingworker"
              inheritAll="false"
              target="clean"/>
-        <exec   dir="${debian.src.dir}/lib/src/joscar"
-                executable="ant"
-                failonerror="false">
-            <arg value="clean" />
+        <exec dir="${debian.src.dir}/lib/src/joscar"
+              executable="ant"
+              failonerror="false">
+            <arg value="clean"/>
         </exec>
         <delete dir="${debian.src.dir}/lib/src/jsocks/classes"
                 failonerror="false"/>
         <delete dir="${debian.src.dir}/lib/src/joscar/lib/annotations/classes"
                 failonerror="false"/>
-        <exec   dir="${debian.src.dir}/lib/src/smack_src_3_2_2/build"
-                executable="ant"
-                failonerror="false">
-            <arg value="clean" />
+        <exec dir="${debian.src.dir}/lib/src/smack_src_3_2_2/build"
+              executable="ant"
+              failonerror="false">
+            <arg value="clean"/>
         </exec>
         <delete dir="${debian.src.dir}/lib/src/jnsapi/classes"
                 failonerror="false"/>
         <delete dir="${debian.src.dir}/lib/src/java-jml/classes"
                 failonerror="false"/>
         <ant dir="${debian.src.dir}/lib/src/misc"
-            inheritAll="true"
-            inheritRefs="true"
-            target="clean"/>
+             inheritAll="true"
+             inheritRefs="true"
+             target="clean"/>
         <ant dir="${debian.src.dir}/lib/src/jymsg"
-            inheritAll="false"
-            target="clean"/>
+             inheritAll="false"
+             target="clean"/>
         <delete dir="${debian.src.dir}/lib/src/dhcp4java/classes"
                 failonerror="false"/>
         <delete dir="${debian.src.dir}/lib/src/otr4j/bin"
@@ -2721,13 +2730,13 @@
 
         <!-- deletes the symbolic links left as delete target skips them
          if if removeNotFollowedSymlinks is set -->
-        <exec   dir="${debian.src.dir}/lib"
-                executable="find"
-                failonerror="false">
-            <arg value="." />
-            <arg value="-name" />
-            <arg value="*.jar" />
-            <arg value="-delete" />
+        <exec dir="${debian.src.dir}/lib"
+              executable="find"
+              failonerror="false">
+            <arg value="."/>
+            <arg value="-name"/>
+            <arg value="*.jar"/>
+            <arg value="-delete"/>
         </exec>
 
     </target>
@@ -2735,7 +2744,7 @@
     <target name="-pre-deb-src-rebuild" depends="load-properties">
 
         <dirname property="current.basedir" file="${ant.file.jitsi}"/>
-        <property name="debian.src.dir" value="${current.basedir}" />
+        <property name="debian.src.dir" value="${current.basedir}"/>
 
         <symlink resource="/usr/share/java/org.apache.felix.framework.jar"
                  overwrite="true"
@@ -2755,7 +2764,7 @@
             depends="init,-pre-deb-src-rebuild,version">
 
         <property name="debian.src.dir"
-            value="${debian.tmp.dir}/${package.name}-${sip-communicator.version}" />
+                  value="${debian.tmp.dir}/${package.name}-${sip-communicator.version}"/>
 
         <symlink resource="/usr/share/java/libphonenumber.jar"
                  overwrite="true"
@@ -2766,8 +2775,8 @@
                  link="${debian.src.dir}/lib/installer-exclude/"/>
 
         <symlink resource="/usr/share/java/weupnp.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/weupnp-0.1.2-SNAPSHOT.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/weupnp-0.1.2-SNAPSHOT.jar"/>
 
         <!-- swingworker -->
         <ant dir="${debian.src.dir}/lib/src/swingworker"
@@ -2775,41 +2784,41 @@
              target="bundles">
         </ant>
         <symlink resource="../src/swingworker/dist/bundles/swing-worker.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/swing-worker-1.2.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/swing-worker-1.2.jar"/>
 
         <!-- joscar -->
         <mkdir dir="${debian.src.dir}/lib/src/jsocks/classes"/>
         <javac debug="true"
-            deprecation="true" destdir="${debian.src.dir}/lib/src/jsocks/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
-                <src path="${debian.src.dir}/lib/src/jsocks"/>
-                <exclude name="test/**" />
-                <include name="*.properties"/>
-                <include name="*.java"/>
-                <include name="*.gif"/>
+               deprecation="true" destdir="${debian.src.dir}/lib/src/jsocks/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
+            <src path="${debian.src.dir}/lib/src/jsocks"/>
+            <exclude name="test/**"/>
+            <include name="*.properties"/>
+            <include name="*.java"/>
+            <include name="*.gif"/>
         </javac>
         <jar compress="true" destfile="${debian.src.dir}/lib/src/jsocks/jsocks.jar">
             <zipfileset dir="${debian.src.dir}/lib/src/jsocks/classes"/>
         </jar>
         <symlink resource="../../jsocks/jsocks.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/joscar/lib/jsocks.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/joscar/lib/jsocks.jar"/>
         <mkdir dir="${debian.src.dir}/lib/src/joscar/lib/annotations/classes"/>
         <javac classpathref="compile.class.path" debug="true"
-            deprecation="true" destdir="${debian.src.dir}/lib/src/joscar/lib/annotations/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
-                <src path="${debian.src.dir}/lib/src/joscar/lib/annotations"/>
-                <include name="**/*.java" />
+               deprecation="true" destdir="${debian.src.dir}/lib/src/joscar/lib/annotations/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
+            <src path="${debian.src.dir}/lib/src/joscar/lib/annotations"/>
+            <include name="**/*.java"/>
         </javac>
         <symlink resource="/usr/share/java/bcpkix.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/joscar/lib"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/joscar/lib"/>
         <symlink resource="/usr/share/java/bcprov.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/joscar/lib"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/joscar/lib"/>
         <jar compress="true" destfile="${debian.src.dir}/lib/src/joscar/lib/annotations.jar">
             <zipfileset dir="${debian.src.dir}/lib/src/joscar/lib/annotations/classes"/>
         </jar>
@@ -2819,105 +2828,105 @@
         </ant>
         <!-- now make the links -->
         <symlink resource="../src/joscar/dist/joscar-client.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <symlink resource="../src/joscar/dist/joscar-common.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <symlink resource="../src/joscar/dist/joscar-protocol.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <symlink resource="../src/jsocks/jsocks.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/jsocks-klea.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/jsocks-klea.jar"/>
 
         <!-- smack -->
         <symlink resource="/usr/share/java/ant-contrib.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/smack_src_3_2_2/build"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/smack_src_3_2_2/build"/>
         <symlink resource="/usr/share/java/xpp3-min.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/smack_src_3_2_2/build/merge/xpp.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/smack_src_3_2_2/build/merge/xpp.jar"/>
         <symlink resource="/usr/share/java/jzlib.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/smack_src_3_2_2/build/merge/"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/smack_src_3_2_2/build/merge/"/>
         <ant dir="${debian.src.dir}/lib/src/smack_src_3_2_2/build"
              useNativeBasedir="true"
              inheritAll="false"
              target="jar">
         </ant>
         <symlink resource="../src/smack_src_3_2_2/target/smack.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <symlink resource="../src/smack_src_3_2_2/target/smackx.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <!--symlink resource="../installer-exclude/smack.manifest.mf"
              overwrite="true"
              link="${debian.src.dir}/lib/installer-exclude"/-->
         <symlink resource="../src/smack_src_3_2_2/target/smackx-debug.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
 
         <!-- jinglenodes -->
         <mkdir dir="${debian.src.dir}/lib/src/jnsapi/lib"/>
         <symlink resource="../../smack_src_3_2_2/target/smack.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/jnsapi/lib"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/jnsapi/lib"/>
         <symlink resource="../../smack_src_3_2_2/target/smackx.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/jnsapi/lib"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/jnsapi/lib"/>
         <mkdir dir="${debian.src.dir}/lib/src/jnsapi/classes"/>
         <javac debug="true"
-            deprecation="true" destdir="${debian.src.dir}/lib/src/jnsapi/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
-                <src path="${debian.src.dir}/lib/src/jnsapi/src/main/java"/>
-                <include name="**/*.java" />
+               deprecation="true" destdir="${debian.src.dir}/lib/src/jnsapi/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
+            <src path="${debian.src.dir}/lib/src/jnsapi/src/main/java"/>
+            <include name="**/*.java"/>
             <classpath>
-                  <fileset dir="${debian.src.dir}/lib/src/jnsapi/lib">
+                <fileset dir="${debian.src.dir}/lib/src/jnsapi/lib">
                     <include name="*.jar"/>
-                  </fileset>
+                </fileset>
             </classpath>
         </javac>
         <jar compress="true" destfile="${debian.src.dir}/lib/src/jnsapi/jnsapi.jar">
             <zipfileset dir="${debian.src.dir}/lib/src/jnsapi/classes"/>
         </jar>
         <symlink resource="../src/jnsapi/jnsapi.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
 
         <symlink resource="/usr/share/java/dnsjava.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/dnsjava.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/dnsjava.jar"/>
 
         <!-- java-jml needs libcommons-logging-java -->
         <mkdir dir="${debian.src.dir}/lib/src/java-jml/lib"/>
         <symlink resource="/usr/share/java/httpcore.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/java-jml/lib"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/java-jml/lib"/>
         <symlink resource="/usr/share/java/commons-logging.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/java-jml/lib"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/java-jml/lib"/>
         <mkdir dir="${debian.src.dir}/lib/src/java-jml/classes"/>
         <javac debug="true"
-            deprecation="true" destdir="${debian.src.dir}/lib/src/java-jml/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
-                <src path="${debian.src.dir}/lib/src/java-jml/src"/>
-                <include name="**/*.java" />
+               deprecation="true" destdir="${debian.src.dir}/lib/src/java-jml/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
+            <src path="${debian.src.dir}/lib/src/java-jml/src"/>
+            <include name="**/*.java"/>
             <classpath>
-                  <fileset dir="${debian.src.dir}/lib/src/java-jml/lib">
+                <fileset dir="${debian.src.dir}/lib/src/java-jml/lib">
                     <include name="*.jar"/>
-                  </fileset>
+                </fileset>
             </classpath>
         </javac>
         <jar compress="true" destfile="${debian.src.dir}/lib/src/java-jml/java-jml.jar">
             <zipfileset dir="${debian.src.dir}/lib/src/java-jml/classes"/>
         </jar>
         <symlink resource="../src/java-jml/java-jml.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/jml-1.0b5.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/jml-1.0b5.jar"/>
 
         <!-- jdic misc -->
         <ant dir="${debian.src.dir}/lib/src/misc"
@@ -2925,8 +2934,8 @@
              inheritRefs="true"
              target="buildall"/>
         <symlink resource="../src/misc/dist/linux/jdic_misc.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <copy file="${debian.src.dir}/lib/src/misc/dist/linux/libjdic_misc-64.so"
               failonerror="false"
               tofile="${debian.src.dir}/lib/native/linux-64/libjdic_misc.so"/>
@@ -2936,8 +2945,8 @@
 
         <!-- json -->
         <symlink resource="/usr/share/java/json-simple.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/json-simple-1.1.1.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/json-simple-1.1.1.jar"/>
 
         <!-- jymsg -->
         <ant dir="${debian.src.dir}/lib/src/jymsg"
@@ -2951,18 +2960,18 @@
         <!-- dhcp4j -->
         <mkdir dir="${debian.src.dir}/lib/src/dhcp4java/classes"/>
         <javac debug="true"
-            deprecation="true" destdir="${debian.src.dir}/lib/src/dhcp4java/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
-                <src path="${debian.src.dir}/lib/src/dhcp4java/src"/>
-                <include name="**/*.java" />
+               deprecation="true" destdir="${debian.src.dir}/lib/src/dhcp4java/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
+            <src path="${debian.src.dir}/lib/src/dhcp4java/src"/>
+            <include name="**/*.java"/>
         </javac>
         <jar compress="true" destfile="${debian.src.dir}/lib/src/dhcp4java/dhcp4java-1.00.jar">
             <zipfileset dir="${debian.src.dir}/lib/src/dhcp4java/classes"/>
         </jar>
         <symlink resource="../src/dhcp4java/dhcp4java-1.00.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
 
         <!-- jmdns -->
         <symlink resource="/usr/share/java/jmdns.jar"
@@ -2971,18 +2980,18 @@
 
         <!-- otr4j -->
         <symlink resource="/usr/share/java/bcprov.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/src/otr4j/lib"/>
-        
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/src/otr4j/lib"/>
+
         <path id="otr4j-classpath">
-            <fileset dir="${debian.src.dir}/lib/src/otr4j/lib" includes="**/*.jar" />
+            <fileset dir="${debian.src.dir}/lib/src/otr4j/lib" includes="**/*.jar"/>
         </path>
-        <mkdir dir="${debian.src.dir}/lib/src/otr4j/bin/classes" />
+        <mkdir dir="${debian.src.dir}/lib/src/otr4j/bin/classes"/>
         <javac target="1.6" source="1.6"
                srcdir="${debian.src.dir}/lib/src/otr4j/src"
                destdir="${debian.src.dir}/lib/src/otr4j/bin/classes"
                classpathref="otr4j-classpath"
-               debug="On" />
+               debug="On"/>
         <jar destfile="${debian.src.dir}/lib/src/otr4j/bin/otr4j.jar"
              basedir="${debian.src.dir}/lib/src/otr4j/bin/classes"/>
         <symlink resource="../src/otr4j/bin/otr4j.jar"
@@ -2991,14 +3000,14 @@
 
         <!-- irc-api -->
         <path id="irc-api-classpath">
-            <fileset dir="/usr/share/java" includes="slf4j-api.jar" />
+            <fileset dir="/usr/share/java" includes="slf4j-api.jar"/>
         </path>
-        <mkdir dir="${debian.src.dir}/lib/src/irc-api/classes" />
+        <mkdir dir="${debian.src.dir}/lib/src/irc-api/classes"/>
         <javac target="1.6" source="1.6"
                srcdir="${debian.src.dir}/lib/src/irc-api/src"
                destdir="${debian.src.dir}/lib/src/irc-api/classes"
                classpathref="irc-api-classpath"
-               debug="On" />
+               debug="On"/>
         <jar destfile="${debian.src.dir}/lib/src/irc-api/irc-api-1.0.jar"
              basedir="${debian.src.dir}/lib/src/irc-api/classes">
             <manifest>
@@ -3055,28 +3064,28 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <!-- jmyspell -->
         <mkdir dir="${debian.src.dir}/lib/src/jmyspell/classes"/>
         <javac debug="true"
-            deprecation="true" destdir="${debian.src.dir}/lib/src/jmyspell/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
-                <src path="${debian.src.dir}/lib/src/jmyspell/src/main/java"/>
-                <src path="${debian.src.dir}/lib/src/jmyspell/src/main/resources"/>
-                <include name="**/*.java" />
-                <include name="**/*.properties" />
+               deprecation="true" destdir="${debian.src.dir}/lib/src/jmyspell/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
+            <src path="${debian.src.dir}/lib/src/jmyspell/src/main/java"/>
+            <src path="${debian.src.dir}/lib/src/jmyspell/src/main/resources"/>
+            <include name="**/*.java"/>
+            <include name="**/*.properties"/>
         </javac>
         <jar compress="true" destfile="${debian.src.dir}/lib/src/jmyspell/jmyspell-core.jar">
             <zipfileset dir="${debian.src.dir}/lib/src/jmyspell/classes"/>
         </jar>
         <symlink resource="../src/jmyspell/jmyspell-core.jar" overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 link="${debian.src.dir}/lib/installer-exclude"/>
 
         <!-- jfontchooser -->
         <mkdir dir="${debian.src.dir}/lib/src/jfontchooser/classes"/>
         <javac debug="true"
-            deprecation="true" destdir="${debian.src.dir}/lib/src/jfontchooser/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
-                <src path="${debian.src.dir}/lib/src/jfontchooser/src"/>
-                <include name="**/*.java" />
+               deprecation="true" destdir="${debian.src.dir}/lib/src/jfontchooser/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
+            <src path="${debian.src.dir}/lib/src/jfontchooser/src"/>
+            <include name="**/*.java"/>
         </javac>
         <jar compress="true"
              destfile="${debian.src.dir}/lib/src/jfontchooser/jfontchooser-1.0.5.jar">
@@ -3162,21 +3171,21 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
              overwrite="true"
              link="${debian.src.dir}/lib/installer-exclude/"/>-->
         <symlink
-             resource="/usr/share/java/guava.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/guava-15.0.jar"/>
+                resource="/usr/share/java/guava.jar"
+                overwrite="true"
+                link="${debian.src.dir}/lib/installer-exclude/guava-15.0.jar"/>
         <symlink
-             resource="/usr/share/java/hsqldb.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/hsqldb.jar"/>
+                resource="/usr/share/java/hsqldb.jar"
+                overwrite="true"
+                link="${debian.src.dir}/lib/installer-exclude/hsqldb.jar"/>
 
         <!-- compile and pack jmork -->
         <property name="jmork.src.folder" value="${debian.src.dir}/lib/src/jmork"/>
-        <mkdir dir="${jmork.src.folder}/classes" />
+        <mkdir dir="${jmork.src.folder}/classes"/>
         <javac debug="false" optimize="true"
-            destdir="${jmork.src.folder}/classes"
-            nowarn="false"
-            source="1.5" target="1.5" fork="true">
+               destdir="${jmork.src.folder}/classes"
+               nowarn="false"
+               source="1.5" target="1.5" fork="true">
             <src path="${jmork.src.folder}"/>
         </javac>
         <jar compress="true" destfile="${jmork.src.folder}/jmork-1.0.5-SNAPSHOT.jar">
@@ -3191,9 +3200,9 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
                 <attribute name="Bundle-Version" value="1.0.5.SNAPSHOT"/>
 
                 <attribute name="Import-Package"
-                    value="javax.swing,javax.swing.filechooser"/>
+                           value="javax.swing,javax.swing.filechooser"/>
                 <attribute name="Export-Package"
-                    value="mork,mork.gui,mozilla.thunderbird"/>
+                           value="mork,mork.gui,mozilla.thunderbird"/>
             </manifest>
         </jar>
         <symlink resource="../src/jmork/jmork-1.0.5-SNAPSHOT.jar"
@@ -3201,19 +3210,19 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
                  link="${debian.src.dir}/lib/installer-exclude"/>
 
         <symlink resource="/usr/share/java/junit.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
 
         <!-- mac_widgets -->
         <symlink
-             resource="/usr/share/java/mac_widgets.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/mac_widgets-0.9.5.jar"/>
+                resource="/usr/share/java/mac_widgets.jar"
+                overwrite="true"
+                link="${debian.src.dir}/lib/installer-exclude/mac_widgets-0.9.5.jar"/>
         <!-- forms -->
         <symlink
-             resource="/usr/share/java/forms.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/forms-1.2.1.jar"/>
+                resource="/usr/share/java/forms.jar"
+                overwrite="true"
+                link="${debian.src.dir}/lib/installer-exclude/forms-1.2.1.jar"/>
         <!-- jna -->
         <symlink resource="/usr/share/java/jna.jar"
                  link="${debian.src.dir}/lib/installer-exclude/jna.jar"/>
@@ -3222,63 +3231,63 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
                  link="${debian.src.dir}/lib/installer-exclude/"/>
         <!-- ice4j -->
         <symlink resource="/usr/share/libjitsi/lib/ice4j.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <!-- fmj -->
         <symlink resource="/usr/share/libjitsi/lib/fmj.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <!-- zrtp -->
         <symlink resource="/usr/share/libjitsi/lib/zrtp4j-light.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <!-- sdes -->
         <symlink resource="/usr/share/libjitsi/lib/sdes4j.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/sdes4j.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/sdes4j.jar"/>
 
         <!-- libhttpcore-java libhttpmime-java  libhttpclient-java -->
         <symlink resource="/usr/share/java/httpclient.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/httpclient-osgi-4.2.3.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/httpclient-osgi-4.2.3.jar"/>
         <symlink resource="/usr/share/java/httpcore.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/httpcore-osgi-4.2.3.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/httpcore-osgi-4.2.3.jar"/>
         <symlink resource="/usr/share/java/httpmime.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/httpmime-4.1.2.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/httpmime-4.1.2.jar"/>
 
         <!-- jsip -->
         <symlink resource="/usr/share/libjitsi/lib/jain-sdp.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/jain-sdp.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/jain-sdp.jar"/>
         <symlink resource="/usr/share/libjitsi/lib/jain-sip-api.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/jain-sip-api.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/jain-sip-api.jar"/>
         <symlink resource="/usr/share/libjitsi/lib/jain-sip-ri.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/jain-sip-ri.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/jain-sip-ri.jar"/>
 
         <!-- libdbus java libdbus-java -->
         <symlink resource="/usr/share/java/dbus.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/libdbus-java-2.7.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/libdbus-java-2.7.jar"/>
         <symlink resource="/usr/share/java/hexdump-0.2.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
         <symlink resource="/usr/share/java/unix-0.5.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
 
         <!-- easymock libeasymock-java-->
         <symlink resource="/usr/share/java/easymock.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude"/>
 
         <!-- libjcalendar-java -->
         <symlink resource="/usr/share/java/jcalendar.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/jcalendar-1.4.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/jcalendar-1.4.jar"/>
 
         <!-- now rebuild jitsi -->
         <antcall target="rebuild"/>
@@ -3286,8 +3295,8 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <!-- will build native libs -->
         <symlink resource="/usr/share/java/ant-contrib-cpptasks.jar"
-             overwrite="true"
-             link="${debian.src.dir}/lib/installer-exclude/cpptasks.jar"/>
+                 overwrite="true"
+                 link="${debian.src.dir}/lib/installer-exclude/cpptasks.jar"/>
 
         <antcall target="galagonotification"/>
         <antcall target="globalshortcut"/>
@@ -3304,31 +3313,31 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
             in debian dest folder debian.bundles.dest.-->
         <unzip src="${debian.bundles.dest}/jnalib.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/jnalib.jar"/>
         <mkdir dir="${debian.bundles.dest}/jnalib.jar/META-INF"/>
         <symlink resource="/usr/share/java/jna.jar"
-             link="${debian.bundles.dest}/jnalib.jar/jna.jar"/>
+                 link="${debian.bundles.dest}/jnalib.jar/jna.jar"/>
         <symlink resource="/usr/share/java/jna-platform.jar"
-             link="${debian.bundles.dest}/jnalib.jar/jna-platform.jar"/>
+                 link="${debian.bundles.dest}/jnalib.jar/jna-platform.jar"/>
 
         <move file="${debian.bundles.dest}/META-INF/MANIFEST.MF"
               todir="${debian.bundles.dest}/jnalib.jar/META-INF"/>
         <delete dir="${debian.bundles.dest}/META-INF"/>
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/jnalib.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/jnalib.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/jnalib.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,jna-platform.jar,jna.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/jnalib.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,jna-platform.jar,jna.jar&#013;&#010;&#013;&#010;</concat>
     </target>
 
     <!-- target to rebuild the json bundle reusing debian package -->
@@ -3337,14 +3346,14 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
             in debian dest folder debian.bundles.dest.-->
         <unzip src="${debian.bundles.dest}/json.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/json.jar"/>
         <mkdir dir="${debian.bundles.dest}/json.jar/META-INF"/>
         <symlink resource="/usr/share/java/json-simple.jar"
-             link="${debian.bundles.dest}/json.jar/json-simple.jar"/>
+                 link="${debian.bundles.dest}/json.jar/json-simple.jar"/>
         <manifest
                 file="${debian.bundles.dest}/json.jar/META-INF/MANIFEST.MF">
             <attribute name="Bundle-Name" value="JSON.simple"/>
@@ -3366,20 +3375,20 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <!-- Create a properties file that the arg handler could use
         to determine SC's version -->
         <echo
-            file="${dest}/net/java/sip/communicator/util/launchutils/version.properties"
-            message="APPLICATION_NAME=${application.name}${line.separator}" />
+                file="${dest}/net/java/sip/communicator/util/launchutils/version.properties"
+                message="APPLICATION_NAME=${application.name}${line.separator}"/>
         <echo
-            file="${dest}/net/java/sip/communicator/util/launchutils/version.properties"
-            message="PACKAGE_NAME=${package.name}${line.separator}"
-            append="true"/>
+                file="${dest}/net/java/sip/communicator/util/launchutils/version.properties"
+                message="PACKAGE_NAME=${package.name}${line.separator}"
+                append="true"/>
         <echo file="${dest}/net/java/sip/communicator/util/launchutils/version.properties"
               message="APPLICATION_VERSION=${sip-communicator.version}${line.separator}"
               append="true"/>
         <unzip src="${debian.bundles.dest}/util.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/util.jar"/>
         <mkdir dir="${debian.bundles.common.dest}/util.jar/META-INF"/>
@@ -3390,7 +3399,7 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <jar compress="false"
              destfile="${debian.bundles.common.dest}/util.jar/util.jar">
             <zipfileset dir="${dest}/net/java/sip/communicator/util"
-                prefix="net/java/sip/communicator/util">
+                        prefix="net/java/sip/communicator/util">
                 <exclude name="dns/**"/>
             </zipfileset>
         </jar>
@@ -3398,10 +3407,10 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <jar compress="false"
              destfile="${debian.bundles.common.dest}/util.jar/launchutils.jar">
             <zipfileset
-                dir="${dest}/net/java/sip/communicator/util/launchutils"
-                prefix="net/java/sip/communicator/util/launchutils"/>
+                    dir="${dest}/net/java/sip/communicator/util/launchutils"
+                    prefix="net/java/sip/communicator/util/launchutils"/>
             <zipfileset dir="${dest}/net/java/sip/communicator/util"
-                prefix="net/java/sip/communicator/util">
+                        prefix="net/java/sip/communicator/util">
                 <include name="ScStdOut*"/>
                 <include name="ScLogFormatter*"/>
                 <include name="Logger*"/>
@@ -3414,19 +3423,19 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <delete dir="${debian.bundles.dest}/util.jar"/>
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.common.dest}/util.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.common.dest}/util.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.common.dest}/util.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,util.jar,dnsjava.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.common.dest}/util.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,util.jar,dnsjava.jar&#013;&#010;&#013;&#010;</concat>
 
         <!-- Use the system installed dnsjava -->
         <echo file="${debian.bundles.dest}/../lib/felix.client.run.properties"
-            append="true">felix.auto.start.14= reference:file:/usr/share/java/dnsjava.jar
+              append="true">felix.auto.start.14= reference:file:/usr/share/java/dnsjava.jar
         </echo>
         <replace file="${debian.bundles.dest}/../lib/felix.client.run.properties"
                  token="reference:file:sc-bundles/util.jar">
@@ -3439,20 +3448,20 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
     <target name="deb-bundle-desktoputil">
         <unzip src="${debian.bundles.dest}/desktoputil.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/desktoputil.jar"/>
         <mkdir dir="${debian.bundles.dest}/desktoputil.jar/META-INF"/>
         <symlink resource="/usr/share/java/laf-widget.jar"
-             link="${debian.bundles.dest}/desktoputil.jar/laf-widget.jar"/>
+                 link="${debian.bundles.dest}/desktoputil.jar/laf-widget.jar"/>
 
         <!-- Create the desktoputil.jar-->
         <jar compress="false"
              destfile="${debian.bundles.dest}/desktoputil.jar/desktoputil.jar">
             <zipfileset dir="${dest}/net/java/sip/communicator/plugin/desktoputil"
-                prefix="net/java/sip/communicator/plugin/desktoputil">
+                        prefix="net/java/sip/communicator/plugin/desktoputil">
                 <exclude name="dns/**"/>
             </zipfileset>
         </jar>
@@ -3461,15 +3470,15 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <delete dir="${debian.bundles.dest}/META-INF"/>
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/desktoputil.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/desktoputil.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/desktoputil.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,desktoputil.jar,laf-widget.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/desktoputil.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,desktoputil.jar,laf-widget.jar&#013;&#010;&#013;&#010;</concat>
     </target>
 
     <!-- target to rebuild the sysactivitynotifications bundle reusing
@@ -3478,43 +3487,43 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <unzip src="${debian.bundles.dest}/sysactivitynotifications.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/sysactivitynotifications.jar"/>
         <mkdir dir="${debian.bundles.dest}/sysactivitynotifications.jar/META-INF"/>
         <symlink resource="/usr/share/java/dbus.jar"
-             link="${debian.bundles.dest}/sysactivitynotifications.jar/dbus.jar"/>
+                 link="${debian.bundles.dest}/sysactivitynotifications.jar/dbus.jar"/>
         <symlink resource="/usr/share/java/unix.jar"
-             link="${debian.bundles.dest}/sysactivitynotifications.jar/unix.jar"/>
+                 link="${debian.bundles.dest}/sysactivitynotifications.jar/unix.jar"/>
         <symlink resource="/usr/share/java/hexdump.jar"
-             link="${debian.bundles.dest}/sysactivitynotifications.jar/hexdump.jar"/>
+                 link="${debian.bundles.dest}/sysactivitynotifications.jar/hexdump.jar"/>
 
         <!-- Create the sys .jar-->
         <jar compress="false"
              destfile="${debian.bundles.dest}/sysactivitynotifications.jar/sysactivitynotifications.jar">
             <zipfileset
-                dir="${dest}/net/java/sip/communicator/impl/sysactivity"
-                prefix="net/java/sip/communicator/impl/sysactivity" />
+                    dir="${dest}/net/java/sip/communicator/impl/sysactivity"
+                    prefix="net/java/sip/communicator/impl/sysactivity"/>
             <zipfileset
-                dir="${dest}/net/java/sip/communicator/service/sysactivity"
-                prefix="net/java/sip/communicator/service/sysactivity"/>
+                    dir="${dest}/net/java/sip/communicator/service/sysactivity"
+                    prefix="net/java/sip/communicator/service/sysactivity"/>
         </jar>
         <move file="${debian.bundles.dest}/META-INF/MANIFEST.MF"
               todir="${debian.bundles.dest}/sysactivitynotifications.jar/META-INF"/>
         <delete dir="${debian.bundles.dest}/META-INF"/>
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/sysactivitynotifications.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/sysactivitynotifications.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/sysactivitynotifications.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,sysactivitynotifications.jar,dbus.jar,unix.jar,hexdump.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/sysactivitynotifications.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,sysactivitynotifications.jar,dbus.jar,unix.jar,hexdump.jar&#013;&#010;&#013;&#010;</concat>
     </target>
 
     <!-- target to rebuild the swing-ui bundle reusing debian package -->
@@ -3522,16 +3531,16 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <unzip src="${debian.bundles.dest}/swing-ui.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/swing-ui.jar"/>
         <mkdir dir="${debian.bundles.dest}/swing-ui.jar/META-INF"/>
         <symlink resource="/usr/share/java/forms.jar"
-             link="${debian.bundles.dest}/swing-ui.jar/forms.jar"/>
+                 link="${debian.bundles.dest}/swing-ui.jar/forms.jar"/>
         <symlink resource="/usr/share/java/mac_widgets.jar"
-             link="${debian.bundles.dest}/swing-ui.jar/"/>
+                 link="${debian.bundles.dest}/swing-ui.jar/"/>
 
         <!-- Create the sys .jar-->
         <jar compress="false"
@@ -3546,15 +3555,16 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <delete dir="${debian.bundles.dest}/META-INF"/>
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/swing-ui.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/swing-ui.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/swing-ui.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,swing-ui.jar,mac_widgets.jar,forms.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/swing-ui.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath:
+            .,swing-ui.jar,mac_widgets.jar,forms.jar&#013;&#010;&#013;&#010;</concat>
     </target>
 
     <!-- target to rebuild the smacklib bundle reusing debian package -->
@@ -3562,22 +3572,22 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <unzip src="${debian.bundles.dest}/smacklib.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/smacklib.jar"/>
         <mkdir dir="${debian.bundles.common.dest}/smacklib.jar/META-INF"/>
 
         <symlink resource="/usr/share/java/xpp3-min.jar"
-             link="${debian.bundles.common.dest}/smacklib.jar/xpp3.jar"/>
+                 link="${debian.bundles.common.dest}/smacklib.jar/xpp3.jar"/>
         <symlink resource="/usr/share/java/jzlib.jar"
-             link="${debian.bundles.common.dest}/smacklib.jar/jzlib.jar"/>
+                 link="${debian.bundles.common.dest}/smacklib.jar/jzlib.jar"/>
 
         <!-- Create the smacklib .jar-->
         <jar compress="false"
-            destfile="${debian.bundles.common.dest}/smacklib.jar/smacklib.jar"
-            manifest="lib/installer-exclude/smack.manifest.mf">
+             destfile="${debian.bundles.common.dest}/smacklib.jar/smacklib.jar"
+             manifest="lib/installer-exclude/smack.manifest.mf">
             <zipfileset src="lib/installer-exclude/smackx-debug.jar" prefix=""/>
             <zipfileset src="lib/installer-exclude/smack.jar" prefix=""/>
             <zipfileset src="lib/installer-exclude/smackx.jar" prefix=""/>
@@ -3589,20 +3599,20 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <delete dir="${debian.bundles.dest}/smacklib.jar"/>
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.common.dest}/smacklib.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.common.dest}/smacklib.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.common.dest}/smacklib.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,smacklib.jar,xpp3.jar,jzlib.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.common.dest}/smacklib.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,smacklib.jar,xpp3.jar,jzlib.jar&#013;&#010;&#013;&#010;</concat>
         <replace file="${debian.bundles.dest}/../lib/felix.client.run.properties"
                  token="reference:file:sc-bundles/smacklib.jar">
             <replacevalue>reference:file:/usr/share/jitsi-common/smacklib.jar</replacevalue>
         </replace>
-            
+
     </target>
 
     <!-- target to rebuild the jmdnslib bundle reusing debian package -->
@@ -3610,30 +3620,30 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <unzip src="${debian.bundles.dest}/jmdnslib.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/jmdnslib.jar"/>
         <mkdir dir="${debian.bundles.dest}/jmdnslib.jar/META-INF"/>
 
         <symlink resource="/usr/share/java/jmdns.jar"
-             link="${debian.bundles.dest}/jmdnslib.jar/"/>
+                 link="${debian.bundles.dest}/jmdnslib.jar/"/>
 
         <move file="${debian.bundles.dest}/META-INF/MANIFEST.MF"
               todir="${debian.bundles.dest}/jmdnslib.jar/META-INF"/>
         <delete dir="${debian.bundles.dest}/META-INF"/>
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/jmdnslib.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/jmdnslib.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/jmdnslib.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,jmdns.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/jmdnslib.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,jmdns.jar&#013;&#010;&#013;&#010;</concat>
     </target>
 
     <!-- target to rebuild the bouncycastle bundle reusing
@@ -3646,19 +3656,19 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <copy file="${lib.noinst}/bcprov.manifest.mf"
               tofile="${debian.bundles.dest}/bouncycastle.jar/META-INF/MANIFEST.MF"/>
         <symlink resource="/usr/share/java/bcprov.jar"
-             link="${debian.bundles.dest}/bouncycastle.jar/"/>
+                 link="${debian.bundles.dest}/bouncycastle.jar/"/>
 
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/bouncycastle.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/bouncycastle.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/bouncycastle.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,bcprov.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/bouncycastle.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,bcprov.jar&#013;&#010;&#013;&#010;</concat>
     </target>
 
     <!-- target to rebuild the account info bundle reusing debian package -->
@@ -3666,14 +3676,14 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <unzip src="${debian.bundles.dest}/accountinfo.jar"
                dest="${debian.bundles.dest}">
-          <patternset>
-            <include name="META-INF/MANIFEST.MF"/>
-          </patternset>
+            <patternset>
+                <include name="META-INF/MANIFEST.MF"/>
+            </patternset>
         </unzip>
         <delete file="${debian.bundles.dest}/accountinfo.jar"/>
         <mkdir dir="${debian.bundles.dest}/accountinfo.jar/META-INF"/>
         <symlink resource="/usr/share/java/jcalendar.jar"
-             link="${debian.bundles.dest}/accountinfo.jar/"/>
+                 link="${debian.bundles.dest}/accountinfo.jar/"/>
 
         <!-- Create the sys .jar-->
         <jar compress="false"
@@ -3687,15 +3697,15 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/accountinfo.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/accountinfo.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/accountinfo.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,accountinfo.jar,jcalendar.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/accountinfo.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,accountinfo.jar,jcalendar.jar&#013;&#010;&#013;&#010;</concat>
     </target>
 
     <!-- target to rebuild the commons-lang bundle reusing debian package -->
@@ -3757,15 +3767,15 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.common.dest}/libjitsi.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.common.dest}/libjitsi.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.common.dest}/libjitsi.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,libjitsi-impl.jar,fmj.jar,libjitsi.jar,bcpkix.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.common.dest}/libjitsi.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,libjitsi-impl.jar,fmj.jar,libjitsi.jar,bcpkix.jar&#013;&#010;&#013;&#010;</concat>
         <replace file="${debian.bundles.dest}/../lib/felix.client.run.properties"
                  token="reference:file:sc-bundles/libjitsi.jar">
             <replacevalue>reference:file:/usr/share/jitsi-common/libjitsi.jar</replacevalue>
@@ -3800,15 +3810,15 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.common.dest}/netaddr.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.common.dest}/netaddr.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.common.dest}/netaddr.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,netaddr.jar,ice4j.jar,weupnp.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.common.dest}/netaddr.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,netaddr.jar,ice4j.jar,weupnp.jar&#013;&#010;&#013;&#010;</concat>
         <replace file="${debian.bundles.dest}/../lib/felix.client.run.properties"
                  token="reference:file:sc-bundles/netaddr.jar">
             <replacevalue>reference:file:/usr/share/jitsi-common/netaddr.jar</replacevalue>
@@ -3832,15 +3842,15 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/zrtp4j.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/zrtp4j.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/zrtp4j.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,zrtp4j-light.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/zrtp4j.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,zrtp4j-light.jar&#013;&#010;&#013;&#010;</concat>
 
         <!--sdes4j /usr/share/libjitsi/lib/sdes4j.jar -->
         <unzip src="${debian.bundles.dest}/sdes4j.jar"
@@ -3860,15 +3870,15 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/sdes4j.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/sdes4j.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/sdes4j.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,sdes4j.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/sdes4j.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath: .,sdes4j.jar&#013;&#010;&#013;&#010;</concat>
 
         <!--bundle-sip-->
         <unzip src="${debian.bundles.dest}/protocol-sip.jar"
@@ -3898,15 +3908,16 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
 
         <!-- Removes the last empty line -->
         <replaceregexp
-            file="${debian.bundles.dest}/protocol-sip.jar/META-INF/MANIFEST.MF"
-            match="^\r\n$"
-            flags="m"
-            replace=""/>
+                file="${debian.bundles.dest}/protocol-sip.jar/META-INF/MANIFEST.MF"
+                match="^\r\n$"
+                flags="m"
+                replace=""/>
         <concat
-            destfile="${debian.bundles.dest}/protocol-sip.jar/META-INF/MANIFEST.MF"
-            append="true"
-            eol="crlf"
-            fixlastline="true">Bundle-ClassPath: .,protocol-sip.jar,jain-sip-ri.jar.jar,jain-sip-api.jar.jar,jain-sdp.jar&#013;&#010;&#013;&#010;</concat>
+                destfile="${debian.bundles.dest}/protocol-sip.jar/META-INF/MANIFEST.MF"
+                append="true"
+                eol="crlf"
+                fixlastline="true">Bundle-ClassPath:
+            .,protocol-sip.jar,jain-sip-ri.jar.jar,jain-sip-api.jar.jar,jain-sdp.jar&#013;&#010;&#013;&#010;</concat>
 
     </target>
 
@@ -3916,7 +3927,7 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <symlink resource="/usr/share/java/httpmime.jar"
                  link="${debian.bundles.dest}/httpmime.jar/httpmime.jar"/>
         <manifest
-            file="${debian.bundles.dest}/httpmime.jar/META-INF/MANIFEST.MF">
+                file="${debian.bundles.dest}/httpmime.jar/META-INF/MANIFEST.MF">
             <attribute name="Bundle-Name" value="Apache Http Mime"/>
             <attribute name="Bundle-Description"
                        value="Apache Http Mime"/>
@@ -3930,7 +3941,7 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         </manifest>
     </target>
     <target name="deb-bundle-common">
-    
+
         <move file="${debian.bundles.dest}/protocol-jabber.jar"
               tofile="${debian.bundles.common.dest}/protocol-jabber.jar"/>
         <replace file="${debian.bundles.dest}/../lib/felix.client.run.properties"
@@ -4007,7 +4018,7 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <symlink resource="/usr/share/java/slf4j-api.jar"
                  link="${debian.bundles.dest}/slf4j-api.jar/slf4j-api.jar"/>
         <manifest
-            file="${debian.bundles.dest}/slf4j-api.jar/META-INF/MANIFEST.MF">
+                file="${debian.bundles.dest}/slf4j-api.jar/META-INF/MANIFEST.MF">
             <attribute name="Bundle-Name"
                        value="slf4j-api"/>
             <attribute name="Bundle-Description"
@@ -4031,7 +4042,7 @@ com.ircclouds.irc.api.domain.messages.interfaces&quot;;version=&quot;1.0.0&quot;
         <symlink resource="/usr/share/java/slf4j-jdk14.jar"
                  link="${debian.bundles.dest}/slf4j-jdk14.jar/slf4j-jdk14.jar"/>
         <manifest
-            file="${debian.bundles.dest}/slf4j-jdk14.jar/META-INF/MANIFEST.MF">
+                file="${debian.bundles.dest}/slf4j-jdk14.jar/META-INF/MANIFEST.MF">
             <attribute name="Bundle-Name"
                        value="slf4j-jdk14"/>
             <attribute name="Bundle-Description"
