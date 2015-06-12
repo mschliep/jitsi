@@ -11,6 +11,7 @@ import java.util.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.jingle.*;
 
+import org.jitsi.util.*;
 import org.jitsi.service.neomedia.*;
 
 import org.jivesoftware.smack.packet.*;
@@ -45,6 +46,12 @@ public class ColibriConferenceIQ
      */
     public static final String NAMESPACE
         = "http://jitsi.org/protocol/colibri";
+
+    /**
+     * The logger instance used by this class.
+     */
+    private final static Logger logger
+            = Logger.getLogger(ColibriConferenceIQ.class);
 
     /**
      * An array of <tt>int</tt>s which represents the lack of any (RTP) SSRCs
@@ -473,6 +480,13 @@ public class ColibriConferenceIQ
                 = "adaptive-simulcast";
 
         /**
+         * The XML name of the <tt>simulcast-mode</tt> attribute of a video
+         * <tt>channel</tt>.
+         */
+        public static final String SIMULCAST_MODE_ATTR_NAME
+                = "simulcast-mode";
+
+        /**
          * The XML name of the <tt>receive-simulcast-layer</tt> attribute of a
          * video <tt>Channel</tt> which specifies the target quality of the
          * simulcast substreams to be sent from Jitsi Videobridge to the
@@ -549,11 +563,23 @@ public class ColibriConferenceIQ
         private Boolean adaptiveSimulcast;
 
         /**
+         * The 'simulcast-mode' flag.
+         */
+        private SimulcastMode simulcastMode;
+
+        /**
          * The <tt>payload-type</tt> elements defined by XEP-0167: Jingle RTP
          * Sessions associated with this <tt>channel</tt>.
          */
         private final List<PayloadTypePacketExtension> payloadTypes
             = new ArrayList<PayloadTypePacketExtension>();
+
+        /**
+         * The <tt>rtp-hdrext</tt> elements defined by XEP-0294: Jingle RTP
+         * Header Extensions Negotiation associated with this channel.
+         */
+        private final Map<Integer, RTPHdrExtPacketExtension> rtpHeaderExtensions
+            = new HashMap<Integer, RTPHdrExtPacketExtension>();
 
         /**
          * The target quality of the simulcast substreams to be sent from Jitsi
@@ -638,6 +664,48 @@ public class ColibriConferenceIQ
                 payloadTypes.contains(payloadType)
                     ? false
                     : payloadTypes.add(payloadType);
+        }
+
+        /**
+         * Adds an <tt>rtp-hdrext</tt> element defined by XEP-0294: Jingle RTP
+         * Header Extensions Negotiation to this <tt>Channel</tt>.
+         *
+         * @param ext the <tt>payload-type</tt> element to be added to
+         * this <tt>channel</tt>
+         * @return <tt>true</tt> if the list of <tt>rtp-hdrext</tt> elements
+         * associated with this <tt>channel</tt> has been modified as part of
+         * the method call; otherwise, <tt>false</tt>
+         * @throws NullPointerException if the specified <tt>ext</tt> is
+         * <tt>null</tt>
+         */
+        public void addRtpHeaderExtension(RTPHdrExtPacketExtension ext)
+        {
+            if (ext == null)
+                throw new NullPointerException("payloadType");
+
+            // Create a new instance, because we are going to modify the NS
+            RTPHdrExtPacketExtension newExt = new RTPHdrExtPacketExtension(ext);
+
+            // Make sure that the parent namespace (COLIBRI) is used.
+            newExt.setNamespace(null);
+
+            int id = -1;
+            try
+            {
+                id = Integer.valueOf(newExt.getID());
+            }
+            catch (NumberFormatException nfe)
+            {}
+
+            // Only accept valid extension IDs (4-bits, 0xF reserved)
+            if (id < 0 || id > 14)
+            {
+                logger.warn("Failed to add an RTP header extension element "
+                                    + "with an invalid ID: " + newExt.getID());
+                return;
+            }
+
+            rtpHeaderExtensions.put(id, newExt);
         }
 
         /**
@@ -771,6 +839,15 @@ public class ColibriConferenceIQ
         }
 
         /**
+         * Gets the value of the 'simulcast-mode' flag.
+         * @return the value of the 'simulcast-mode' flag.
+         */
+        public SimulcastMode getSimulcastMode()
+        {
+            return simulcastMode;
+        }
+
+        /**
          * Gets a list of <tt>payload-type</tt> elements defined by XEP-0167:
          * Jingle RTP Sessions added to this <tt>channel</tt>.
          *
@@ -781,6 +858,21 @@ public class ColibriConferenceIQ
         public List<PayloadTypePacketExtension> getPayloadTypes()
         {
             return Collections.unmodifiableList(payloadTypes);
+        }
+
+        /**
+         * Gets a list of <tt>rtp-hdrext</tt> elements defined by XEP-0294:
+         * Jingle RTP Header Extensions Negotiation added to this
+         * <tt>channel</tt>.
+         *
+         * @return an unmodifiable <tt>List</tt> of <tt>rtp-hdrext</tt>
+         * elements defined by XEP-0294: Jingle RTP Header Extensions
+         * Negotiation added to this <tt>channel</tt>
+         */
+        public Collection<RTPHdrExtPacketExtension> getRtpHeaderExtensions()
+        {
+            return Collections
+                    .unmodifiableCollection(rtpHeaderExtensions.values());
         }
 
         /**
@@ -932,6 +1024,15 @@ public class ColibriConferenceIQ
                         .append(lastN).append('\'');
             }
 
+            // simulcastMode
+            SimulcastMode simulcastMode = getSimulcastMode();
+
+            if (simulcastMode != null)
+            {
+                xml.append(' ').append(SIMULCAST_MODE_ATTR_NAME).append("='")
+                        .append(simulcastMode).append('\'');
+            }
+
             // rtcpPort
             int rtcpPort = getRTCPPort();
 
@@ -964,18 +1065,23 @@ public class ColibriConferenceIQ
         protected void printContent(StringBuilder xml)
         {
             List<PayloadTypePacketExtension> payloadTypes = getPayloadTypes();
+            Collection<RTPHdrExtPacketExtension> rtpHdrExtPacketExtensions
+                    = getRtpHeaderExtensions();
             List<SourcePacketExtension> sources = getSources();
-            List<SourceGroupPacketExtension> souceGroups = getSourceGroups();
+            List<SourceGroupPacketExtension> sourceGroups = getSourceGroups();
             int[] ssrcs = getSSRCs();
 
             for (PayloadTypePacketExtension payloadType : payloadTypes)
                 xml.append(payloadType.toXML());
 
+            for (RTPHdrExtPacketExtension ext : rtpHdrExtPacketExtensions)
+                xml.append(ext.toXML());
+
             for (SourcePacketExtension source : sources)
                 xml.append(source.toXML());
 
-            if (souceGroups != null && souceGroups.size() != 0)
-                for (SourceGroupPacketExtension sourceGroup : souceGroups)
+            if (sourceGroups != null && sourceGroups.size() != 0)
+                for (SourceGroupPacketExtension sourceGroup : sourceGroups)
                     xml.append(sourceGroup.toXML());
 
             for (int i = 0; i < ssrcs.length; i++)
@@ -1000,6 +1106,32 @@ public class ColibriConferenceIQ
         public boolean removePayloadType(PayloadTypePacketExtension payloadType)
         {
             return payloadTypes.remove(payloadType);
+        }
+
+        /**
+         * Removes a <tt>rtp-hdrext</tt> element defined by XEP-0294: Jingle
+         * RTP Header Extensions Negotiation from this <tt>channel</tt>.
+         *
+         * @param ext the <tt>rtp-hdrext</tt> element to be removed
+         * from this <tt>channel</tt>
+         * @return <tt>true</tt> if the list of <tt>rtp-hdrext</tt> elements
+         * associated with this <tt>channel</tt> has been modified as part of
+         * the method call; otherwise, <tt>false</tt>
+         */
+        public void removeRtpHeaderExtension(RTPHdrExtPacketExtension ext)
+        {
+            int id = -1;
+            try
+            {
+                id = Integer.valueOf(ext.getID());
+            }
+            catch (NumberFormatException nfe)
+            {
+                logger.warn("Invalid ID: " + ext.getID());
+                return;
+            }
+
+            rtpHeaderExtensions.remove(id);
         }
 
         /**
@@ -1122,6 +1254,15 @@ public class ColibriConferenceIQ
         public void setAdaptiveSimulcast(Boolean adaptiveSimulcast)
         {
             this.adaptiveSimulcast = adaptiveSimulcast;
+        }
+
+        /**
+         * Sets the value of the 'simulcast-mode' flag.
+         * @param simulcastMode the value to set.
+         */
+        public void setSimulcastMode(SimulcastMode simulcastMode)
+        {
+            this.simulcastMode = simulcastMode;
         }
 
         /**

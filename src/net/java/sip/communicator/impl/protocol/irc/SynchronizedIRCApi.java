@@ -51,6 +51,14 @@ public class SynchronizedIRCApi
     }
 
     @Override
+    public synchronized void connect(final IServerParameters aServerParameters,
+        final Callback<IIRCState> aCallback,
+        final CapabilityNegotiator negotiator)
+    {
+        this.irc.connect(aServerParameters, aCallback, negotiator);
+    }
+
+    @Override
     public synchronized void disconnect()
     {
         this.irc.disconnect();
@@ -270,11 +278,29 @@ public class SynchronizedIRCApi
     }
 
     @Override
+    public synchronized void dccReceive(final File aFile, final Integer aSize,
+        final SocketAddress aAddress, final DCCReceiveCallback aCallback,
+        final Proxy aProxy)
+    {
+        this.irc.dccReceive(aFile, aSize, aAddress, aCallback, aProxy);
+    }
+
+    @Override
     public synchronized void dccResume(final File aFile,
         final Integer aResumePosition, final Integer aSize,
         final SocketAddress aAddress, final DCCReceiveCallback aCallback)
     {
         this.irc.dccResume(aFile, aResumePosition, aSize, aAddress, aCallback);
+    }
+
+    @Override
+    public synchronized void dccResume(final File aFile,
+        final Integer aResumePosition, final Integer aSize,
+        final SocketAddress aAddress, final DCCReceiveCallback aCallback,
+        final Proxy aProxy)
+    {
+        this.irc.dccResume(aFile, aResumePosition, aSize, aAddress, aCallback,
+            aProxy);
     }
 
     @Override

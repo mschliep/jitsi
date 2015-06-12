@@ -559,6 +559,17 @@ public class ProtocolProviderServiceSipImpl
                 addSupportedOperationSet(
                     OperationSetJitsiMeetTools.class,
                     new OperationSetJitsiMeetToolsSipImpl());
+
+                boolean isParkingEnabled
+                    = accountID.getAccountPropertyBoolean(
+                        OperationSetTelephonyPark.IS_CALL_PARK_ENABLED,
+                        false);
+                if(isParkingEnabled)
+                {
+                    addSupportedOperationSet(
+                        OperationSetTelephonyPark.class,
+                        new OperationSetTelephonyParkSipImpl(this));
+                }
             }
 
             if (enablePresence)
@@ -637,6 +648,15 @@ public class ProtocolProviderServiceSipImpl
                 addSupportedOperationSet(
                     OperationSetCusaxUtils.class,
                     new OperationSetCusaxUtilsSipImpl(this));
+            }
+
+            if(accountID.getAccountPropertyBoolean(
+                OperationSetTelephonyBLFSipImpl.BLF_ENABLED_ACC_PROP,
+                false))
+            {
+                addSupportedOperationSet(
+                    OperationSetTelephonyBLF.class,
+                    new OperationSetTelephonyBLFSipImpl(this));
             }
 
             //initialize our OPTIONS handler

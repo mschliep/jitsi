@@ -36,6 +36,16 @@ public class ColibriIQProvider
                 new DefaultPacketExtensionProvider<PayloadTypePacketExtension>(
                         PayloadTypePacketExtension.class));
         providerManager.addExtensionProvider(
+                RtcpFbPacketExtension.ELEMENT_NAME,
+                RtcpFbPacketExtension.NAMESPACE,
+                new DefaultPacketExtensionProvider<RtcpFbPacketExtension>(
+                        RtcpFbPacketExtension.class));
+        providerManager.addExtensionProvider(
+                RTPHdrExtPacketExtension.ELEMENT_NAME,
+                ColibriConferenceIQ.NAMESPACE,
+                new DefaultPacketExtensionProvider<RTPHdrExtPacketExtension>(
+                        RTPHdrExtPacketExtension.class));
+        providerManager.addExtensionProvider(
                 SourcePacketExtension.ELEMENT_NAME,
                 SourcePacketExtension.NAMESPACE,
                 new DefaultPacketExtensionProvider<SourcePacketExtension>(
@@ -135,6 +145,13 @@ public class ColibriIQProvider
                     = (SourceGroupPacketExtension)childExtension;
 
             channel.addSourceGroup(sourceGroup);
+        }
+        else if (childExtension instanceof RTPHdrExtPacketExtension)
+        {
+            RTPHdrExtPacketExtension rtpHdrExtPacketExtension
+                    = (RTPHdrExtPacketExtension) childExtension;
+
+            channel.addRtpHeaderExtension(rtpHdrExtPacketExtension);
         }
     }
 
@@ -430,6 +447,17 @@ public class ColibriIQProvider
                             channel.setAdaptiveLastN(
                                     Boolean.parseBoolean(adaptiveLastN));
 
+                        // simulcastMode
+                        String simulcastMode
+                                = parser.getAttributeValue(
+                                "",
+                                ColibriConferenceIQ.Channel
+                                        .SIMULCAST_MODE_ATTR_NAME);
+
+                        if (!StringUtils.isNullOrEmpty(simulcastMode))
+                            channel.setSimulcastMode(
+                                    SimulcastMode.fromString(simulcastMode));
+
                         // receiving simulcast layer
                         String receivingSimulcastLayer
                                 = parser.getAttributeValue(
@@ -671,6 +699,30 @@ public class ColibriIQProvider
                             /*
                              * The channel element of the Jitsi Videobridge
                              * protocol reuses the payload-type element defined
+                             * in XEP-0167: Jingle RTP Sessions.
+                             */
+                            peName = name;
+                            peNamespace = namespace;
+                        }
+                        else if (RtcpFbPacketExtension.ELEMENT_NAME.equals(
+                                name)
+                                && RtcpFbPacketExtension.NAMESPACE
+                                .equals(parser.getNamespace()))
+                        {
+                            /*
+                             * The channel element of the Jitsi Videobridge
+                             * protocol reuses the payload-type element defined
+                             * in XEP-0167: Jingle RTP Sessions.
+                             */
+                            peName = name;
+                            peNamespace = namespace;
+                        }
+                        else if (RTPHdrExtPacketExtension.ELEMENT_NAME.equals(
+                                name))
+                        {
+                            /*
+                             * The channel element of the Jitsi Videobridge
+                             * protocol reuses the rtp-hdrext element defined
                              * in XEP-0167: Jingle RTP Sessions.
                              */
                             peName = name;

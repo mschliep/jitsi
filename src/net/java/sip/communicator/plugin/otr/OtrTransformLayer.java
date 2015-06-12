@@ -8,7 +8,6 @@ package net.java.sip.communicator.plugin.otr;
 
 import net.java.gotr4j.*;
 import net.java.gotr4j.crypto.*;
-import net.java.gotr4j.io.SerializationUtil;
 import net.java.gotr4j.util.*;
 import net.java.otr4j.*;
 import net.java.otr4j.io.*;
@@ -146,7 +145,6 @@ public class OtrTransformLayer
             && sessionStatus != ScSessionStatus.ENCRYPTED
             && sessionStatus != ScSessionStatus.FINISHED)
             return new MessageDeliveryPendingEvent[] {evt};
-
         // If this is a message otr4j injected earlier, return the event as is.
         if (OtrActivator.scOtrEngine.isMessageUIDInjected(evt
             .getSourceMessage().getMessageUID()))
@@ -226,16 +224,6 @@ public class OtrTransformLayer
         Contact contact = evt.getSourceContact();
         OtrContact otrContact =
             OtrContactManager.getOtrContact(contact, evt.getContactResource());
-
-        OtrPolicy policy = OtrActivator.scOtrEngine.getContactPolicy(contact);
-        ScSessionStatus sessionStatus =
-            OtrActivator.scOtrEngine.getSessionStatus(otrContact);
-        // If OTR is disabled and we are not over an encrypted session, don't
-        // process anything.
-        if (!policy.getEnableManual()
-            && sessionStatus != ScSessionStatus.ENCRYPTED
-            && sessionStatus != ScSessionStatus.FINISHED)
-            return evt;
 
         // Process the incoming message.
         String msgContent = evt.getSourceMessage().getContent();

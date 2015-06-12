@@ -9,6 +9,7 @@ package net.java.sip.communicator.impl.protocol.irc;
 import java.io.*;
 import java.util.*;
 
+import net.java.sip.communicator.impl.protocol.irc.ClientConfig.SASL;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.util.*;
@@ -16,6 +17,9 @@ import net.java.sip.communicator.util.*;
 import com.ircclouds.irc.api.*;
 import com.ircclouds.irc.api.domain.messages.*;
 import com.ircclouds.irc.api.listeners.*;
+import com.ircclouds.irc.api.negotiators.*;
+import com.ircclouds.irc.api.negotiators.CompositeNegotiator.Capability;
+import com.ircclouds.irc.api.negotiators.capabilities.*;
 import com.ircclouds.irc.api.state.*;
 
 /**
@@ -24,8 +28,6 @@ import com.ircclouds.irc.api.state.*;
  * TODO Show MOTD in Jitsi "System Room" or something similar, since the MOTD is
  * aimed directly at the local user.
  *
- * TODO Find out how irc-api responds to losing a connection (no response). Does
- * it use ping/pong messages to determine connectivity?
  * @author Danny van Heumen
  */
 public class IrcConnection
@@ -116,13 +118,17 @@ public class IrcConnection
      * @param config client configuration
      * @param irc the irc instance
      * @param params connection parameters
+     * @param password the password for authentication
      * @param connectionListener listener for callback upon connection
      *            interruption
+     * @param allowV3 Allow IRC version 3 capability negotiation. If not
+     *            allowed, this may regress the IRC client to "classic" IRC
+     *            (RFC1459)
      * @throws Exception Throws IOException in case of connection problems.
      */
     IrcConnection(final IrcStack.PersistentContext context,
         final ClientConfig config, final IRCApi irc,
-        final IServerParameters params,
+        final IServerParameters params, final String password,
         final IrcConnectionListener connectionListener)
         throws Exception
     {
@@ -143,13 +149,28 @@ public class IrcConnection
         this.irc = irc;
         this.connectionListener = connectionListener;
 
+        // Prepare an IRC capability negotiator in case version 3 is allowed.
+        final CapabilityNegotiator negotiator;
+        final NegotiationHandler handler = new NegotiationHandler();
+        if (config.isVersion3Allowed())
+        {
+            negotiator =
+                determineNegotiator(params.getNickname(), password, config,
+                    handler);
+        }
+        else
+        {
+            negotiator = null;
+        }
+
         // Install a listener for everything that is not directly related to a
         // specific chat room or operation.
         this.irc.addListener(new ServerListener());
 
         // Now actually connect to the IRC server.
         this.connectionState =
-            connectSynchronized(this.context.provider, params, this.irc);
+            connectSynchronized(this.context.provider, params, this.irc,
+                negotiator);
 
         // instantiate identity manager for the connection
         this.identity =
@@ -164,7 +185,7 @@ public class IrcConnection
         // instantiate channel manager for the connection
         this.channel =
             new ChannelManager(this.irc, this.connectionState,
-                this.context.provider, this.config);
+                this.context.provider, this.config, handler.awayNotify);
 
         // instantiate presence manager for the connection
         this.presence =
@@ -178,16 +199,52 @@ public class IrcConnection
     }
 
     /**
+     * Determine which capability negotiator needed.
+     *
+     * Decide on which capability negotiator will be used in IRC server
+     * registration. The null negotiator is used to skip negotiation completely.
+     * This may regress the client connection to plain IRC (RFC1459) as defined
+     * in the specification
+     * (http://ircv3.atheme.org/specification/capability-negotiation-3.1).
+     *
+     * The NoopNegotiator should be used to do IRCv3 negotiation (enabling IRCv3
+     * in the process) but not set up anything at that moment.
+     *
+     * @param user the user nick used for authentication
+     * @param password the authentication password
+     * @param config the client configuration
+     * @param handler the negotiation handler for updates during negotiation
+     * @return returns capability negotiator
+     */
+    private static CapabilityNegotiator determineNegotiator(final String user,
+        final String password, final ClientConfig config,
+        final CompositeNegotiator.Host handler)
+    {
+        final ArrayList<Capability> capabilities = new ArrayList<Capability>();
+        capabilities.add(new SimpleCapability("away-notify"));
+        capabilities.add(new SimpleCapability("multi-prefix"));
+        final SASL sasl = config.getSASL();
+        if (sasl != null)
+        {
+            capabilities.add(new SaslCapability(true, sasl.getRole(), sasl
+                .getUser(), sasl.getPass()));
+        }
+        return new CompositeNegotiator(capabilities, handler);
+    }
+
+    /**
      * Perform synchronized connect operation.
      *
      * @param provider Parent protocol provider
      * @param params Server connection parameters
      * @param irc IRC Api instance
+     * @param negotiator the capability negotiator for enabling IRCv3 features
      * @throws Exception exception thrown when connect fails
      */
     private static IIRCState connectSynchronized(
         final ProtocolProviderServiceIrcImpl provider,
-        final IServerParameters params, final IRCApi irc) throws Exception
+        final IServerParameters params, final IRCApi irc,
+        final CapabilityNegotiator negotiator) throws Exception
     {
         final Result<IIRCState, Exception> result =
             new Result<IIRCState, Exception>();
@@ -218,7 +275,7 @@ public class IrcConnection
                         result.notifyAll();
                     }
                 }
-            });
+            }, negotiator);
 
             provider.setCurrentRegistrationState(RegistrationState.REGISTERING,
                 RegistrationStateChangeEvent.REASON_USER_REQUEST);
@@ -382,13 +439,46 @@ public class IrcConnection
             if (LOGGER.isDebugEnabled())
             {
                 LOGGER
-                    .debug("ERROR: " + msg.getSource() + ": " + msg.getText());
+                    .debug("SERVER ERROR: " + msg.getSource() + ": " + msg.getText());
             }
 
             // Errors signal fatal situation, so unregister and assume
             // connection lost.
             LOGGER.debug("Local user received ERROR message: removing server "
                 + "listener.");
+            IrcConnection.this.irc.deleteListener(this);
+
+            // If listener is available, inform of connection interrupt.
+            if (IrcConnection.this.connectionListener != null)
+            {
+                IrcConnection.this.connectionListener
+                    .connectionInterrupted(IrcConnection.this);
+            }
+        }
+
+        /**
+         * Received Client error for "fatal" connectivity issues.
+         *
+         * In case of client-side discovered disruptive connectivity issues, we
+         * need to inform listeners, as the IRC server will not be able to do so
+         * anymore.
+         *
+         * @param msg the client-side error message
+         */
+        @Override
+        public void onClientError(ClientErrorMessage msg)
+        {
+            if (LOGGER.isDebugEnabled())
+            {
+                LOGGER.debug(
+                    "CLIENT ERROR: " + msg.getException().getMessage(),
+                    msg.getException());
+            }
+
+            // Errors signal fatal situation, so unregister and assume
+            // connection lost.
+            LOGGER.debug("Local user received CLIENT ERROR message: removing "
+                + "server listener.");
             IrcConnection.this.irc.deleteListener(this);
 
             // If listener is available, inform of connection interrupt.
@@ -425,6 +515,50 @@ public class IrcConnection
             {
                 IrcConnection.this.connectionListener
                     .connectionInterrupted(IrcConnection.this);
+            }
+        }
+    }
+
+    /**
+     * Capability negotiation handler.
+     *
+     * This handler receives the negotiation results for each capability as soon
+     * as it is known. This class is used to get an update on what capabilities
+     * are available to the client.
+     *
+     * @author Danny van Heumen
+     */
+    private static class NegotiationHandler
+        implements CompositeNegotiator.Host
+    {
+
+        /**
+         * Constant for id of away notify capability.
+         */
+        private static final String AWAY_NOTIFY = "away-notify";
+
+        /**
+         * Availability of 'away-notify' capability.
+         */
+        private boolean awayNotify = false;
+
+        @Override
+        public void acknowledge(Capability cap)
+        {
+            LOGGER.info("Capability " + cap.getId() + " acknowledged.");
+            if (AWAY_NOTIFY.equals(cap.getId()))
+            {
+                this.awayNotify = true;
+            }
+        }
+
+        @Override
+        public void reject(Capability cap)
+        {
+            LOGGER.info("Capability " + cap.getId() + " rejected.");
+            if (AWAY_NOTIFY.equals(cap.getId()))
+            {
+                this.awayNotify = false;
             }
         }
     }

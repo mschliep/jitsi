@@ -6,8 +6,10 @@
  */
 package net.java.sip.communicator.impl.protocol.sip;
 
+import gov.nist.javax.sip.header.*;
 import net.java.sip.communicator.util.*;
 
+import javax.sip.address.*;
 import javax.sip.header.*;
 import javax.sip.message.*;
 import java.util.*;
@@ -91,12 +93,14 @@ public class ConfigHeaders
         for(Map.Entry<String, String> entry : props.entrySet())
         {
             String pName = entry.getKey();
-            String prefStr = entry.getValue().trim();
+            String prefStr = entry.getValue();
             String name;
             String ix;
 
-            if(!pName.startsWith(ACC_PROPERTY_CONFIG_HEADER))
+            if(!pName.startsWith(ACC_PROPERTY_CONFIG_HEADER) || prefStr == null)
                 continue;
+
+            prefStr = prefStr.trim();
 
             if(pName.contains("."))
             {
@@ -138,16 +142,25 @@ public class ConfigHeaders
 
             try
             {
+                String name = headerValues.get(ACC_PROPERTY_CONFIG_HEADER_NAME);
+                String value = processParams(
+                    headerValues.get(ACC_PROPERTY_CONFIG_HEADER_VALUE),
+                    request);
 
-                Header customHeader = protocolProvider.getHeaderFactory()
-                    .createHeader(
-                        headerValues.get(ACC_PROPERTY_CONFIG_HEADER_NAME),
-                        processParams(
-                            headerValues.get(ACC_PROPERTY_CONFIG_HEADER_VALUE),
-                            request)
-                    );
+                Header h = request.getHeader(name);
 
-                request.setHeader(customHeader);
+                // makes possible overriding already created headers which
+                // are not custom one
+                // RouteHeader is used by ProxyRouter/DefaultRouter and we
+                // cannot use it as custom header if we want to add it
+                if((h != null && !(h instanceof CustomHeader))
+                    || name.equals(SIPHeaderNames.ROUTE))
+                {
+                    request.setHeader(protocolProvider.getHeaderFactory()
+                        .createHeader(name, value));
+                }
+                else
+                    request.addHeader(new CustomHeaderList(name, value));
             }
             catch(Exception e)
             {
@@ -178,6 +191,32 @@ public class ConfigHeaders
             }
         }
 
+        if(value.indexOf("${from.userID}") != -1)
+        {
+            FromHeader fromHeader
+                = (FromHeader)request.getHeader(FromHeader.NAME);
+
+            if(fromHeader != null)
+            {
+                URI fromURI = fromHeader.getAddress().getURI();
+                String fromAddr = fromURI.toString();
+
+                // strips sip: or sips:
+                if(fromURI.isSipURI())
+                {
+                    fromAddr
+                        = fromAddr.replaceFirst(fromURI.getScheme() + ":", "");
+                }
+
+                // take the userID part
+                int index = fromAddr.indexOf('@');
+                if ( index > -1 )
+                    fromAddr = fromAddr.substring(0, index);
+
+                value = value.replace("${from.userID}", fromAddr);
+            }
+        }
+
         if(value.indexOf("${to.address}") != -1)
         {
             ToHeader toHeader =
@@ -188,6 +227,31 @@ public class ConfigHeaders
                 value = value.replace(
                     "${to.address}",
                     toHeader.getAddress().getURI().toString());
+            }
+        }
+
+        if(value.indexOf("${to.userID}") != -1)
+        {
+            ToHeader toHeader =
+                (ToHeader)request.getHeader(ToHeader.NAME);
+
+            if(toHeader != null)
+            {
+                URI toURI = toHeader.getAddress().getURI();
+                String toAddr = toURI.toString();
+
+                // strips sip: or sips:
+                if(toURI.isSipURI())
+                {
+                    toAddr = toAddr.replaceFirst(toURI.getScheme() + ":", "");
+                }
+
+                // take the userID part
+                int index = toAddr.indexOf('@');
+                if ( index > -1 )
+                    toAddr = toAddr.substring(0, index);
+
+                value = value.replace("${to.userID}", toAddr);
             }
         }
 

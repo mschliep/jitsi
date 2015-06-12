@@ -173,7 +173,7 @@ public class OperationSetBasicTelephonySipImpl
      * @throws OperationFailedException with the corresponding code if we fail
      * to create the call.
      */
-    private synchronized CallSipImpl createOutgoingCall(
+    synchronized CallSipImpl createOutgoingCall(
             Address calleeAddress,
             javax.sip.message.Message cause,
             CallConference conference)
@@ -1960,9 +1960,11 @@ public class OperationSetBasicTelephonySipImpl
     public String toString()
     {
         return getClass().getSimpleName() + "-[dn="
-            + protocolProvider.getOurDisplayName() + " addr=["
-            + protocolProvider.getRegistrarConnection().getAddressOfRecord()
-            + "]";
+            + protocolProvider.getOurDisplayName()
+            + (protocolProvider.getRegistrarConnection() != null ?
+                " addr=[" + protocolProvider.getRegistrarConnection()
+                    .getAddressOfRecord() + "]"
+                : "]");
     }
 
     /**
@@ -2165,7 +2167,7 @@ public class OperationSetBasicTelephonySipImpl
      * @throws OperationFailedException if the protocol provider that created us
      * is not registered.
      */
-    private void assertRegistered()
+    void assertRegistered()
         throws OperationFailedException
     {
         if(!protocolProvider.isRegistered())
