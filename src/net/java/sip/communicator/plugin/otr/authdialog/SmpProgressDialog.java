@@ -40,7 +40,7 @@ public class SmpProgressDialog
      * 
      * @param contact The contact that this dialog is associated with.
      */
-    public SmpProgressDialog(Contact contact)
+    public SmpProgressDialog(String name)
     {
         setTitle(
             OtrActivator.resourceService.getI18NString(
@@ -57,7 +57,7 @@ public class SmpProgressDialog
                 OtrActivator.resourceService
                     .getI18NString(
                         "plugin.otr.authbuddydialog.AUTHENTICATION_FROM",
-                        new String[] {contact.getDisplayName()}));
+                        new String[] {name}));
 
         JPanel labelsPanel = new TransparentPanel();
         labelsPanel.setLayout(new BoxLayout(labelsPanel, BoxLayout.X_AXIS));

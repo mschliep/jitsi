@@ -326,6 +326,19 @@ public class OtrMetaContactMenu
             }
             menu.add(authenticatedMenu);
 
+            JMenuItem refreshKey = new JMenuItem();
+            refreshKey.setText(OtrActivator.resourceService
+                    .getI18NString("plugin.otr.gotr.menu.REFRESH_KEYS"));
+            refreshKey.addActionListener(new ActionListener()
+            {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent)
+                {
+                    currentChatRoomSession.getSession().refreshKeys();
+                }
+            });
+            menu.add(refreshKey);
+
             JMenuItem finishItem = new JMenuItem();
             finishItem.setText(OtrActivator.resourceService
                     .getI18NString("plugin.otr.menu.END_OTR"));

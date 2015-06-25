@@ -1,11 +1,11 @@
 package net.java.sip.communicator.plugin.otr;
 
-import gov.nist.javax.sip.header.ims.PPreferredService;
 import net.java.gotr4j.*;
 import net.java.gotr4j.crypto.GotrException;
-import net.java.sip.communicator.plugin.otr.authdialog.GotrSmpAuthenticateDialog;
+import net.java.sip.communicator.plugin.otr.authdialog.GotrMemberAuthDialogBackend;
 import net.java.sip.communicator.plugin.otr.authdialog.SmpAuthenticateBuddyDialog;
 
+import net.java.sip.communicator.plugin.otr.authdialog.SmpProgressDialog;
 import net.java.sip.communicator.plugin.otr.gui.*;
 import net.java.sip.communicator.service.gui.Chat;
 import net.java.sip.communicator.service.protocol.*;
@@ -13,8 +13,6 @@ import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.util.Logger;
 
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.*;
 
@@ -23,7 +21,8 @@ public class ScGotrSessionHost
         ChatRoomMemberPresenceListener
 {
 
-    private static final String ITS_A_LIE = "ITS A LIE";
+    private static final String FORGE_ME = "FORGE_ME";
+    private static final String FORGE_OTHER = "FORGE_OTHER";
 
     private static final Logger logger = Logger.getLogger(ScGotrSessionHost.class);
 
@@ -48,6 +47,8 @@ public class ScGotrSessionHost
 
     private final Map<GotrUser, ChatRoomMember> userToMemberMap =
             new HashMap<GotrUser, ChatRoomMember>();
+
+    private final Map<GotrUser, SmpProgressDialog> progressDialogMap = new HashMap<GotrUser, SmpProgressDialog>();
 
     private final Set<String> sentBroadcasts = new HashSet<String>();
     private final Set<String> receivedBroadcasts = new HashSet<String>();
@@ -122,8 +123,12 @@ public class ScGotrSessionHost
             logger.debug(String.format("size %s: %d", localUser, gotrSession.getSize()));
         }
 
-        if(broadcast.startsWith(ITS_A_LIE)){
-            receivedUnsentMessage(broadcast.substring(ITS_A_LIE.length()));
+        if(broadcast.startsWith(FORGE_ME)){
+            receivedUnsentMessage(localUser);
+            return;
+        }
+        else if(broadcast.startsWith(FORGE_OTHER)){
+            receivedUnsentMessage(source);
             return;
         }
 
@@ -166,6 +171,10 @@ public class ScGotrSessionHost
         ChatRoomMember member = userToMemberMap.get(user);
         OtrActivator.scOtrKeyManager.verify("", fingerprint);
         OtrActivator.gotrComponentService.update(chatRoom);
+
+        SmpProgressDialog dialog = getSmpProgressDialog(user);
+        dialog.setProgressSuccess();
+        dialog.setVisible(true);
     }
 
     @Override
@@ -174,6 +183,8 @@ public class ScGotrSessionHost
         GotrComponentServiceImpl componentService =
                 OtrActivator.gotrComponentService;
         componentService.update(chatRoom);
+
+        postStateMessageToChat(gotrSessionState);
 
         synchronized (listeners)
         {
@@ -184,12 +195,72 @@ public class ScGotrSessionHost
         }
     }
 
+    private void postStateMessageToChat(GotrSessionState state) {
+
+        String message = null;
+        String messageType = null;
+
+        if(state == GotrSessionState.PLAINTEXT){
+            return;
+        }
+        else if(state == GotrSessionState.SETUP){
+            message = OtrActivator.resourceService
+                    .getI18NString("plugin.otr.gotr.SETUP_STATE", new String[]{});
+            messageType = Chat.SYSTEM_MESSAGE;
+        }
+        else if(state == GotrSessionState.SECURE){
+            if(areAllAuthenticated()) {
+                message = OtrActivator.resourceService
+                        .getI18NString("plugin.otr.gotr.SECURE_AUTH_STATE", new String[]{});
+                messageType = Chat.SYSTEM_MESSAGE;
+            }
+            else {
+                message = OtrActivator.resourceService
+                        .getI18NString("plugin.otr.gotr.SECURE_NO_AUTH_STATE", new String[]{});
+                messageType = Chat.ERROR_MESSAGE;
+            }
+        }
+
+        OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
+                messageType, message,
+                OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+
+
+    }
+
     @Override
     public void askForSecret(GotrUser user, String question) {
         ChatRoomMember member = userToMemberMap.get(user);
-        GotrSmpAuthenticateDialog dialog =
-                new GotrSmpAuthenticateDialog(
-                        this, member, user, question);
+        SmpAuthenticateBuddyDialog dialog =
+                new SmpAuthenticateBuddyDialog(question, new GotrMemberAuthDialogBackend(this, member, user));
+        dialog.setVisible(true);
+
+        SmpProgressDialog progressDialog = getSmpProgressDialog(user);
+        progressDialog.init();
+        progressDialog.setVisible(true);
+    }
+
+    @Override
+    public void smpAborted(GotrUser user) {
+        SmpProgressDialog dialog = getSmpProgressDialog(user);
+        dialog.setProgressFail();
+        dialog.setVisible(true);
+    }
+
+    @Override
+    public void smpError(GotrUser user) {
+        SmpProgressDialog dialog = getSmpProgressDialog(user);
+        dialog.setProgressFail();
+        dialog.setVisible(true);
+    }
+
+    @Override
+    public void unverify(GotrUser user, String fingerprint) {
+        OtrActivator.scOtrKeyManager.unverify("", fingerprint);
+        OtrActivator.gotrComponentService.update(chatRoom);
+
+        SmpProgressDialog dialog = getSmpProgressDialog(user);
+        dialog.setProgressFail();
         dialog.setVisible(true);
     }
 
@@ -224,9 +295,18 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public void receivedUnsentMessage(String message) {
+    public void receivedUnsentMessage(GotrUser source) {
         String finished = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.RECEIVED_UNSENT_MSG", new String[]{message});
+                .getI18NString("plugin.otr.gotr.RECEIVED_UNSENT_MSG", new String[]{});
+        OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
+                Chat.ERROR_MESSAGE, finished,
+                OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+    }
+
+    @Override
+    public void broadcastToEmptySecureRoom(String message) {
+        String finished = OtrActivator.resourceService
+                .getI18NString("plugin.otr.gotr.EMPTY_SECURE_BROADCAST", new String[]{});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
@@ -431,9 +511,49 @@ public class ScGotrSessionHost
         try
         {
             gotrSession.initSmp(user, question, secret);
+            SmpProgressDialog dialog = getSmpProgressDialog(user);
+            dialog.init();
+            dialog.setVisible(true);
         } catch (GotrException e)
         {
             logger.error("Unable to init smp with remote user.", e);
+        }
+    }
+
+    public SmpProgressDialog getSmpProgressDialog(GotrUser user){
+        synchronized (progressDialogMap){
+            SmpProgressDialog dialog = progressDialogMap.get(user);
+
+            if(dialog == null){
+
+                Contact contact = userToContactMap.get(user);
+
+                dialog = new SmpProgressDialog(contact.getDisplayName());
+                progressDialogMap.put(user, dialog);
+            }
+
+            return dialog;
+        }
+    }
+
+    public void respondSmp(GotrUser user, String question, String text) {
+        try {
+            gotrSession.respondSmp(user, question, text);
+            SmpProgressDialog dialog = getSmpProgressDialog(user);
+            dialog.incrementProgress();
+            dialog.setVisible(true);
+        } catch (GotrException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void abortSmp(GotrUser user) {
+        try {
+            gotrSession.abortSmp(user);
+            SmpProgressDialog dialog = getSmpProgressDialog(user);
+            dialog.dispose();
+        } catch (GotrException e) {
+            e.printStackTrace();
         }
     }
 }

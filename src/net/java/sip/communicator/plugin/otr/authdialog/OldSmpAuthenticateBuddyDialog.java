@@ -6,20 +6,15 @@
  */
 package net.java.sip.communicator.plugin.otr.authdialog;
 
-import net.java.gotr4j.GotrUser;
-import net.java.gotr4j.crypto.GotrException;
-import net.java.otr4j.session.InstanceTag;
-import net.java.sip.communicator.plugin.desktoputil.SIPCommDialog;
-import net.java.sip.communicator.plugin.desktoputil.TransparentPanel;
-import net.java.sip.communicator.plugin.otr.OtrActivator;
-import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
-import net.java.sip.communicator.plugin.otr.ScGotrSessionHost;
-import net.java.sip.communicator.service.protocol.ChatRoomMember;
+import java.awt.*;
+import java.awt.event.*;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
+import net.java.otr4j.session.*;
+import net.java.sip.communicator.plugin.desktoputil.*;
+import net.java.sip.communicator.plugin.otr.*;
+import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
 
 /**
  * The dialog that pops up when the remote party send us SMP
@@ -29,21 +24,20 @@ import java.awt.event.ActionListener;
  * @author Marin Dzhigarov
  */
 @SuppressWarnings("serial")
-public class GotrSmpAuthenticateDialog
+public class OldSmpAuthenticateBuddyDialog
     extends SIPCommDialog
 {
-    private final ScGotrSessionHost sessionHost;
-    private final ChatRoomMember member;
-    private final GotrUser user;
+    private final OtrContact otrContact;
 
     private final String question;
 
-    public GotrSmpAuthenticateDialog(ScGotrSessionHost sessionHost,
-                                     ChatRoomMember member, GotrUser user, String question)
+    private final InstanceTag receiverTag;
+
+    public OldSmpAuthenticateBuddyDialog(
+            OtrContact contact, InstanceTag receiverTag, String question)
     {
-        this.sessionHost = sessionHost;
-        this.member = member;
-        this.user = user;
+        this.otrContact = contact;
+        this.receiverTag = receiverTag;
         this.question = question;
         initComponents();
     }
@@ -71,13 +65,17 @@ public class GotrSmpAuthenticateDialog
                 , Font.BOLD
                 , 14);
         authenticationFrom.setFont(newFont);
+
+        String resourceName = otrContact.resource != null ?
+            "/" + otrContact.resource.getResourceName() : "";
         String authFromText =
             String.format(
                 OtrActivator.resourceService
                     .getI18NString(
                         "plugin.otr.authbuddydialog.AUTHENTICATION_FROM",
                         new String[]
-                            {member.getName()}));
+                            {otrContact.contact.getDisplayName() +
+                            resourceName}));
         authenticationFrom.setText(authFromText);
         mainPanel.add(authenticationFrom);
 
@@ -113,22 +111,7 @@ public class GotrSmpAuthenticateDialog
         c.insets = new Insets(5, 5, 0, 5);
         c.weightx = 0;
 
-        //Add petname prompt
-        JLabel petnameLabel =
-                new JLabel(
-                        OtrActivator.resourceService
-                                .getI18NString(
-                                        "plugin.otr.authbuddydialog.PETNAME"));
-        questionAnswerPanel.add(petnameLabel, c);
-        c.gridy = 1;
-        c.insets = new Insets(0, 5, 5, 5);
-        final JTextField petname= new JTextField();
-        petname.setText(member.getName());
-        questionAnswerPanel.add(petname, c);
-
         // Add question label.
-        c.gridy = 2;
-        c.insets = new Insets(5, 5, 0, 5);
         JLabel questionLabel =
             new JLabel(
                 OtrActivator.resourceService
@@ -138,7 +121,7 @@ public class GotrSmpAuthenticateDialog
 
         // Add the question.
         c.insets = new Insets(0, 5, 5, 5);
-        c.gridy = 3;
+        c.gridy = 1;
         JTextArea questionArea = 
             new CustomTextArea();
         newFont =
@@ -154,14 +137,14 @@ public class GotrSmpAuthenticateDialog
 
         // Add answer label.
         c.insets = new Insets(5, 5, 5, 5);
-        c.gridy = 4;
+        c.gridy = 2;
         JLabel answerLabel =
             new JLabel(OtrActivator.resourceService
                 .getI18NString("plugin.otr.authbuddydialog.ANSWER"));
         questionAnswerPanel.add(answerLabel, c);
 
         // Add the answer text field.
-        c.gridy = 5;
+        c.gridy = 3;
         final JTextField answerTextBox = new JTextField();
         questionAnswerPanel.add(answerTextBox, c);
 
@@ -197,8 +180,8 @@ public class GotrSmpAuthenticateDialog
         {
             public void actionPerformed(ActionEvent e)
             {
-                //TODO cancel
-                GotrSmpAuthenticateDialog.this.dispose();
+                OtrActivator.scOtrEngine.abortSmp(otrContact);
+                OldSmpAuthenticateBuddyDialog.this.dispose();
             }
         });
         c.insets = new Insets(5, 5, 5, 5);
@@ -214,14 +197,9 @@ public class GotrSmpAuthenticateDialog
         {
             public void actionPerformed(ActionEvent e)
             {
-                try {
-                    String fingerprint = sessionHost.getRemoteFingerprint(member);
-                    OtrActivator.scOtrKeyManager.saveFingerprint(petname.getText(), fingerprint);
-                    sessionHost.getSession().respondSmp(user, question, answerTextBox.getText());
-                } catch (GotrException e1) {
-                    e1.printStackTrace();
-                }
-                GotrSmpAuthenticateDialog.this.dispose();
+                OtrActivator.scOtrEngine.respondSmp(
+                    otrContact, receiverTag, question, answerTextBox.getText());
+                OldSmpAuthenticateBuddyDialog.this.dispose();
             }
         });
 

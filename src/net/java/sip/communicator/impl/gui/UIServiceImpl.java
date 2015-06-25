@@ -1616,7 +1616,7 @@ public class UIServiceImpl
      */
     public void showAddChatRoomDialog()
     {
-        ChatRoomTableDialog.showChatRoomTableDialog();
+        ChatRoomTableDialog.showChatRoomTableDialog(false);
     }
     
     /**

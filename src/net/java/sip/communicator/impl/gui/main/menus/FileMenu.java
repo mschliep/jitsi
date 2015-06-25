@@ -281,11 +281,11 @@ public class FileMenu
         }
         else if (itemName.equals("myChatRooms"))
         {
-            ChatRoomTableDialog.showChatRoomTableDialog();
+            ChatRoomTableDialog.showChatRoomTableDialog(false);
         }
         else if (itemName.equals("addGotrRoom"))
         {
-            ChatRoomTableDialog.showChatRoomTableDialog();
+            ChatRoomTableDialog.showChatRoomTableDialog(true);
         }
     }
 

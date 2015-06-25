@@ -105,6 +105,17 @@ public class ChatRoomTableDialog
      */
     private ServerChatRoomsChoiceDialog serverChatRoomsChoiceDialog = null;
 
+
+    /**
+     * Displaying a secure chat room setup.
+     */
+    private boolean secure;
+
+    /**
+     * Panel to set the name of the chat room.
+     */
+    private JLabel secureLabel;
+
     /**
      * The <tt>ChatRoomList.ChatRoomProviderWrapperListener</tt> instance which
      * has been registered with {@link #chatRoomList} and which is to be
@@ -132,29 +143,28 @@ public class ChatRoomTableDialog
      * Shows a <code>ChatRoomTableDialog</code> creating it first if necessary.
      * The shown instance is shared in order to prevent displaying multiple
      * instances of one and the same <code>ChatRoomTableDialog</code>.
+     *
+     * @param secure show the chat room dialog to start a GOTR chat room
      */
-    public static void showChatRoomTableDialog()
-    {
-        if (chatRoomTableDialog == null)
-        {
+    public static void showChatRoomTableDialog(boolean secure) {
+        if (chatRoomTableDialog == null) {
             chatRoomTableDialog
-                = new ChatRoomTableDialog(
-                        GuiActivator.getUIService().getMainFrame());
+                    = new ChatRoomTableDialog(
+                    GuiActivator.getUIService().getMainFrame());
 
             /*
              * When the global/shared ChatRoomTableDialog closes, don't keep a
              * reference to it and let it be garbage-collected.
              */
-            chatRoomTableDialog.addWindowListener(new WindowAdapter()
-            {
+            chatRoomTableDialog.addWindowListener(new WindowAdapter() {
                 @Override
-                public void windowClosed(WindowEvent e)
-                {
+                public void windowClosed(WindowEvent e) {
                     if (chatRoomTableDialog == e.getWindow())
                         chatRoomTableDialog = null;
                 }
             });
         }
+        chatRoomTableDialog.setSecure(secure);
         chatRoomTableDialog.setVisible(true);
         chatRoomTableDialog.pack();
     }
@@ -201,12 +211,11 @@ public class ChatRoomTableDialog
         chatRoomNameField = new JTextField();
 
         valuesPanel.add(providersCombo);
-        //valuesPanel.add(chatRoomNameField);
 
         JPanel namePanel = new TransparentPanel(new GridLayout(1, 0));
-        JLabel gotr = new JLabel("_gotr");
+        secureLabel = new JLabel("_gotr");
         namePanel.add(chatRoomNameField);
-        namePanel.add(gotr);
+        namePanel.add(secureLabel);
         valuesPanel.add(namePanel);
 
         northPanel.add(labels, BorderLayout.WEST);
@@ -392,9 +401,15 @@ public class ChatRoomTableDialog
                 && (nicknameField.getText() != null
                     && nicknameField.getText().trim().length() > 0))
             {
+                String chatroomName = chatRoomNameField.getText().trim();
+
+                if(secure){
+                    chatroomName = String.format("%s_gotr", chatroomName);
+                }
+
                 final ChatRoomWrapper chatRoomWrapper =
                     GuiActivator.getMUCService().createChatRoom(
-                        chatRoomNameField.getText().trim(),
+                        chatroomName,
                         getSelectedProvider().getProtocolProvider(),
                         new ArrayList<String>(),
                         "",
@@ -547,6 +562,24 @@ public class ChatRoomTableDialog
         {
             chatRoomTableDialog.setChatRoomNameField(chatRoom);
         }
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+        if(secure){
+            secureLabel.setVisible(true);
+            this.setTitle(GuiActivator.getResources()
+                    .getI18NString("service.gui.ADD_SECURE_ROOM_TITLE"));
+        }
+        else{
+            secureLabel.setVisible(false);
+            this.setTitle(GuiActivator.getResources()
+                    .getI18NString("service.gui.MY_CHAT_ROOMS_TITLE"));
+        }
+    }
+
+    public boolean isSecure() {
+        return secure;
     }
 
     /**

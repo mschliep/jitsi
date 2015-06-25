@@ -12,4 +12,8 @@ public interface AuthenticationDialogBackend
 
     public void initSmp(String petname, String question, String secret);
 
+    public void abortSmp();
+
+    public void respondSmp(String petname, String question, String secret);
+
 }

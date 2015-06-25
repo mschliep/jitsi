@@ -10,6 +10,7 @@ import java.awt.*;
 import java.util.*;
 
 import net.java.gotr4j.GotrUser;
+import net.java.otr4j.session.InstanceTag;
 import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
 import net.java.sip.communicator.plugin.otr.authdialog.*;
 import net.java.sip.communicator.service.protocol.ChatRoomMember;
@@ -34,11 +35,12 @@ public class SwingOtrActionHandler
 
     public static void openAuthDialog(OtrContact contact)
     {
-        openAuthDialog(new OtrContactAuthDialogBackend(contact));
+        openAuthDialog(new OtrContactAuthDialogBackend(contact, null));
     }
 
     public static void openAuthDialog(ScGotrSessionHost sessionHost, ChatRoomMember member) {
-        openAuthDialog(new GotrMemberAuthDialogBackend(sessionHost, member));
+        GotrUser user = sessionHost.getUser(member);
+        openAuthDialog(new GotrMemberAuthDialogBackend(sessionHost, member, user));
     }
 
     public static void openAuthDialog(AuthenticationDialogBackend backend)

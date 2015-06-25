@@ -305,12 +305,14 @@ public class OtrTransformLayer
         if(evt.getEventType() !=
                 ChatRoomMessageReceivedEvent.CONVERSATION_MESSAGE_RECEIVED)
         {
+            logger.debug(String.format("MessageType: %s, %s", evt.getEventType(), evt.getMessage().getContent()));
             return evt;
         }
 
         if(evt.isHistoryMessage()
-                && GotrUtil.isGotrBroadcast( evt.getMessage().getContent()))
+                && GotrUtil.isGotrBroadcast(evt.getMessage().getContent()))
         {
+            logger.debug("Received history gotr message.");
             return null;
         }
 
@@ -320,6 +322,7 @@ public class OtrTransformLayer
 
         if(host.receivedChatRoomMessage(evt.getMessage().getMessageUID()))
         {
+            logger.debug("Received message with null host.");
             return evt;
         }
 
@@ -328,7 +331,14 @@ public class OtrTransformLayer
         final GotrSessionManager session = host.getSession();
 
         if(source == null){
-            return evt;
+            logger.debug("Received message with null source.");
+            if(GotrUtil.isGotrBroadcast(evt.getMessage().getContent())) {
+                return null;
+            }
+            else{
+                logger.debug("Received message with null source. not broadcast.");
+                return evt;
+            }
         }
 
         try
@@ -348,10 +358,16 @@ public class OtrTransformLayer
         final ScGotrSessionHost host =
                 gotrSessionManager.getGotrSessionHost(evt.getSourceChatRoom());
 
+        if(host == null){
+            logger.debug(String.format("Host is null, %s", evt));
+            return evt;
+        }
+
         if(logger.isDebugEnabled())
         {
             logger.debug(String.format("Delivery Pending %s:%s", host.getLocalUser(), evt.getMessage().getContent()));
         }
+
 
         if(host.sentChatRoomMessage(evt.getMessage().getMessageUID()))
         {

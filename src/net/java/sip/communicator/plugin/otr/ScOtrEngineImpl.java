@@ -195,7 +195,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -227,7 +227,7 @@ public class ScOtrEngineImpl
                     progressDialogMap.get(otrContact);
                 if (progressDialog == null)
                 {
-                    progressDialog = new SmpProgressDialog(contact);
+                    progressDialog = new SmpProgressDialog(contact.getDisplayName());
                     progressDialogMap.put(otrContact, progressDialog);
                 }
 
@@ -297,14 +297,13 @@ public class ScOtrEngineImpl
 
             Contact contact = otrContact.contact;
             SmpAuthenticateBuddyDialog dialog =
-                new SmpAuthenticateBuddyDialog(
-                    otrContact, receiverTag, question);
+                new SmpAuthenticateBuddyDialog(question, new OtrContactAuthDialogBackend(otrContact, receiverTag));
             dialog.setVisible(true);
 
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -326,7 +325,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -347,7 +346,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -1219,7 +1218,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(otrContact.contact);
+                progressDialog = new SmpProgressDialog(otrContact.contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -1248,7 +1247,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(otrContact.contact);
+                progressDialog = new SmpProgressDialog(otrContact.contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -1275,7 +1274,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(otrContact.contact);
+                progressDialog = new SmpProgressDialog(otrContact.contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
