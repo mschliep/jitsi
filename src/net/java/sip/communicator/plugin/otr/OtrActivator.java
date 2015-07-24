@@ -372,6 +372,16 @@ public class OtrActivator
                         Container.CONTAINER_CHAT_MENU_BAR),
                 containerFilter);
 
+            // Register the chat window menu bar item.
+            containerFilter.put(Container.CONTAINER_ID,
+                    Container.CONTAINER_CHAT_WRITE_PANEL.getID());
+
+            bundleContext.registerService(
+                    PluginComponentFactory.class.getName(),
+                    new OtrPluginComponentFactory(
+                            Container.CONTAINER_CHAT_WRITE_PANEL),
+                    containerFilter);
+
             // Register the chat button bar default-action-button.
             containerFilter.put(Container.CONTAINER_ID,
                                 Container.CONTAINER_CHAT_TOOL_BAR.getID());
@@ -519,6 +529,10 @@ public class OtrActivator
             Container container = getContainer();
             if(container.equals(Container.CONTAINER_CHAT_TOOL_BAR))
                 return new OtrToolBarButton(container, this, gotrSessionManager);
+            else if(container.equals(Container.CONTAINER_CHAT_WRITE_PANEL)) {
+                logger.debug("Creating sending label");
+                return new GotrSendingLabel(container, this, gotrSessionManager);
+            }
             else
                 return new OtrMetaContactMenu(container, this, gotrSessionManager);
         }

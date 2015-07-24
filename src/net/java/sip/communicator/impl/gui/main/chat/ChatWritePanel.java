@@ -1598,6 +1598,7 @@ public class ChatWritePanel
      */
     void initPluginComponents()
     {
+        logger.debug("Initing plugins");
         // Search for plugin components registered through the OSGI bundle
         // context.
         Collection<ServiceReference<PluginComponentFactory>> serRefs;
@@ -1648,6 +1649,7 @@ public class ChatWritePanel
                     }
                     else if(currentDescriptor instanceof ChatRoom)
                     {
+                        logger.debug(String.format("Setting chatroom for comp: %s", component.getName()));
                         ChatRoom chatRoom = (ChatRoom) currentDescriptor;
                         component.setCurrentChatRoom(chatRoom);
                     }
@@ -1683,6 +1685,7 @@ public class ChatWritePanel
      */
     public void pluginComponentAdded(PluginComponentEvent event)
     {
+        logger.debug("plugin comonent added");
         PluginComponentFactory factory = event.getPluginComponentFactory();
         if (!factory.getContainer().equals(
                 net.java.sip.communicator.service.
@@ -1758,6 +1761,7 @@ public class ChatWritePanel
     @Override
     public void currentChatTransportChanged(ChatSession chatSession)
     {
+        logger.debug("Chat Transport changed.");
         List<PluginComponent> components;
         synchronized (this.pluginComponents)
         {
@@ -1774,6 +1778,14 @@ public class ChatWritePanel
         else if (descriptor instanceof Contact)
         {
             contact = (Contact) descriptor;
+        }
+        else if (descriptor instanceof ChatRoom){
+            contact = null;
+            for (PluginComponent c : components)
+            {
+                c.setCurrentContact((Contact) null);
+                c.setCurrentChatRoom((ChatRoom) descriptor);
+            }
         }
         else if (descriptor == null)
         {

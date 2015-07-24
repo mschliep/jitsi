@@ -339,24 +339,22 @@ public class OtrMetaContactMenu
             });
             menu.add(refreshKey);
 
-            JMenuItem finishItem = new JMenuItem();
-            finishItem.setText(OtrActivator.resourceService
-                    .getI18NString("plugin.otr.menu.END_OTR"));
-            finishItem.addActionListener(new ActionListener()
-            {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent)
-                {
-                    try
-                    {
-                        currentChatRoomSession.getSession().end();
-                    } catch (GotrException e)
-                    {
-                        logger.error("Unable to end session", e);
+            if(currentChatRoomSession.isGotrRequired()) {
+                JMenuItem finishItem = new JMenuItem();
+                finishItem.setText(OtrActivator.resourceService
+                        .getI18NString("plugin.otr.menu.END_OTR"));
+                finishItem.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        try {
+                            currentChatRoomSession.getSession().end();
+                        } catch (GotrException e) {
+                            logger.error("Unable to end session", e);
+                        }
                     }
-                }
-            });
-            menu.add(finishItem);
+                });
+                menu.add(finishItem);
+            }
         }
     }
 

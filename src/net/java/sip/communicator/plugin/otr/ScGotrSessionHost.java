@@ -8,21 +8,23 @@ import net.java.sip.communicator.plugin.otr.authdialog.SmpAuthenticateBuddyDialo
 import net.java.sip.communicator.plugin.otr.authdialog.SmpProgressDialog;
 import net.java.sip.communicator.plugin.otr.gui.*;
 import net.java.sip.communicator.service.gui.Chat;
+import net.java.sip.communicator.service.gui.ChatLinkClickedListener;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.util.Logger;
 
+import javax.swing.*;
+import java.net.URI;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScGotrSessionHost
         implements GotrSessionHost,
-        ChatRoomMemberPresenceListener
-{
-
-    private static final String FORGE_ME = "FORGE_ME";
-    private static final String FORGE_OTHER = "FORGE_OTHER";
+        ChatRoomMemberPresenceListener,
+        ChatLinkClickedListener,
+        ScOtrKeyManagerListener{
 
     private static final Logger logger = Logger.getLogger(ScGotrSessionHost.class);
 
@@ -33,8 +35,6 @@ public class ScGotrSessionHost
     private GotrSessionManager gotrSession;
 
     private GotrUser localUser;
-
-    private boolean errorInSession = false;
 
     private final Map<GotrUser, Contact> userToContactMap =
             new HashMap<GotrUser, Contact>();
@@ -57,6 +57,10 @@ public class ScGotrSessionHost
     private final List<ScGotrSessionListener> listeners =
             new ArrayList<ScGotrSessionListener>();
 
+    private boolean displaySecure = true;
+
+    private volatile int outgoing = 0;
+
     public ScGotrSessionHost(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
         this.protocolProvider = chatRoom.getParentProvider();
@@ -69,25 +73,41 @@ public class ScGotrSessionHost
             this.gotrSession = new GotrSessionManager(this, localUser, chatRoom.getName(), true);
         } catch (GotrException e) {
             this.gotrSession = null;
-            errorInSession = true;
+            logger.error(e);
         }
 
         chatRoom.addMemberPresenceListener(this);
+        OtrActivator.scOtrKeyManager.addListener(this);
 
-        for (ChatRoomMember member : chatRoom.getMembers())
-        {
-            if(!member.getName().equals(chatRoom.getUserNickname()))
-            {
+        for (ChatRoomMember member : chatRoom.getMembers()) {
+            if (!member.getName().equals(chatRoom.getUserNickname())) {
+                logger.debug(String.format("%s adding %s in construct.", chatRoom.getUserNickname(), member.getName()));
                 memberAdded(member);
             }
         }
+
+        registerChatLinkListener();
+    }
+
+    private void registerChatLinkListener() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    registerChatLinkListener();
+                }
+            });
+            return;
+        }
+
+        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+        chat.addChatLinkClickedListener(this);
+
     }
 
     @Override
-    public void sendMessage(GotrUser gotrUser, String message)
-    {
-        if(logger.isDebugEnabled())
-        {
+    public void sendMessage(GotrUser gotrUser, String message) {
+        if (logger.isDebugEnabled()) {
             logger.debug(String.format("Host: %s sending %s:%s.", localUser, gotrUser, message));
         }
 
@@ -99,10 +119,8 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public void sendBroadcast(String broadcast)
-    {
-        if(logger.isDebugEnabled())
-        {
+    public void sendBroadcast(String broadcast) {
+        if (logger.isDebugEnabled()) {
             logger.debug(String.format("Sending %s: %s", localUser, broadcast));
             logger.debug(String.format("size %s: %d", localUser, gotrSession.getSize()));
         }
@@ -116,35 +134,29 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public void handleBroadcast(GotrUser source, String broadcast)
-    {
-        if(logger.isDebugEnabled()){
+    public void handleBroadcast(GotrUser source, String broadcast) {
+        if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s: %s", source, broadcast));
             logger.debug(String.format("size %s: %d", localUser, gotrSession.getSize()));
-        }
-
-        if(broadcast.startsWith(FORGE_ME)){
-            receivedUnsentMessage(localUser);
-            return;
-        }
-        else if(broadcast.startsWith(FORGE_OTHER)){
-            receivedUnsentMessage(source);
-            return;
         }
 
         ChatRoomMessageEvent event;
         final Message message = chatRoom.createMessage(broadcast);
         receivedBroadcasts.add(message.getMessageUID());
 
-        if(source.equals(localUser))
-        {
+        if (source.equals(localUser)) {
             event = new ChatRoomMessageDeliveredEvent(chatRoom,
                     new Date(),
                     message,
                     ChatRoomMessageDeliveredEvent.CONVERSATION_MESSAGE_DELIVERED);
-        }
-        else
-        {
+            outgoing--;
+            if(outgoing < 0){
+                outgoing = 0;
+            }
+            for (ScGotrSessionListener listener : listeners) {
+                listener.outgoingMessagesUpdated(this);
+            }
+        } else {
             final ChatRoomMember member = userToMemberMap.get(source);
             event = new ChatRoomMessageReceivedEvent(chatRoom, member,
                     new Date(),
@@ -155,8 +167,7 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public KeyPair getLocalKeyPair()
-    {
+    public KeyPair getLocalKeyPair() {
         AccountID accountID = protocolProvider.getAccountID();
         KeyPair keyPair =
                 OtrActivator.scOtrKeyManager.loadKeyPair(accountID);
@@ -168,7 +179,6 @@ public class ScGotrSessionHost
 
     @Override
     public void verify(GotrUser user, String fingerprint) {
-        ChatRoomMember member = userToMemberMap.get(user);
         OtrActivator.scOtrKeyManager.verify("", fingerprint);
         OtrActivator.gotrComponentService.update(chatRoom);
 
@@ -178,54 +188,107 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public void stateChanged(GotrSessionState gotrSessionState)
-    {
+    public void stateChanged(GotrSessionState gotrSessionState) {
         GotrComponentServiceImpl componentService =
                 OtrActivator.gotrComponentService;
         componentService.update(chatRoom);
 
         postStateMessageToChat(gotrSessionState);
 
-        synchronized (listeners)
-        {
-            for(ScGotrSessionListener listener: listeners)
-            {
+        outgoing=0;
+        for (ScGotrSessionListener listener : listeners) {
+            listener.outgoingMessagesUpdated(this);
+        }
+        synchronized (listeners) {
+            for (ScGotrSessionListener listener : listeners) {
                 listener.statusChanged(this);
             }
         }
     }
 
-    private void postStateMessageToChat(GotrSessionState state) {
+    private void postStateMessageToChat(final GotrSessionState state) {
+
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    postStateMessageToChat(state);
+                }
+            });
+            return;
+        }
 
         String message = null;
         String messageType = null;
 
-        if(state == GotrSessionState.PLAINTEXT){
+        if (state == GotrSessionState.PLAINTEXT) {
             return;
-        }
-        else if(state == GotrSessionState.SETUP){
+        } else if (state == GotrSessionState.SETUP) {
+            displaySecure = true;
             message = OtrActivator.resourceService
                     .getI18NString("plugin.otr.gotr.SETUP_STATE", new String[]{});
             messageType = Chat.SYSTEM_MESSAGE;
+        } else if (state == GotrSessionState.SECURE && displaySecure) {
+            displaySecure = false;
+            if (areAllAuthenticated()) {
+                displayAuthMessage();
+                return;
+            } else {
+                displayNoAuthMessage();
+                return;
+            }
         }
-        else if(state == GotrSessionState.SECURE){
-            if(areAllAuthenticated()) {
-                message = OtrActivator.resourceService
-                        .getI18NString("plugin.otr.gotr.SECURE_AUTH_STATE", new String[]{});
-                messageType = Chat.SYSTEM_MESSAGE;
-            }
-            else {
-                message = OtrActivator.resourceService
-                        .getI18NString("plugin.otr.gotr.SECURE_NO_AUTH_STATE", new String[]{});
-                messageType = Chat.ERROR_MESSAGE;
-            }
+        else{
+            return;
         }
 
-        OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
+        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+        chat.addMessage(chatRoom.getName(), new Date(),
                 messageType, message,
-                OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+    }
 
+    private void displayNoAuthMessage() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    displayNoAuthMessage();
+                }
+            });
+            return;
+        }
+        String message = OtrActivator.resourceService
+                .getI18NString("plugin.otr.gotr.SECURE_NO_AUTH_STATE", new String[]{
+                        ScGotrSessionHost.class.getName(),
+                        getFirstUnauthedUser().getName()});
 
+        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+        chat.addMessage(chatRoom.getName(), new Date(),
+                Chat.ERROR_MESSAGE, message,
+                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+    }
+
+    private void displayAuthMessage() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    displayAuthMessage();
+                }
+            });
+            return;
+        }
+        String message = OtrActivator.resourceService
+                .getI18NString("plugin.otr.gotr.SECURE_AUTH_STATE", new String[]{});
+
+        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+        chat.addMessage(chatRoom.getName(), new Date(),
+                Chat.SYSTEM_MESSAGE, message,
+                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
     }
 
     @Override
@@ -265,8 +328,7 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public void sessionFinished(GotrUser user)
-    {
+    public void sessionFinished(GotrUser user) {
         String finished = OtrActivator.resourceService
                 .getI18NString("plugin.otr.gotr.FINISHED", new String[]{getName(user)});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
@@ -275,23 +337,29 @@ public class ScGotrSessionHost
     }
 
     @Override
-    public void unrecoverableError(GotrUser user)
-    {
+    public void unrecoverableError(GotrUser user) {
         String finished = OtrActivator.resourceService
                 .getI18NString("plugin.otr.gotr.UNRECOVERABLE_ERROR", new String[]{getName(user)});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+        outgoing=0;
+        for (ScGotrSessionListener listener : listeners) {
+            listener.outgoingMessagesUpdated(this);
+        }
     }
 
     @Override
-    public void recoverableError(GotrUser user)
-    {
+    public void recoverableError(GotrUser user) {
         String finished = OtrActivator.resourceService
                 .getI18NString("plugin.otr.gotr.RECOVERABLE_ERROR", new String[]{getName(user)});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
-                Chat.ERROR_MESSAGE, finished,
+                Chat.SYSTEM_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+        outgoing=0;
+        for (ScGotrSessionListener listener : listeners) {
+            listener.outgoingMessagesUpdated(this);
+        }
     }
 
     @Override
@@ -310,22 +378,22 @@ public class ScGotrSessionHost
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
+        outgoing=0;
+        for (ScGotrSessionListener listener : listeners) {
+            listener.outgoingMessagesUpdated(this);
+        }
     }
 
-    private String getName(GotrUser user)
-    {
-        if(user.equals(localUser))
-        {
+    private String getName(GotrUser user) {
+        if (user.equals(localUser)) {
             return chatRoom.getUserNickname();
-        }
-        else{
+        } else {
             ChatRoomMember member = userToMemberMap.get(user);
             return member.getName();
         }
     }
 
-    public GotrSessionManager getSession()
-    {
+    public GotrSessionManager getSession() {
         return gotrSession;
     }
 
@@ -334,10 +402,8 @@ public class ScGotrSessionHost
      *
      * @param member newly added member
      */
-    private void memberAdded(ChatRoomMember member)
-    {
-        if(logger.isDebugEnabled())
-        {
+    private void memberAdded(ChatRoomMember member) {
+        if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s added to %s, %s", member.getName(), chatRoom.getUserNickname(), member.getName().equals(chatRoom.getUserNickname())));
         }
         final Contact contact = chatRoom.getPrivateContactByNickname(
@@ -349,134 +415,109 @@ public class ScGotrSessionHost
         userToMemberMap.put(user, member);
         memberToUserMap.put(member, user);
 
-        try
-        {
+        try {
             this.gotrSession.addUser(user);
-        } catch (GotrException e)
-        {
-            errorInSession = true;
+        } catch (GotrException e) {
             e.printStackTrace();
         }
     }
 
-    private void memberRemoved(ChatRoomMember member)
-    {
+    private void memberRemoved(ChatRoomMember member) {
         final GotrUser user = memberToUserMap.remove(member);
         final Contact contact = userToContactMap.remove(user);
         contactToUserMap.remove(contact);
         userToMemberMap.remove(user);
 
-        if(logger.isDebugEnabled())
-        {
+        if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s, %s removed.", user, chatRoom.getUserNickname()));
         }
 
-        try
-        {
+        try {
             this.gotrSession.removeUser(user);
-        } catch (GotrException e)
-        {
-            errorInSession = true;
+        } catch (GotrException e) {
             e.printStackTrace();
         }
     }
 
-    public GotrUser getUser(ChatRoomMember member)
-    {
+    public GotrUser getUser(ChatRoomMember member) {
         return memberToUserMap.get(member);
     }
 
     /**
      * Should be called when the user leaves the chat room.
      */
-    public void close(){
+    public void close() {
         chatRoom.removeMemberPresenceListener(this);
+        OtrActivator.scOtrKeyManager.removeListener(this);
     }
 
     @Override
-    public void memberPresenceChanged(ChatRoomMemberPresenceChangeEvent evt)
-    {
+    public void memberPresenceChanged(ChatRoomMemberPresenceChangeEvent evt) {
         if (evt.getEventType().equals(
                 ChatRoomMemberPresenceChangeEvent.MEMBER_JOINED)
                 && !evt.getChatRoomMember().getName()
-                .equals(chatRoom.getUserNickname()))
-        {
+                .equals(chatRoom.getUserNickname())) {
             memberAdded(evt.getChatRoomMember());
         } else if ((evt.getEventType().equals(
-                    ChatRoomMemberPresenceChangeEvent.MEMBER_KICKED)
+                ChatRoomMemberPresenceChangeEvent.MEMBER_KICKED)
                 || evt.getEventType().equals(
-                    ChatRoomMemberPresenceChangeEvent.MEMBER_LEFT)
+                ChatRoomMemberPresenceChangeEvent.MEMBER_LEFT)
                 || evt.getEventType().equals(
-                    ChatRoomMemberPresenceChangeEvent.MEMBER_QUIT))
+                ChatRoomMemberPresenceChangeEvent.MEMBER_QUIT))
                 && chatRoom.getUserNickname() != null
                 && !evt.getChatRoomMember().getName().equals(
-                    chatRoom.getUserNickname()))
-        {
+                chatRoom.getUserNickname())) {
             memberRemoved(evt.getChatRoomMember());
         }
     }
 
 
-    public GotrUser getUser(Contact contact)
-    {
+    public GotrUser getUser(Contact contact) {
         return contactToUserMap.get(contact);
     }
 
-    public SessionID getSessionID()
-    {
+    public SessionID getSessionID() {
         return gotrSession.getSessionID();
     }
 
-    public ProtocolProviderService getProtocolProvider()
-    {
+    public ProtocolProviderService getProtocolProvider() {
         return protocolProvider;
     }
 
-    public boolean sentChatRoomMessage(String messageUID)
-    {
+    public boolean sentChatRoomMessage(String messageUID) {
         return sentBroadcasts.contains(messageUID);
     }
 
-    public GotrUser getLocalUser()
-    {
+    public GotrUser getLocalUser() {
         return localUser;
     }
 
-    public boolean receivedChatRoomMessage(String messageUID)
-    {
+    public boolean receivedChatRoomMessage(String messageUID) {
         return receivedBroadcasts.contains(messageUID);
     }
 
-    public void addSessionListener(ScGotrSessionListener listener)
-    {
-        synchronized (listener)
-        {
-            if(!listeners.contains(listener))
-            {
+    public void addSessionListener(ScGotrSessionListener listener) {
+        synchronized (listener) {
+            if (!listeners.contains(listener)) {
                 listeners.add(listener);
             }
         }
     }
 
-    public boolean areAllAuthenticated()
-    {
-        for(ChatRoomMember member: memberToUserMap.keySet())
-        {
-            if(!authenticated(member))
-            {
+    public boolean areAllAuthenticated() {
+        for (ChatRoomMember member : memberToUserMap.keySet()) {
+            if (!authenticated(member)) {
                 return false;
             }
         }
         return true;
     }
 
-    public boolean sentP2pMessage(String messageUID)
-    {
+    public boolean sentP2pMessage(String messageUID) {
         return sentP2pMessages.contains(messageUID);
     }
 
-    public boolean authenticated(ChatRoomMember member)
-    {
+    public boolean authenticated(ChatRoomMember member) {
         String fingerprint = getRemoteFingerprint(member);
 
         return OtrActivator.scOtrKeyManager.isVerified(fingerprint);
@@ -487,44 +528,37 @@ public class ScGotrSessionHost
         return new ArrayList<ChatRoomMember>(memberToUserMap.keySet());
     }
 
-    public String getRemoteFingerprint(ChatRoomMember member)
-    {
-        GotrUser user  = memberToUserMap.get(member);
-        try
-        {
+    public String getRemoteFingerprint(ChatRoomMember member) {
+        GotrUser user = memberToUserMap.get(member);
+        try {
             PublicKey remoteKey = gotrSession.getRemotePublicKey(user);
-            if(remoteKey == null)
-            {
+            if (remoteKey == null) {
                 return null;
             }
             return OtrActivator.scOtrKeyManager.getFingerprintFromPublicKey(remoteKey);
-        } catch (GotrException e)
-        {
+        } catch (GotrException e) {
             logger.error("Unable to get remote users public key", e);
             return null;
         }
     }
 
-    public void initSmp(ChatRoomMember member, String question, String secret)
-    {
+    public void initSmp(ChatRoomMember member, String question, String secret) {
         GotrUser user = memberToUserMap.get(member);
-        try
-        {
+        try {
             gotrSession.initSmp(user, question, secret);
             SmpProgressDialog dialog = getSmpProgressDialog(user);
             dialog.init();
             dialog.setVisible(true);
-        } catch (GotrException e)
-        {
+        } catch (GotrException e) {
             logger.error("Unable to init smp with remote user.", e);
         }
     }
 
-    public SmpProgressDialog getSmpProgressDialog(GotrUser user){
-        synchronized (progressDialogMap){
+    public SmpProgressDialog getSmpProgressDialog(GotrUser user) {
+        synchronized (progressDialogMap) {
             SmpProgressDialog dialog = progressDialogMap.get(user);
 
-            if(dialog == null){
+            if (dialog == null) {
 
                 Contact contact = userToContactMap.get(user);
 
@@ -555,5 +589,89 @@ public class ScGotrSessionHost
         } catch (GotrException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean isGotrRequired() {
+        return chatRoom.getName().contains("_gotr");
+    }
+
+    @Override
+    public void chatLinkClicked(URI url) {
+        final String action = url.getPath();
+        if("/authenticate".equals(action)){
+            final String displayName = url.getQuery();
+
+            final ChatRoomMember member = getMemberWithName(displayName);
+
+            if(member != null){
+                SwingOtrActionHandler.openAuthDialog(this, member);
+            }
+        }
+    }
+
+    private ChatRoomMember getMemberWithName(String displayName) {
+        for (ChatRoomMember member : chatRoom.getMembers()) {
+            if (member.getName().equals(displayName)) {
+                return member;
+            }
+        }
+        return null;
+    }
+
+    public ChatRoomMember getFirstUnauthedUser() {
+        final List<ChatRoomMember> memberList = chatRoom.getMembers();
+        Collections.sort(memberList, new Comparator<ChatRoomMember>() {
+            @Override
+            public int compare(ChatRoomMember member, ChatRoomMember member2) {
+                return member.getName().compareTo(member2.getName());
+            }
+        });
+
+        for (ChatRoomMember member : memberList) {
+            if (!member.getName().equals(chatRoom.getUserNickname())
+                    && !authenticated(member)) {
+                return member;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void verificationStatusChanged(String fingerprint) {
+        for(ChatRoomMember member: chatRoom.getMembers()){
+            GotrUser gotrUser = getUser(member);
+            if(gotrUser == null){
+                continue;
+            }
+            try {
+                PublicKey publicKey = gotrSession.getRemotePublicKey(gotrUser);
+                if(publicKey == null){
+                    continue;
+                }
+
+                String userFingerprint = OtrActivator.scOtrKeyManager.getFingerprintFromPublicKey(publicKey);
+
+                if(fingerprint.equals(userFingerprint)){
+                    displaySecure = true;
+                    postStateMessageToChat(gotrSession.getState());
+                    return;
+                }
+
+            } catch (GotrException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean outgoingMessages(){
+        return outgoing > 0;
+    }
+
+    public void handleUserBroadcast(String content) throws GotrException {
+        outgoing++;
+        for (ScGotrSessionListener listener : listeners) {
+            listener.outgoingMessagesUpdated(this);
+        }
+        gotrSession.broadcastMessage(content);
     }
 }

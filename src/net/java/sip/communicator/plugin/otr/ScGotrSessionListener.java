@@ -10,4 +10,6 @@ public interface ScGotrSessionListener
      */
     public void statusChanged(ScGotrSessionHost host);
 
+    public void outgoingMessagesUpdated(ScGotrSessionHost host);
+
 }

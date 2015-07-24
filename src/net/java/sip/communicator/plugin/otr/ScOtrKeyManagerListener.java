@@ -6,8 +6,6 @@
  */
 package net.java.sip.communicator.plugin.otr;
 
-import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
-
 /**
  *
  * @author George Politis

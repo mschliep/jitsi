@@ -73,6 +73,10 @@ public class ChatRoomMessageReceivedEvent
      */
     private boolean isImportantMessage = false;
 
+    private boolean isEncrypted = false;
+
+    private boolean isAuthenticated = false;
+
     /**
      * Creates a <tt>MessageReceivedEvent</tt> representing reception of the
      * <tt>source</tt> message received from the specified <tt>from</tt>
@@ -174,5 +178,21 @@ public class ChatRoomMessageReceivedEvent
     public boolean isImportantMessage()
     {
         return isImportantMessage;
+    }
+
+    public boolean isEncrypted() {
+        return isEncrypted;
+    }
+
+    public void setEncrypted(boolean isEncrypted) {
+        this.isEncrypted = isEncrypted;
+    }
+
+    public boolean isAuthenticated() {
+        return isAuthenticated;
+    }
+
+    public void setAuthenticated(boolean isAuthenticated) {
+        this.isAuthenticated = isAuthenticated;
     }
 }

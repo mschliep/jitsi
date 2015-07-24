@@ -323,6 +323,12 @@ public class OtrTransformLayer
         if(host.receivedChatRoomMessage(evt.getMessage().getMessageUID()))
         {
             logger.debug("Received message with null host.");
+            if(host.getSession().getState() == GotrSessionState.SECURE){
+                evt.setEncrypted(true);
+            }
+            if(host.authenticated(evt.getSourceChatRoomMember())){
+                evt.setAuthenticated(true);
+            }
             return evt;
         }
 
@@ -377,7 +383,7 @@ public class OtrTransformLayer
         {
             try
             {
-                host.getSession().broadcastMessage(evt.getMessage().getContent());
+                host.handleUserBroadcast(evt.getMessage().getContent());
             } catch (GotrException e)
             {
                 e.printStackTrace();

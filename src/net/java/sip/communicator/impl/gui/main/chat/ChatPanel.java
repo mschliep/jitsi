@@ -381,6 +381,8 @@ public class ChatPanel
             ConferenceChatSession confSession
                 = (ConferenceChatSession) chatSession;
 
+
+            writeMessagePanel.initPluginComponents();
             writeMessagePanel.setTransportSelectorBoxVisible(false);
 
             confSession.addLocalUserRoleListener(this);
@@ -953,12 +955,43 @@ public class ChatPanel
      * @param contentType the content type
      */
     public void addMessage(String contactName, String displayName, Date date,
-            String messageType, String message, String contentType,
-            String messageUID, String correctedMessageUID)
+                           String messageType, String message, String contentType,
+                           String messageUID, String correctedMessageUID)
     {
         ChatMessage chatMessage = new ChatMessage(contactName, displayName,
                 date, messageType, null, message, contentType,
-                messageUID, correctedMessageUID);
+                messageUID, correctedMessageUID, false, false);
+
+        this.addChatMessage(chatMessage);
+
+        // A bug Fix for Previous/Next buttons .
+        // Must update buttons state after message is processed
+        // otherwise states are not proper
+        fireChatHistoryChange();
+    }
+
+    /**
+     * Passes the message to the contained <code>ChatConversationPanel</code>
+     * for processing and appends it at the end of the conversationPanel
+     * document.
+     *
+     * @param contactName the name of the contact sending the message
+     * @param displayName the display name of the contact
+     * @param date the time at which the message is sent or received
+     * @param messageType the type of the message. One of OUTGOING_MESSAGE
+     * or INCOMING_MESSAGE
+     * @param message the message text
+     * @param contentType the content type
+     * @param isEncrypted if the message was encrypted
+     * @param isAuthenticated if the message was authenticated
+     */
+    public void addMessage(String contactName, String displayName, Date date,
+            String messageType, String message, String contentType,
+            String messageUID, String correctedMessageUID, boolean isEncrypted, boolean isAuthenticated)
+    {
+        ChatMessage chatMessage = new ChatMessage(contactName, displayName,
+                date, messageType, null, message, contentType,
+                messageUID, correctedMessageUID, isEncrypted, isAuthenticated);
 
         this.addChatMessage(chatMessage);
 

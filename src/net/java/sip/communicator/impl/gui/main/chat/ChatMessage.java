@@ -63,6 +63,9 @@ public class ChatMessage
      */
     private String correctedMessageUID;
 
+    private boolean isEncrypted;
+    private boolean isAuthenticated;
+
     /**
      * Creates a <tt>ChatMessage</tt> by specifying all parameters of the
      * message.
@@ -79,7 +82,7 @@ public class ChatMessage
                         String contentType)
     {
         this(contactName, null, date, messageType,
-                null, message, contentType, null, null);
+                null, message, contentType, null, null, false, false);
     }
 
     /**
@@ -100,7 +103,7 @@ public class ChatMessage
                         String contentType)
     {
         this(contactName, null, date, messageType,
-                messageTitle, message, contentType, null, null);
+                messageTitle, message, contentType, null, null, false, false);
     }
 
     /**
@@ -121,7 +124,7 @@ public class ChatMessage
                         String contentType)
     {
         this(contactName, contactDisplayName, date, messageType,
-                null, message, contentType, null, null);
+                null, message, contentType, null, null, false, false);
     }
 
     /**
@@ -146,6 +149,34 @@ public class ChatMessage
                         String messageUID,
                         String correctedMessageUID)
     {
+        this(contactName, contactDisplayName, date, messageType, messageTitle,
+                message, contentType, messageUID, correctedMessageUID, false, false);
+    }
+
+    /**
+     * Creates a <tt>ChatMessage</tt> by specifying all parameters of the
+     * message.
+     * @param contactName the name of the contact
+     * @param contactDisplayName the contact display name
+     * @param date the date and time
+     * @param messageType the type (INCOMING or OUTGOING)
+     * @param message the content
+     * @param contentType the content type (e.g. "text", "text/html", etc.)
+     * @param messageUID The ID of the message.
+     * @param correctedMessageUID The ID of the message being replaced.
+     */
+    public ChatMessage( String contactName,
+                        String contactDisplayName,
+                        Date date,
+                        String messageType,
+                        String messageTitle,
+                        String message,
+                        String contentType,
+                        String messageUID,
+                        String correctedMessageUID,
+                        boolean isEncrypted,
+                        boolean isAuthenticated)
+    {
         this.contactName = contactName;
         this.contactDisplayName = contactDisplayName;
         this.date = date;
@@ -155,6 +186,8 @@ public class ChatMessage
         this.contentType = contentType;
         this.messageUID = messageUID;
         this.correctedMessageUID = correctedMessageUID;
+        this.isEncrypted = isEncrypted;
+        this.isAuthenticated = isAuthenticated;
     }
 
     /**
@@ -257,5 +290,13 @@ public class ChatMessage
     public String getCorrectedMessageUID()
     {
         return correctedMessageUID;
+    }
+
+    public boolean isEncrypted() {
+        return isEncrypted;
+    }
+
+    public boolean isAuthenticated() {
+        return isAuthenticated;
     }
 }

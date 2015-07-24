@@ -303,7 +303,9 @@ public class ConferenceChatManager
             messageContent,
             message.getContentType(),
             message.getMessageUID(),
-            null);
+            null,
+            evt.isEncrypted(),
+            evt.isAuthenticated());
 
         if(createWindow)
             chatWindowManager.openChat(chatPanel, false);

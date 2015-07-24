@@ -443,6 +443,11 @@ public class OtrToolBarButton
         }
     }
 
+    @Override
+    public void outgoingMessagesUpdated(ScGotrSessionHost host) {
+
+    }
+
     private void setButtonState(ScGotrSessionHost host, GotrSessionState state)
     {
         Image image;
@@ -454,6 +459,7 @@ public class OtrToolBarButton
                 tipKey = "plugin.otr.menu.START_OTR";
                 break;
             case SETUP:
+            case NEGOTIATING_KEYS:
                 image = animatedPadlockImage;
                 animatedPadlockImage.start();
                 tipKey = "plugin.otr.menu.LOADING_OTR";

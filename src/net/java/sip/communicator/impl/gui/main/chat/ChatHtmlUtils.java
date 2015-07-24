@@ -12,6 +12,7 @@ import java.util.*;
 import javax.swing.text.html.HTML.Tag;
 
 import net.java.sip.communicator.impl.gui.*;
+import net.java.sip.communicator.plugin.otr.ScGotrSessionHost;
 import net.java.sip.communicator.service.history.*;
 import net.java.sip.communicator.util.*;
 
@@ -65,6 +66,11 @@ public class ChatHtmlUtils
     public static final String MSG_NAME_BACKGROUND = "#efefef";
 
     /**
+     * The color used in html for name background.
+     */
+    public static final String NOAUTH_MSG_NAME_BACKGROUND = "#800000";
+
+    /**
      * The color used in html for incoming message contact name foreground.
      */
     public static final String MSG_IN_NAME_FOREGROUND = "#488fe7";
@@ -95,8 +101,11 @@ public class ChatHtmlUtils
         String message,
         String contentType,
         boolean isHistory,
-        boolean isSimpleTheme)
+        boolean isSimpleTheme,
+        boolean isEncrypted,
+        boolean isAuthenticated)
     {
+        boolean warnNotAuthenticated = isEncrypted && !isAuthenticated;
         if (isSimpleTheme)
             return createSimpleIncomingMessageTag(  messageID,
                                                     contactName,
@@ -105,7 +114,8 @@ public class ChatHtmlUtils
                                                     date,
                                                     message,
                                                     contentType,
-                                                    isHistory);
+                                                    isHistory,
+                                                    warnNotAuthenticated);
         else
             return createAdvancedIncomingMessageTag(messageID,
                                                     contactName,
@@ -114,7 +124,8 @@ public class ChatHtmlUtils
                                                     date,
                                                     message,
                                                     contentType,
-                                                    isHistory);
+                                                    isHistory,
+                                                    warnNotAuthenticated);
     }
 
     /**
@@ -215,18 +226,18 @@ public class ChatHtmlUtils
      * @param date the date, when the message was sent
      * @param message the message content
      * @param contentType the content type HTML or PLAIN_TEXT
-     * @param isHistory indicates if this is a message coming from history
-     * @return the created incoming message tag
+     *@param isHistory indicates if this is a message coming from history  @return the created incoming message tag
      */
     private static String createSimpleIncomingMessageTag(
-        String messageID,
-        String contactName,
-        String contactDisplayName,
-        String avatarPath,
-        Date date,
-        String message,
-        String contentType,
-        boolean isHistory)
+            String messageID,
+            String contactName,
+            String contactDisplayName,
+            String avatarPath,
+            Date date,
+            String message,
+            String contentType,
+            boolean isHistory,
+            boolean warnNotAuthenticated)
     {
         StringBuilder headerBuffer = new StringBuilder();
 
@@ -240,8 +251,12 @@ public class ChatHtmlUtils
         headerBuffer.append("font-weight:bold;");
         headerBuffer.append("text-decoration:none;\" ");
         headerBuffer.append("href=\"").append(contactName).append("\">");
-        headerBuffer.append(
-            contactDisplayName).append(createEditedAtTag(messageID, -1));
+        headerBuffer.append(contactDisplayName);
+        if(warnNotAuthenticated){
+            headerBuffer.append(GuiActivator.getResources().getI18NString("plugin.otr.gotr.NOAUTH_SIMPLE_MSG_HEADER",
+                    new String[] {MSG_IN_NAME_FOREGROUND, contactDisplayName}));
+        }
+        headerBuffer.append(createEditedAtTag(messageID, -1));
         headerBuffer.append("</a>");
         headerBuffer.append("</h2>");
 
@@ -252,7 +267,14 @@ public class ChatHtmlUtils
             .append(Tag.TABLE.toString())
             .append("\" id=\"messageHeader\" ");
         messageBuff.append("style=\"background-color:");
-        messageBuff.append(MSG_NAME_BACKGROUND).append(";\">");
+
+        if(warnNotAuthenticated) {
+            messageBuff.append(NOAUTH_MSG_NAME_BACKGROUND);
+        }
+        else{
+            messageBuff.append(MSG_NAME_BACKGROUND);
+        }
+        messageBuff.append(";\">");
         messageBuff.append("<tr>");
         messageBuff.append("<td align=\"left\" >");
         messageBuff.append(headerBuffer.toString());
@@ -356,17 +378,19 @@ public class ChatHtmlUtils
      * @param message the message content
      * @param contentType the content type HTML or PLAIN_TEXT
      * @param isHistory indicates if this is a message coming from history
+     * @param warnNotAuthenticated
      * @return the created incoming message tag
      */
     private static String createAdvancedIncomingMessageTag(
-        String messageID,
-        String contactName,
-        String contactDisplayName,
-        String avatarPath,
-        Date date,
-        String message,
-        String contentType,
-        boolean isHistory)
+            String messageID,
+            String contactName,
+            String contactDisplayName,
+            String avatarPath,
+            Date date,
+            String message,
+            String contentType,
+            boolean isHistory,
+            boolean warnNotAuthenticated)
     {
         StringBuilder headerBuffer = new StringBuilder();
 
@@ -383,6 +407,10 @@ public class ChatHtmlUtils
         headerBuffer.append("href=\"").append(contactName).append("\">");
         headerBuffer.append(
             contactDisplayName).append(createEditedAtTag(messageID, -1));
+        if(warnNotAuthenticated){
+            headerBuffer.append(GuiActivator.getResources().getI18NString("plugin.otr.gotr.NOAUTH_SIMPLE_MSG_HEADER",
+                    new String[] {MSG_IN_NAME_FOREGROUND, contactDisplayName}));
+        }
         headerBuffer.append("</a></h2>");
 
         StringBuffer messageBuff = new StringBuffer();
