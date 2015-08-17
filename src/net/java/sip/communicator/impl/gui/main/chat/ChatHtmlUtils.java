@@ -66,11 +66,6 @@ public class ChatHtmlUtils
     public static final String MSG_NAME_BACKGROUND = "#efefef";
 
     /**
-     * The color used in html for name background.
-     */
-    public static final String NOAUTH_MSG_NAME_BACKGROUND = "#800000";
-
-    /**
      * The color used in html for incoming message contact name foreground.
      */
     public static final String MSG_IN_NAME_FOREGROUND = "#488fe7";
@@ -254,7 +249,7 @@ public class ChatHtmlUtils
         headerBuffer.append(contactDisplayName);
         if(warnNotAuthenticated){
             headerBuffer.append(GuiActivator.getResources().getI18NString("plugin.otr.gotr.NOAUTH_SIMPLE_MSG_HEADER",
-                    new String[] {MSG_IN_NAME_FOREGROUND, contactDisplayName}));
+                    new String[] {contactDisplayName}));
         }
         headerBuffer.append(createEditedAtTag(messageID, -1));
         headerBuffer.append("</a>");
@@ -268,12 +263,7 @@ public class ChatHtmlUtils
             .append("\" id=\"messageHeader\" ");
         messageBuff.append("style=\"background-color:");
 
-        if(warnNotAuthenticated) {
-            messageBuff.append(NOAUTH_MSG_NAME_BACKGROUND);
-        }
-        else{
-            messageBuff.append(MSG_NAME_BACKGROUND);
-        }
+        messageBuff.append(MSG_NAME_BACKGROUND);
         messageBuff.append(";\">");
         messageBuff.append("<tr>");
         messageBuff.append("<td align=\"left\" >");
@@ -409,7 +399,7 @@ public class ChatHtmlUtils
             contactDisplayName).append(createEditedAtTag(messageID, -1));
         if(warnNotAuthenticated){
             headerBuffer.append(GuiActivator.getResources().getI18NString("plugin.otr.gotr.NOAUTH_SIMPLE_MSG_HEADER",
-                    new String[] {MSG_IN_NAME_FOREGROUND, contactDisplayName}));
+                    new String[] {contactDisplayName}));
         }
         headerBuffer.append("</a></h2>");
 

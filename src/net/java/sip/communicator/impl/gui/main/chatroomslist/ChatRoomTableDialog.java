@@ -114,7 +114,7 @@ public class ChatRoomTableDialog
     /**
      * Panel to set the name of the chat room.
      */
-    private JLabel secureLabel;
+    private JTextArea gotrInfoTextArea;
 
     /**
      * The <tt>ChatRoomList.ChatRoomProviderWrapperListener</tt> instance which
@@ -165,8 +165,8 @@ public class ChatRoomTableDialog
             });
         }
         chatRoomTableDialog.setSecure(secure);
-        chatRoomTableDialog.setVisible(true);
         chatRoomTableDialog.pack();
+        chatRoomTableDialog.setVisible(true);
     }
 
     /**
@@ -194,33 +194,49 @@ public class ChatRoomTableDialog
     {
         this.getContentPane().setLayout(new BorderLayout(5,5));
 
-        JPanel northPanel = new TransparentPanel(new BorderLayout(5, 5));
-        northPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
+        JPanel northPanel = new TransparentPanel(new GridBagLayout());
+        GridBagConstraints gbCon = new GridBagConstraints();
 
-        JPanel labels = new TransparentPanel(new GridLayout(2, 2, 5, 5));
+        gbCon.gridy = 0;
+        gbCon.gridx = 0;
+        gbCon.weightx = 0;
+        gbCon.weighty = 0;
+        gbCon.fill = GridBagConstraints.HORIZONTAL;
+        gbCon.insets = new Insets(5,5,5,5);
 
-        labels.add(new JLabel(GuiActivator.getResources()
-            .getI18NString("service.gui.ACCOUNT")));
-        labels.add(new JLabel(GuiActivator.getResources()
-            .getI18NString("service.gui.ROOM_NAME")));
+        northPanel.add(new JLabel(GuiActivator.getResources()
+            .getI18NString("service.gui.ACCOUNT")), gbCon);
 
-
-        JPanel valuesPanel = new TransparentPanel(new GridLayout(2, 2, 5, 5));
         providersCombo = createProvidersCombobox();
 
         chatRoomNameField = new JTextField();
 
-        valuesPanel.add(providersCombo);
+        gbCon.gridx = 1;
+        gbCon.weightx = 1;
+        northPanel.add(providersCombo, gbCon);
 
-        JPanel namePanel = new TransparentPanel(new GridLayout(1, 0));
-        secureLabel = new JLabel("_gotr");
-        namePanel.add(chatRoomNameField);
-        namePanel.add(secureLabel);
-        valuesPanel.add(namePanel);
+        gbCon.gridx = 0;
+        gbCon.gridy = 1;
+        gbCon.weightx = 0;
+        northPanel.add(new JLabel(GuiActivator.getResources()
+                .getI18NString("service.gui.ROOM_NAME")), gbCon);
 
-        northPanel.add(labels, BorderLayout.WEST);
-        northPanel.add(valuesPanel, BorderLayout.CENTER);
-        northPanel.setPreferredSize(new Dimension(600, 80));
+        gbCon.gridx = 1;
+        gbCon.weightx = 1;
+        northPanel.add(chatRoomNameField, gbCon);
+
+        gotrInfoTextArea = new JTextArea();
+        gotrInfoTextArea.setBackground(new Color(0, 0, 0, 0));
+        gotrInfoTextArea.setOpaque(true);
+        gotrInfoTextArea.setEditable(false);
+        gotrInfoTextArea.setLineWrap(true);
+        gotrInfoTextArea.setWrapStyleWord(true);
+        gotrInfoTextArea.setText(GuiActivator.getResources()
+                .getI18NString("plugin.otr.menu.SECURE_REQUIRED_INFO"));
+
+        gbCon.gridy = 2;
+        northPanel.add(gotrInfoTextArea, gbCon);
+
         JPanel buttonPanel = new TransparentPanel(new BorderLayout(5, 5));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
         JPanel eastButtonPanel = new TransparentPanel();
@@ -567,12 +583,12 @@ public class ChatRoomTableDialog
     public void setSecure(boolean secure) {
         this.secure = secure;
         if(secure){
-            secureLabel.setVisible(true);
+            gotrInfoTextArea.setVisible(true);
             this.setTitle(GuiActivator.getResources()
                     .getI18NString("service.gui.ADD_SECURE_ROOM_TITLE"));
         }
         else{
-            secureLabel.setVisible(false);
+            gotrInfoTextArea.setVisible(false);
             this.setTitle(GuiActivator.getResources()
                     .getI18NString("service.gui.MY_CHAT_ROOMS_TITLE"));
         }

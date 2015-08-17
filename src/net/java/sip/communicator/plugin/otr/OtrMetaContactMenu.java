@@ -259,7 +259,9 @@ public class OtrMetaContactMenu
     @Override
     public void setCurrentContact(MetaContact metaContact)
     {
-        currentChatRoomSession = null;
+        if(metaContact != null) {
+            currentChatRoomSession = null;
+        }
         if (this.currentContact != metaContact)
         {
             this.currentContact = metaContact;
@@ -339,7 +341,7 @@ public class OtrMetaContactMenu
             });
             menu.add(refreshKey);
 
-            if(currentChatRoomSession.isGotrRequired()) {
+            if(!currentChatRoomSession.isGotrRequired()) {
                 JMenuItem finishItem = new JMenuItem();
                 finishItem.setText(OtrActivator.resourceService
                         .getI18NString("plugin.otr.menu.END_OTR"));

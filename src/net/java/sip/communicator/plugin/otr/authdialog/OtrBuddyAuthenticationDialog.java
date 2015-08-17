@@ -45,7 +45,13 @@ public class OtrBuddyAuthenticationDialog
         TransparentPanel mainPanel = new TransparentPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        mainPanel.setPreferredSize(new Dimension(350, 400));
+        //mainPanel.setPreferredSize(new Dimension(350, 400));
+
+        AuthStepPanel authPanel = new AuthStepPanel();
+        authPanel.initStep();
+
+        mainPanel.add(authPanel);
+        mainPanel.add(Box.createVerticalStrut(10));
 
         JTextArea generalInformation = new CustomTextArea();
         generalInformation.setText(OtrActivator.resourceService

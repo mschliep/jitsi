@@ -15,6 +15,8 @@ import net.java.sip.communicator.util.Logger;
 
 import javax.swing.*;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.*;
@@ -182,9 +184,7 @@ public class ScGotrSessionHost
         OtrActivator.scOtrKeyManager.verify("", fingerprint);
         OtrActivator.gotrComponentService.update(chatRoom);
 
-        SmpProgressDialog dialog = getSmpProgressDialog(user);
-        dialog.setProgressSuccess();
-        dialog.setVisible(true);
+        closeSmpProgressDialog(user);
     }
 
     @Override
@@ -223,6 +223,11 @@ public class ScGotrSessionHost
 
         if (state == GotrSessionState.PLAINTEXT) {
             return;
+        } else if (state == GotrSessionState.AWAITING_USERS) {
+            displaySecure = true;
+            message = OtrActivator.resourceService
+                    .getI18NString("plugin.otr.gotr.AWAITING_USERS_STATE", new String[]{});
+            messageType = Chat.SYSTEM_MESSAGE;
         } else if (state == GotrSessionState.SETUP) {
             displaySecure = true;
             message = OtrActivator.resourceService
@@ -281,8 +286,16 @@ public class ScGotrSessionHost
             });
             return;
         }
+
+        String imageURL = null;
+        try {
+            imageURL = OtrActivator.resourceService.getImageURL("plugin.otr.ENCRYPTED_ICON_16x16").toURI().toString();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
         String message = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.SECURE_AUTH_STATE", new String[]{});
+                .getI18NString("plugin.otr.gotr.SECURE_AUTH_STATE", new String[]{imageURL});
 
         final Chat chat = OtrActivator.uiService.getChat(chatRoom);
 
@@ -297,24 +310,34 @@ public class ScGotrSessionHost
         SmpAuthenticateBuddyDialog dialog =
                 new SmpAuthenticateBuddyDialog(question, new GotrMemberAuthDialogBackend(this, member, user));
         dialog.setVisible(true);
-
-        SmpProgressDialog progressDialog = getSmpProgressDialog(user);
-        progressDialog.init();
-        progressDialog.setVisible(true);
     }
 
     @Override
     public void smpAborted(GotrUser user) {
-        SmpProgressDialog dialog = getSmpProgressDialog(user);
-        dialog.setProgressFail();
-        dialog.setVisible(true);
+        String message = OtrActivator.resourceService
+                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
+
+        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+        chat.addMessage(chatRoom.getName(), new Date(),
+                Chat.ERROR_MESSAGE, message,
+                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+
+        closeSmpProgressDialog(user);
     }
 
     @Override
     public void smpError(GotrUser user) {
-        SmpProgressDialog dialog = getSmpProgressDialog(user);
-        dialog.setProgressFail();
-        dialog.setVisible(true);
+        String message = OtrActivator.resourceService
+                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
+
+        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+        chat.addMessage(chatRoom.getName(), new Date(),
+                Chat.ERROR_MESSAGE, message,
+                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+
+        closeSmpProgressDialog(user);
     }
 
     @Override
@@ -322,9 +345,16 @@ public class ScGotrSessionHost
         OtrActivator.scOtrKeyManager.unverify("", fingerprint);
         OtrActivator.gotrComponentService.update(chatRoom);
 
-        SmpProgressDialog dialog = getSmpProgressDialog(user);
-        dialog.setProgressFail();
-        dialog.setVisible(true);
+        String message = OtrActivator.resourceService
+                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
+
+        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+        chat.addMessage(chatRoom.getName(), new Date(),
+                Chat.ERROR_MESSAGE, message,
+                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+
+        closeSmpProgressDialog(user);
     }
 
     @Override
@@ -546,15 +576,13 @@ public class ScGotrSessionHost
         GotrUser user = memberToUserMap.get(member);
         try {
             gotrSession.initSmp(user, question, secret);
-            SmpProgressDialog dialog = getSmpProgressDialog(user);
-            dialog.init();
-            dialog.setVisible(true);
+            displaySmpProgressDialog(user);
         } catch (GotrException e) {
             logger.error("Unable to init smp with remote user.", e);
         }
     }
 
-    public SmpProgressDialog getSmpProgressDialog(GotrUser user) {
+    public void displaySmpProgressDialog(GotrUser user) {
         synchronized (progressDialogMap) {
             SmpProgressDialog dialog = progressDialogMap.get(user);
 
@@ -565,17 +593,22 @@ public class ScGotrSessionHost
                 dialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(user, dialog);
             }
+            dialog.setVisible(true);
+        }
+    }
 
-            return dialog;
+    public void closeSmpProgressDialog(GotrUser user){
+        synchronized (progressDialogMap){
+            SmpProgressDialog dialog = progressDialogMap.remove(user);
+            if(dialog != null){
+                dialog.dispose();
+            }
         }
     }
 
     public void respondSmp(GotrUser user, String question, String text) {
         try {
             gotrSession.respondSmp(user, question, text);
-            SmpProgressDialog dialog = getSmpProgressDialog(user);
-            dialog.incrementProgress();
-            dialog.setVisible(true);
         } catch (GotrException e) {
             e.printStackTrace();
         }
@@ -584,8 +617,6 @@ public class ScGotrSessionHost
     public void abortSmp(GotrUser user) {
         try {
             gotrSession.abortSmp(user);
-            SmpProgressDialog dialog = getSmpProgressDialog(user);
-            dialog.dispose();
         } catch (GotrException e) {
             e.printStackTrace();
         }
@@ -650,8 +681,19 @@ public class ScGotrSessionHost
                 }
 
                 String userFingerprint = OtrActivator.scOtrKeyManager.getFingerprintFromPublicKey(publicKey);
+                boolean verified = OtrActivator.scOtrKeyManager.isVerified(userFingerprint);
 
                 if(fingerprint.equals(userFingerprint)){
+                    if(verified) {
+                        String message = OtrActivator.resourceService
+                                .getI18NString("plugin.otr.gotr.AUTH_SUCCESS", new String[]{member.getName()});
+
+                        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+                        chat.addMessage(chatRoom.getName(), new Date(),
+                                Chat.SYSTEM_MESSAGE, message,
+                                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+                    }
                     displaySecure = true;
                     postStateMessageToChat(gotrSession.getState());
                     return;
