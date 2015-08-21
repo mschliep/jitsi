@@ -306,8 +306,6 @@ public class ScOtrEngineImpl
                 progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
-
-            progressDialog.init();
             progressDialog.setVisible(true);
         }
 
@@ -1222,7 +1220,6 @@ public class ScOtrEngineImpl
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
-            progressDialog.init();
             progressDialog.setVisible(true);
         }
         catch (OtrException e)

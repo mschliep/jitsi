@@ -44,6 +44,18 @@ public class AuthStepPanel extends  JPanel{
         thirdAuthStep.updateColor(waitColor);
     }
 
+    public void failStep() {
+        firstAuthStep.updateColor(successColor);
+        secondAuthStep.updateColor(successColor);
+        thirdAuthStep.updateColor(failColor);
+    }
+
+    public void successStep() {
+        firstAuthStep.updateColor(successColor);
+        secondAuthStep.updateColor(successColor);
+        thirdAuthStep.updateColor(successColor);
+    }
+
     private class AuthStep extends JPanel {
 
         private final ProgressCircle circle;

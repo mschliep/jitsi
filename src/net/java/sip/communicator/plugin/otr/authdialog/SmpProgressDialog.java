@@ -85,4 +85,16 @@ public class SmpProgressDialog
         this.pack();
         this.setPreferredSize(this.getPreferredSize());
     }
+
+    public void setProgressFail() {
+        authStepPanel.failStep();
+    }
+
+    public void setProgressSuccess() {
+        authStepPanel.successStep();
+    }
+
+    public void incrementProgress() {
+        authStepPanel.awaitingStep();
+    }
 }
