@@ -314,6 +314,8 @@ public class ScGotrSessionHost
 
     @Override
     public void smpAborted(GotrUser user) {
+
+        logger.debug("Found an smp abort.");
         String message = OtrActivator.resourceService
                 .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
 
@@ -328,6 +330,7 @@ public class ScGotrSessionHost
 
     @Override
     public void smpError(GotrUser user) {
+        logger.debug("Found an smp error.");
         String message = OtrActivator.resourceService
                 .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
 
@@ -342,6 +345,7 @@ public class ScGotrSessionHost
 
     @Override
     public void unverify(GotrUser user, String fingerprint) {
+        logger.debug("Found an smp fail.");
         OtrActivator.scOtrKeyManager.unverify("", fingerprint);
         OtrActivator.gotrComponentService.update(chatRoom);
 
@@ -693,9 +697,22 @@ public class ScGotrSessionHost
                         chat.addMessage(chatRoom.getName(), new Date(),
                                 Chat.SYSTEM_MESSAGE, message,
                                 OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+
+                        displaySecure = true;
+                        postStateMessageToChat(gotrSession.getState());
                     }
-                    displaySecure = true;
-                    postStateMessageToChat(gotrSession.getState());
+                    else {
+                        String message = OtrActivator.resourceService
+                                .getI18NString("plugin.otr.gotr.USER_UNAUTHED", new String[]{
+                                        ScGotrSessionHost.class.getName(),
+                                        getFirstUnauthedUser().getName()});
+
+                        final Chat chat = OtrActivator.uiService.getChat(chatRoom);
+
+                        chat.addMessage(chatRoom.getName(), new Date(),
+                                Chat.ERROR_MESSAGE, message,
+                                OperationSetBasicInstantMessaging.HTML_MIME_TYPE);
+                    }
                     return;
                 }
 

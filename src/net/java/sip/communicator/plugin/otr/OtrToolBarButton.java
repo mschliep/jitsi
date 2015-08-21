@@ -458,6 +458,7 @@ public class OtrToolBarButton
                 image = unlockedPadlockImage;
                 tipKey = "plugin.otr.menu.START_OTR";
                 break;
+            case AWAITING_USERS:
             case SETUP:
             case NEGOTIATING_KEYS:
                 image = animatedPadlockImage;

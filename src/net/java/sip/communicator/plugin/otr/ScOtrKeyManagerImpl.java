@@ -285,18 +285,24 @@ public class ScOtrKeyManagerImpl
     @Override
     public void verify(String petname, String fingerprint)
     {
+        boolean old = configurator.isVerified(petname, fingerprint);
         configurator.setVerified(petname, fingerprint, true);
 
-        for (ScOtrKeyManagerListener l : getListeners())
-            l.verificationStatusChanged(fingerprint);
+        if(!old) {
+            for (ScOtrKeyManagerListener l : getListeners())
+                l.verificationStatusChanged(fingerprint);
+        }
     }
 
     @Override
     public void unverify(String petname, String fingerprint)
     {
+        boolean old = configurator.isVerified(petname, fingerprint);
         configurator.setVerified(petname, fingerprint, false);
 
-        for (ScOtrKeyManagerListener l : getListeners())
-            l.verificationStatusChanged(fingerprint);
+        if(old) {
+            for (ScOtrKeyManagerListener l : getListeners())
+                l.verificationStatusChanged(fingerprint);
+        }
     }
 }
