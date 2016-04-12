@@ -816,7 +816,7 @@ public class OperationSetBasicInstantMessagingJabberImpl
                 msg.getExtension("x", "http://jabber.org/protocol/muc#user");
 
             // its not for us
-            if(multiChatExtension != null)
+            if(multiChatExtension != null && !msg.getType().equals(org.jivesoftware.smack.packet.Message.Type.chat))
                 return;
 
             String userFullId
