@@ -2,6 +2,7 @@ package net.java.sip.communicator.plugin.otr;
 
 import net.java.gotr4j.*;
 import net.java.gotr4j.crypto.GotrException;
+import net.java.hsm.HSMException;
 import net.java.sip.communicator.plugin.otr.authdialog.GotrMemberAuthDialogBackend;
 import net.java.sip.communicator.plugin.otr.authdialog.SmpAuthenticateBuddyDialog;
 
@@ -140,6 +141,11 @@ public class ScGotrSessionHost
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("%s: %s", source, broadcast));
             logger.debug(String.format("size %s: %d", localUser, gotrSession.getSize()));
+        }
+
+        if(broadcast.equals("JUST A MAGIC STRING")){
+            receivedUnsentMessage(source);
+            return;
         }
 
         ChatRoomMessageEvent event;
@@ -399,7 +405,7 @@ public class ScGotrSessionHost
     @Override
     public void receivedUnsentMessage(GotrUser source) {
         String finished = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.RECEIVED_UNSENT_MSG", new String[]{});
+                .getI18NString("plugin.otr.gotr.INCONSISTENT_DIGEST", new String[]{});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
@@ -481,6 +487,7 @@ public class ScGotrSessionHost
      * Should be called when the user leaves the chat room.
      */
     public void close() {
+        gotrSession.shutdown();
         chatRoom.removeMemberPresenceListener(this);
         OtrActivator.scOtrKeyManager.removeListener(this);
     }
@@ -565,6 +572,9 @@ public class ScGotrSessionHost
     public String getRemoteFingerprint(ChatRoomMember member) {
         GotrUser user = memberToUserMap.get(member);
         try {
+            if(user == null){
+                return null;
+            }
             PublicKey remoteKey = gotrSession.getRemotePublicKey(user);
             if (remoteKey == null) {
                 return null;
@@ -732,5 +742,10 @@ public class ScGotrSessionHost
             listener.outgoingMessagesUpdated(this);
         }
         gotrSession.broadcastMessage(content);
+    }
+
+    @Override
+    public void handleException(HSMException e) {
+        logger.error("GOTR threw an exception.", e);
     }
 }

@@ -93,7 +93,8 @@ public class ScGotrSessionManager
     private void chatRoomJoined(ChatRoom chatRoom)
     {
         synchronized (chatRoom2SessionHost) {
-            chatRoom2SessionHost.put(chatRoom, new ScGotrSessionHost(chatRoom));
+            ScGotrSessionHost host = new ScGotrSessionHost(chatRoom);
+            chatRoom2SessionHost.put(chatRoom, host);
             if (logger.isDebugEnabled()) {
                 logger.debug(String.format("%s chat rooms", chatRoom2SessionHost.size()));
             }
