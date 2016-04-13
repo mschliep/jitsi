@@ -635,10 +635,10 @@ public class ProtocolProviderServiceSipImpl
                     OperationSetTypingNotifications.class,
                     opSetTypingNotif);
 
-                addSupportedOperationSet(
-                    OperationSetInstantMessageTransform.class,
-                    new OperationSetInstantMessageTransformImpl());
-            }
+                    addSupportedOperationSet(
+                        OperationSetMessageTransform.class,
+                        new OperationSetMessageTransformImpl());
+                }
 
             this.opSetSSAccountInfo =
                 new OperationSetServerStoredAccountInfoSipImpl(this);

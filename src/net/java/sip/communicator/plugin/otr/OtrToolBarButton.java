@@ -17,22 +17,23 @@
  */
 package net.java.sip.communicator.plugin.otr;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.security.*;
-
-import javax.imageio.*;
-
+import net.java.gotr4j.GotrSessionState;
+import net.java.gotr4j.crypto.GotrException;
 import net.java.otr4j.*;
 import net.java.otr4j.session.*;
 import net.java.sip.communicator.plugin.desktoputil.*;
-import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
+import net.java.sip.communicator.plugin.otr.OtrContactManager.*;
 import net.java.sip.communicator.service.contactlist.*;
 import net.java.sip.communicator.service.gui.*;
 import net.java.sip.communicator.service.gui.Container;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.util.*;
+
+import javax.imageio.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.security.*;
 
 /**
  * A {@link AbstractPluginComponent} that registers the Off-the-Record button in
@@ -41,19 +42,24 @@ import net.java.sip.communicator.util.*;
  * @author George Politis
  * @author Marin Dzhigarov
  */
-public class OtrMetaContactButton
+public class OtrToolBarButton
     extends AbstractPluginComponent
     implements ScOtrEngineListener,
-               ScOtrKeyManagerListener
+               ScOtrKeyManagerListener,
+               ScGotrSessionListener
 {
     /**
      * The logger
      */
-    private final Logger logger = Logger.getLogger(OtrMetaContactButton.class);
+    private final Logger logger = Logger.getLogger(OtrToolBarButton.class);
 
     private SIPCommButton button;
 
     private OtrContact otrContact;
+
+    private ScGotrSessionHost currentGotrSession;
+
+    private final ScGotrSessionManager gotrSessionManager;
 
     private AnimatedImage animatedPadlockImage;
 
@@ -70,18 +76,18 @@ public class OtrMetaContactButton
     public void sessionStatusChanged(OtrContact otrContact)
     {
         // OtrMetaContactButton.this.contact can be null.
-        if (otrContact.equals(OtrMetaContactButton.this.otrContact))
+        if (otrContact.equals(OtrToolBarButton.this.otrContact))
         {
             setStatus(
-                OtrActivator.scOtrEngine.getSessionStatus(otrContact));
+                    OtrActivator.scOtrEngine.getSessionStatus(otrContact));
         }
     }
 
     public void contactPolicyChanged(Contact contact)
     {
         // OtrMetaContactButton.this.contact can be null.
-        if (OtrMetaContactButton.this.otrContact != null &&
-            contact.equals(OtrMetaContactButton.this.otrContact.contact))
+        if (OtrToolBarButton.this.otrContact != null &&
+            contact.equals(OtrToolBarButton.this.otrContact.contact))
         {
             setPolicy(
                 OtrActivator.scOtrEngine.getContactPolicy(contact));
@@ -90,25 +96,55 @@ public class OtrMetaContactButton
 
     public void globalPolicyChanged()
     {
-        if (OtrMetaContactButton.this.otrContact != null)
+        if (OtrToolBarButton.this.otrContact != null)
             setPolicy(
                 OtrActivator.scOtrEngine.getContactPolicy(otrContact.contact));
     }
 
-    public void contactVerificationStatusChanged(OtrContact otrContact)
+    public void verificationStatusChanged(String fingerprint)
     {
-        // OtrMetaContactButton.this.contact can be null.
-        if (otrContact.equals(OtrMetaContactButton.this.otrContact))
+        if(otrContact != null)
+        {
+            verificationStatusChanged(otrContact, fingerprint);
+        }
+        else if(currentGotrSession != null)
+        {
+            verificationStatusChanged(currentGotrSession, fingerprint);
+        }
+
+    }
+
+    private void verificationStatusChanged(ScGotrSessionHost currentGotrSession,
+                                           String fingerprint)
+    {
+        statusChanged(currentGotrSession);
+    }
+
+    private void verificationStatusChanged(OtrContact otrContact,
+                                           String fingerprint)
+    {
+        PublicKey currentRemotePubKey = OtrActivator.scOtrEngine
+                .getRemotePublicKey(otrContact);
+        if(currentRemotePubKey == null)
+        {
+            return;
+        }
+
+        String currentFingerprint = OtrActivator.scOtrKeyManager
+                .getFingerprintFromPublicKey(currentRemotePubKey);
+
+        if (currentFingerprint.equals(fingerprint))
         {
             setStatus(
-                OtrActivator.scOtrEngine.getSessionStatus(otrContact));
+                    OtrActivator.scOtrEngine.getSessionStatus(otrContact));
         }
     }
 
-    public OtrMetaContactButton(Container container,
-                                PluginComponentFactory parentFactory)
+    public OtrToolBarButton(Container container,
+                            PluginComponentFactory parentFactory, ScGotrSessionManager gotrSessionManager)
     {
         super(container, parentFactory);
+        this.gotrSessionManager = gotrSessionManager;
 
         /*
          * XXX This OtrMetaContactButton instance cannot be added as a listener
@@ -121,7 +157,7 @@ public class OtrMetaContactButton
          * are gone, this instance will become obsolete and OtrWeakListener will
          * remove it as a listener of scOtrEngine and scOtrKeyManager.
          */
-        new OtrWeakListener<OtrMetaContactButton>(
+        new OtrWeakListener<OtrToolBarButton>(
             this,
             OtrActivator.scOtrEngine, OtrActivator.scOtrKeyManager);
     }
@@ -183,6 +219,16 @@ public class OtrMetaContactButton
             {
                 public void actionPerformed(ActionEvent e)
                 {
+                    if(currentGotrSession != null){
+                        try
+                        {
+                            currentGotrSession.getSession().start();
+                        } catch (GotrException exception)
+                        {
+                            exception.printStackTrace();
+                        }
+                        return;
+                    }
                     if (otrContact == null)
                         return;
 
@@ -238,7 +284,7 @@ public class OtrMetaContactButton
      */
     public String getName()
     {
-        return "";
+        return "OTR";
     }
 
     /*
@@ -252,12 +298,16 @@ public class OtrMetaContactButton
 
     public void setCurrentContact(Contact contact, String resourceName)
     {
+
         if (contact == null)
         {
             this.otrContact = null;
             this.setPolicy(null);
             this.setStatus(ScSessionStatus.PLAINTEXT);
             return;
+        }
+        else{
+            this.currentGotrSession = null;
         }
 
         if (resourceName == null)
@@ -372,6 +422,19 @@ public class OtrMetaContactButton
     }
 
     @Override
+    public void
+    setCurrentChatRoom(ChatRoom chatRoom) {
+        this.otrContact = null;
+        currentGotrSession = gotrSessionManager.getGotrSessionHost(chatRoom);
+        if(currentGotrSession == null){
+            return;
+        }
+        currentGotrSession.addSessionListener(this);
+        statusChanged(currentGotrSession);
+        getButton().setEnabled(true);
+    }
+
+    @Override
     public void multipleInstancesDetected(OtrContact contact)
     {}
 
@@ -379,10 +442,64 @@ public class OtrMetaContactButton
     public void outgoingSessionChanged(OtrContact otrContact)
     {
         // OtrMetaContactButton.this.contact can be null.
-        if (otrContact.equals(OtrMetaContactButton.this.otrContact))
+        if (otrContact.equals(OtrToolBarButton.this.otrContact))
         {
             setStatus(
                 OtrActivator.scOtrEngine.getSessionStatus(otrContact));
         }
+    }
+
+    @Override
+    public void statusChanged(ScGotrSessionHost host)
+    {
+        if(currentGotrSession != null && currentGotrSession.equals(host))
+        {
+            setButtonState(host, currentGotrSession.getSession().getState());
+        }
+    }
+
+    @Override
+    public void outgoingMessagesUpdated(ScGotrSessionHost host) {
+
+    }
+
+    private void setButtonState(ScGotrSessionHost host, GotrSessionState state)
+    {
+        Image image;
+        String tipKey;
+        switch (state)
+        {
+            case PLAINTEXT:
+                image = unlockedPadlockImage;
+                tipKey = "plugin.otr.menu.START_OTR";
+                break;
+            case AWAITING_USERS:
+            case SETUP:
+            case NEGOTIATING_KEYS:
+                image = animatedPadlockImage;
+                animatedPadlockImage.start();
+                tipKey = "plugin.otr.menu.LOADING_OTR";
+                break;
+            case SECURE:
+                if(host.areAllAuthenticated())
+                {
+                    image = verifiedLockedPadlockImage;
+                    tipKey = "plugin.otr.menu.VERIFIED";
+                }
+                else
+                {
+                    image = unverifiedLockedPadlockImage;
+                    tipKey = "plugin.otr.menu.UNVERIFIED";
+                }
+                break;
+            default:
+                return;
+        }
+
+        SIPCommButton button = getButton();
+        button.setIconImage(image);
+        button.setToolTipText(OtrActivator.resourceService
+                .getI18NString(tipKey));
+        button.repaint();
     }
 }

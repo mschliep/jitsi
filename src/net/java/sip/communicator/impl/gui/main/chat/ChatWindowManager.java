@@ -1593,10 +1593,12 @@ public class ChatWindowManager
         {
             try
             {
-                if(!SwingUtilities.isEventDispatchThread())
+                if(!SwingUtilities.isEventDispatchThread()) {
                     SwingUtilities.invokeAndWait(this);
-                else
+                }
+                else {
                     this.run();
+                }
             }
             catch(Throwable t)
             {

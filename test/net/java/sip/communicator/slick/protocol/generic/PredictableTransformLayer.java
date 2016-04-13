@@ -57,8 +57,26 @@ public class PredictableTransformLayer
             .getDestinationContact(), evt.getErrorCode());
     }
 
-    public MessageDeliveredEvent[] messageDeliveryPending(
-        MessageDeliveredEvent evt)
+    @Override
+    public ChatRoomMessageReceivedEvent chatRoomMessageReceived(ChatRoomMessageReceivedEvent evt)
+    {
+        return evt;
+    }
+
+    @Override
+    public ChatRoomMessageDeliveryPendingEvent chatRoomMessageDeliveryPending(ChatRoomMessageDeliveryPendingEvent evt)
+    {
+        return evt;
+    }
+
+    @Override
+    public ChatRoomMessageDeliveredEvent chatRoomMessageDelivered(ChatRoomMessageDeliveredEvent evt)
+    {
+        return evt;
+    }
+
+    public MessageDeliveryPendingEvent[] messageDeliveryPending(
+            MessageDeliveryPendingEvent evt)
     {
         logger
             .debug("Message Delivered Transformation, transform a message after it has failed to be sent.");
@@ -68,8 +86,8 @@ public class PredictableTransformLayer
                 "DELIVERY_PENDING");
 
         logger.debug("OUT: " + transformedMessage.getContent());
-        return new MessageDeliveredEvent[]
-        { new MessageDeliveredEvent(transformedMessage,
+        return new MessageDeliveryPendingEvent[]
+        { new MessageDeliveryPendingEvent(transformedMessage,
             evt.getDestinationContact(), evt.getTimestamp()) };
     }
 

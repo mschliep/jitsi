@@ -180,14 +180,14 @@ public class OperationSetBasicInstantMessagingIcqImpl
         else
             messageContent = message.getContent();
 
-        MessageDeliveredEvent msgDeliveryPendingEvt
-            = new MessageDeliveredEvent(message, to);
+        MessageDeliveryPendingEvent msgDeliveryPendingEvt
+            = new MessageDeliveryPendingEvent(message, to);
 
-        MessageDeliveredEvent[] msgDeliveryPendingEvts = this.messageDeliveryPendingTransform(msgDeliveryPendingEvt);
+        MessageDeliveryPendingEvent[] msgDeliveryPendingEvts = this.messageDeliveryPendingTransform(msgDeliveryPendingEvt);
         if (msgDeliveryPendingEvts == null || msgDeliveryPendingEvts.length == 0)
             return;
 
-        for (MessageDeliveredEvent pendingEvt : msgDeliveryPendingEvts)
+        for (MessageDeliveryPendingEvent pendingEvt : msgDeliveryPendingEvts)
         {
             String transformedContent =
                 pendingEvt.getSourceMessage().getContent();

@@ -125,7 +125,7 @@ public class ContactListCellRenderer
     /**
      * The panel containing the name and status message labels.
      */
-    private final TransparentPanel centerPanel
+    protected final TransparentPanel centerPanel
         = new TransparentPanel(new GridLayout(0, 1));
 
     /**

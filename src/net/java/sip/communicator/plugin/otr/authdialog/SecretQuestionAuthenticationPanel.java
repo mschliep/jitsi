@@ -31,6 +31,10 @@ import net.java.sip.communicator.plugin.otr.*;
 public class SecretQuestionAuthenticationPanel
     extends TransparentPanel
 {
+
+    private final String defaultPetname;
+    private final JTextField petname = new JTextField();
+
     /**
      * The text field where the authentication initiator will type his question.
      */
@@ -44,9 +48,11 @@ public class SecretQuestionAuthenticationPanel
 
     /**
      * Creates an instance SecretQuestionAuthenticationPanel.
+     * @param defaultPetname
      */
-    SecretQuestionAuthenticationPanel()
+    SecretQuestionAuthenticationPanel(String defaultPetname)
     {
+        this.defaultPetname = defaultPetname;
         initComponents();
     }
 
@@ -76,6 +82,19 @@ public class SecretQuestionAuthenticationPanel
         c.insets = new Insets(5, 5, 0, 5);
         c.weightx = 1;
 
+        JLabel petnameLabel =
+                new JLabel(
+                        OtrActivator.resourceService
+                                .getI18NString(
+                                        "plugin.otr.authbuddydialog.PETNAME"));
+        questionAnswerPanel.add(petnameLabel, c);
+        c.gridy = 1;
+        c.insets = new Insets(0, 5, 5, 5);
+        petname.setText(defaultPetname);
+        questionAnswerPanel.add(petname, c);
+
+        c.gridy = 2;
+        c.insets = new Insets(5, 5, 0, 5);
         JLabel questionLabel =
             new JLabel(
                 OtrActivator.resourceService
@@ -83,11 +102,11 @@ public class SecretQuestionAuthenticationPanel
                         "plugin.otr.authbuddydialog.QUESTION_INIT"));
         questionAnswerPanel.add(questionLabel, c);
 
-        c.gridy = 1;
+        c.gridy = 3;
         c.insets = new Insets(0, 5, 5, 5);
         questionAnswerPanel.add(question, c);
 
-        c.gridy = 2;
+        c.gridy = 4;
         c.insets = new Insets(5, 5, 0, 5);
         JLabel answerLabel =
             new JLabel(
@@ -96,7 +115,7 @@ public class SecretQuestionAuthenticationPanel
                         "plugin.otr.authbuddydialog.ANSWER"));
         questionAnswerPanel.add(answerLabel, c);
 
-        c.gridy = 3;
+        c.gridy = 5;
         c.insets = new Insets(0, 5, 5, 5);
         questionAnswerPanel.add(answer, c);
 
@@ -125,5 +144,10 @@ public class SecretQuestionAuthenticationPanel
     String getQuestion()
     {
         return question.getText();
+    }
+
+    public String getPetname()
+    {
+        return petname.getText();
     }
 }

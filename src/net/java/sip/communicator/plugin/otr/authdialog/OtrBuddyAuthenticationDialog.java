@@ -19,15 +19,13 @@ package net.java.sip.communicator.plugin.otr.authdialog;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.security.*;
 
 import javax.swing.*;
 
 import net.java.sip.communicator.plugin.desktoputil.*;
 import net.java.sip.communicator.plugin.otr.*;
-import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
 import net.java.sip.communicator.plugin.otr.authdialog.FingerprintAuthenticationPanel.ActionComboBoxItem;
-import net.java.sip.communicator.service.protocol.*;
+
 
 /**
  * @author George Politis
@@ -37,18 +35,12 @@ import net.java.sip.communicator.service.protocol.*;
 public class OtrBuddyAuthenticationDialog
     extends SIPCommDialog
 {
-    private final OtrContact contact;
+    private final AuthenticationDialogBackend backend;
 
-    /**
-     * The {@link OtrBuddyAuthenticationDialog} ctor.
-     *
-     * @param contact The {@link Contact} this
-     *            {@link OtrBuddyAuthenticationDialog} refers to.
-     */
-    public OtrBuddyAuthenticationDialog(OtrContact contact)
+    public OtrBuddyAuthenticationDialog(AuthenticationDialogBackend backend)
     {
         super(false);
-        this.contact = contact;
+        this.backend = backend;
 
         initComponents();
     }
@@ -64,7 +56,13 @@ public class OtrBuddyAuthenticationDialog
         TransparentPanel mainPanel = new TransparentPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        mainPanel.setPreferredSize(new Dimension(350, 400));
+        //mainPanel.setPreferredSize(new Dimension(350, 400));
+
+        AuthStepPanel authPanel = new AuthStepPanel();
+        authPanel.initStep();
+
+        mainPanel.add(authPanel);
+        mainPanel.add(Box.createVerticalStrut(10));
 
         JTextArea generalInformation = new CustomTextArea();
         generalInformation.setText(OtrActivator.resourceService
@@ -96,11 +94,14 @@ public class OtrBuddyAuthenticationDialog
         final JPanel authenticationPanel =
             new TransparentPanel(new CardLayout());
         final FingerprintAuthenticationPanel fingerprintPanel =
-            new FingerprintAuthenticationPanel(contact);
+            new FingerprintAuthenticationPanel(backend.getLocalName(),
+                    backend.getLocalFingerprint(),
+                    backend.getRemoteFingerprint(),
+                    backend.getDefaultPetname());
         final SecretQuestionAuthenticationPanel secretQuestionPanel =
-            new SecretQuestionAuthenticationPanel();
+            new SecretQuestionAuthenticationPanel(backend.getDefaultPetname());
         final SharedSecretAuthenticationPanel sharedSecretPanel =
-            new SharedSecretAuthenticationPanel();
+            new SharedSecretAuthenticationPanel(backend.getDefaultPetname());
         authenticationPanel.add(secretQuestionPanel, am[0]);
         authenticationPanel.add(sharedSecretPanel, am[1]);
         authenticationPanel.add(fingerprintPanel, am[2]);
@@ -161,7 +162,7 @@ public class OtrBuddyAuthenticationDialog
         });
         buttonPanel.add(cancelButton, c);
 
-        JButton authenticateButton =
+        final JButton authenticateButton =
             new JButton(OtrActivator.resourceService
                 .getI18NString("plugin.otr.authbuddydialog.AUTHENTICATE_BUDDY"));
         authenticateButton.addActionListener(new ActionListener()
@@ -172,18 +173,20 @@ public class OtrBuddyAuthenticationDialog
                     (String)authenticationMethodComboBox.getSelectedItem();
                 if (authenticationMethod.equals(am[0]))
                 {
+                    String petname = secretQuestionPanel.getPetname();
                     String secret = secretQuestionPanel.getSecret();
                     String question = secretQuestionPanel.getQuestion();
 
-                    OtrActivator.scOtrEngine.initSmp(contact, question, secret);
+                    backend.initSmp(petname, question, secret);
                     dispose();
                 }
                 else if (authenticationMethod.equals(am[1]))
                 {
+                    String petname = sharedSecretPanel.getPetname();
                     String secret = sharedSecretPanel.getSecret();
                     String question = null;
 
-                    OtrActivator.scOtrEngine.initSmp(contact, question, secret);
+                    backend.initSmp(petname, question, secret);
                     dispose();
                 }
                 else if (authenticationMethod.equals(am[2]))
@@ -191,20 +194,16 @@ public class OtrBuddyAuthenticationDialog
                     ActionComboBoxItem actionItem =
                         (ActionComboBoxItem) fingerprintPanel.
                             getCbAction().getSelectedItem();
-                    PublicKey pubKey =
-                        OtrActivator.scOtrEngine.getRemotePublicKey(contact);
-                    String fingerprint =
-                        OtrActivator.scOtrKeyManager.
-                            getFingerprintFromPublicKey(pubKey);
+                    String fingerprint = backend.getRemoteFingerprint();
                     switch (actionItem.action)
                     {
                     case I_HAVE:
                         OtrActivator.scOtrKeyManager.verify(
-                            contact, fingerprint);
+                            fingerprintPanel.getPetname(), fingerprint);
                         break;
                     case I_HAVE_NOT:
                         OtrActivator.scOtrKeyManager.unverify(
-                            contact, fingerprint);
+                            fingerprintPanel.getPetname(), fingerprint);
                         break;
                     }
                     dispose();

@@ -161,15 +161,15 @@ public class OperationSetBasicInstantMessagingYahooImpl
         {
             String toUserID = ((ContactYahooImpl) to).getID();
 
-            MessageDeliveredEvent msgDeliveryPendingEvt =
-                new MessageDeliveredEvent(message, to, new Date());
+            MessageDeliveryPendingEvent msgDeliveryPendingEvt =
+                new MessageDeliveryPendingEvent(message, to, new Date());
 
-            MessageDeliveredEvent[] msgDeliveryPendingEvts = messageDeliveryPendingTransform(msgDeliveryPendingEvt);
+            MessageDeliveryPendingEvent[] msgDeliveryPendingEvts = messageDeliveryPendingTransform(msgDeliveryPendingEvt);
 
             if (msgDeliveryPendingEvts == null || msgDeliveryPendingEvts.length == 0)
                 return;
 
-            for (MessageDeliveredEvent event : msgDeliveryPendingEvts)
+            for (MessageDeliveryPendingEvent event : msgDeliveryPendingEvts)
             {
                 byte[] msgBytesToBeSent =
                     event.getSourceMessage().getContent().trim()
@@ -281,7 +281,7 @@ public class OperationSetBasicInstantMessagingYahooImpl
      * registered message listerners.
      */
     @Override
-    protected void fireMessageEvent(EventObject evt)
+    protected void fireMessageEvent(MessageEvent evt)
     {
         // check if this event should be filtered out
         Iterator<EventFilter> filters;

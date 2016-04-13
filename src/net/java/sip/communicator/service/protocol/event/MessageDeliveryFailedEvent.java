@@ -28,7 +28,7 @@ import net.java.sip.communicator.service.protocol.*;
  * @author Emil Ivov
  */
 public class MessageDeliveryFailedEvent
-    extends EventObject
+    extends MessageEvent
 {
     /**
      * Serial version UID.
@@ -236,10 +236,16 @@ public class MessageDeliveryFailedEvent
     /**
      * Sets the ID of the message being corrected to the passed ID.
      *
-     * @param correctedMessageUID The ID of the message being corrected.
+     * @return  correctedMessageUID The ID of the message being corrected.
      */
     public String getCorrectedMessageUID()
     {
         return correctedMessageUID;
+    }
+
+    @Override
+    public ProtocolProviderService getProtocolProvider()
+    {
+        return to.getProtocolProvider();
     }
 }

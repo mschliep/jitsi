@@ -1157,6 +1157,12 @@ public class ImageLoader
         = new ImageID("service.gui.icons.CHAT_ROOM_JOINED_ICON");
 
     /**
+     * The image used for joined GOTR chat rooms.
+     */
+    public static final ImageID CHAT_ROOM_GOTR_ICON
+            = new ImageID("service.gui.icons.CHAT_ROOM_GOTR_JOINED_ICON");
+
+    /**
      * The image used for multi user chat servers.
      */
     public static final ImageID CHAT_SERVER_16x16_ICON

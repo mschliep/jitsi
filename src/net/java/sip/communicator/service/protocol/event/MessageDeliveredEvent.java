@@ -28,7 +28,7 @@ import net.java.sip.communicator.service.protocol.*;
  * @author Emil Ivov
  */
 public class MessageDeliveredEvent
-    extends EventObject
+    extends MessageEvent
 {
     /**
      * Serial version UID.
@@ -134,7 +134,6 @@ public class MessageDeliveredEvent
       *
       * @param source the <tt>Message</tt> whose delivery this event represents.
       * @param to the <tt>Contact</tt> that this message was sent to.
-      * @param timestamp a date indicating the exact moment when the event
       * ocurred
       */
      public MessageDeliveredEvent(
@@ -246,5 +245,11 @@ public class MessageDeliveredEvent
     public void setMessageEncrypted(boolean isMessageEncrypted)
     {
         this.isMessageEncrypted = isMessageEncrypted;
+    }
+
+    @Override
+    public ProtocolProviderService getProtocolProvider()
+    {
+        return to.getProtocolProvider();
     }
 }

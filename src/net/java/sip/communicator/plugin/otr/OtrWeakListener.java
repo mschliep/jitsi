@@ -105,12 +105,12 @@ public class OtrWeakListener
      * Forwards the event/notification to the associated
      * <tt>T</tt> if it is still needed by the application.
      */
-    public void contactVerificationStatusChanged(OtrContact contact)
+    public void verificationStatusChanged(String fingerprint)
     {
         ScOtrKeyManagerListener l = getListener();
 
         if (l != null)
-            l.contactVerificationStatusChanged(contact);
+            l.verificationStatusChanged(fingerprint);
     }
 
     /**

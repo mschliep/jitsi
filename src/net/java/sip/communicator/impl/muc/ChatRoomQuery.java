@@ -47,8 +47,8 @@ public class ChatRoomQuery
     /**
      * List with the current results for the query.
      */
-    private Set<ChatRoomSourceContact> contactResults
-        = new TreeSet<ChatRoomSourceContact>();
+    private Set<ChatRoomSourceContactImpl> contactResults
+        = new TreeSet<ChatRoomSourceContactImpl>();
 
     /**
      * MUC service.
@@ -181,10 +181,10 @@ public class ChatRoomQuery
         String eventType = evt.getEventType();
 
         boolean existingContact = false;
-        ChatRoomSourceContact foundContact = null;
+        ChatRoomSourceContactImpl foundContact = null;
         synchronized (contactResults)
         {
-            for (ChatRoomSourceContact contact : contactResults)
+            for (ChatRoomSourceContactImpl contact : contactResults)
             {
                 if (contactEqualsChatRoom(contact, sourceChatRoom))
                 {
@@ -256,8 +256,8 @@ public class ChatRoomQuery
                     || room.getIdentifier().contains(queryString)
                     )))
         {
-            ChatRoomSourceContact contact 
-                = new ChatRoomSourceContact(room, this, isAutoJoin);
+            ChatRoomSourceContactImpl contact
+                = new ChatRoomSourceContactImpl(room, this, isAutoJoin);
             synchronized (contactResults)
             {
                 contactResults.add(contact);
@@ -294,8 +294,8 @@ public class ChatRoomQuery
                     || chatRoomID.contains(queryString)
                     )))
         {
-            ChatRoomSourceContact contact 
-                = new ChatRoomSourceContact(chatRoomName, chatRoomID, this, pps,
+            ChatRoomSourceContactImpl contact
+                = new ChatRoomSourceContactImpl(chatRoomName, chatRoomID, this, pps,
                     isAutoJoin);
             synchronized (contactResults)
             {
@@ -328,13 +328,13 @@ public class ChatRoomQuery
                     chatRoom.isAutojoin());
                 break;
             case ChatRoomListChangeEvent.CHAT_ROOM_REMOVED:
-                LinkedList<ChatRoomSourceContact> tmpContactResults;
+                LinkedList<ChatRoomSourceContactImpl> tmpContactResults;
                 synchronized (contactResults)
                 {
                     tmpContactResults
-                        = new LinkedList<ChatRoomSourceContact>(contactResults);
+                        = new LinkedList<ChatRoomSourceContactImpl>(contactResults);
 
-                    for (ChatRoomSourceContact contact : tmpContactResults)
+                    for (ChatRoomSourceContactImpl contact : tmpContactResults)
                     {
                     if (contactEqualsChatRoom(contact, chatRoom))
                         {
@@ -348,7 +348,7 @@ public class ChatRoomQuery
             case ChatRoomListChangeEvent.CHAT_ROOM_CHANGED:
                 synchronized (contactResults)
                 {
-                    for (ChatRoomSourceContact contact : contactResults)
+                    for (ChatRoomSourceContactImpl contact : contactResults)
                     {
                         if (contactEqualsChatRoom(contact,
                             chatRoom.getChatRoom()))
@@ -377,13 +377,13 @@ public class ChatRoomQuery
     @Override
     public void chatRoomProviderWrapperRemoved(ChatRoomProviderWrapper provider)
     {
-        LinkedList<ChatRoomSourceContact> tmpContactResults;
+        LinkedList<ChatRoomSourceContactImpl> tmpContactResults;
         synchronized (contactResults)
         {
             tmpContactResults 
-                = new LinkedList<ChatRoomSourceContact>(contactResults);
+                = new LinkedList<ChatRoomSourceContactImpl>(contactResults);
         
-            for(ChatRoomSourceContact contact : tmpContactResults)
+            for(ChatRoomSourceContactImpl contact : tmpContactResults)
             {
                 if(contact.getProvider().equals(provider.getProtocolProvider()))
                 {
@@ -403,7 +403,7 @@ public class ChatRoomQuery
      * @return returns <tt>true</tt> if they are equal, or <tt>false</tt> if
      *         they are different
      */
-    private boolean contactEqualsChatRoom(final ChatRoomSourceContact contact,
+    private boolean contactEqualsChatRoom(final ChatRoomSourceContactImpl contact,
         final ChatRoom chatRoom)
     {
         return contact.getProvider() == chatRoom.getParentProvider()
@@ -420,7 +420,7 @@ public class ChatRoomQuery
      * @return returns <tt>true</tt> if they are equal, or <tt>false</tt> if
      *         they are different.
      */
-    private boolean contactEqualsChatRoom(final ChatRoomSourceContact contact,
+    private boolean contactEqualsChatRoom(final ChatRoomSourceContactImpl contact,
         final ChatRoomWrapper chatRoomWrapper)
     {
         return contact.getProvider() == chatRoomWrapper.getParentProvider()
@@ -434,9 +434,9 @@ public class ChatRoomQuery
      * @param contact the contact.
      * @return the index of the contact in the contact results list.
      */
-    public synchronized int indexOf(ChatRoomSourceContact contact)
+    public synchronized int indexOf(ChatRoomSourceContactImpl contact)
     {
-       Iterator<ChatRoomSourceContact> it = contactResults.iterator();
+       Iterator<ChatRoomSourceContactImpl> it = contactResults.iterator();
        int i = 0;
        while(it.hasNext())
        {

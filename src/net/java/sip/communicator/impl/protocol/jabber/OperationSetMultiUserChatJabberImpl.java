@@ -17,17 +17,22 @@
  */
 package net.java.sip.communicator.impl.protocol.jabber;
 
-import java.util.*;
-
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.event.*;
-import net.java.sip.communicator.util.*;
-
-import org.jivesoftware.smack.*;
+import net.java.sip.communicator.util.Logger;
+import org.jivesoftware.smack.Connection;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
-import org.jivesoftware.smackx.*;
-import org.jivesoftware.smackx.muc.*;
+import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.FormField;
+import org.jivesoftware.smackx.muc.HostedRoom;
+import org.jivesoftware.smackx.muc.InvitationListener;
+import org.jivesoftware.smackx.muc.InvitationRejectionListener;
+import org.jivesoftware.smackx.muc.MultiUserChat;
+
+import java.util.*;
 
 /**
  * A jabber implementation of the multi user chat operation set.

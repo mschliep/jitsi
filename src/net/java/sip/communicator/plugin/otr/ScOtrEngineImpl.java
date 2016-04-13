@@ -1,19 +1,10 @@
+
+
 /*
  * Jitsi, the OpenSource Java VoIP and Instant Messaging client.
  *
- * Copyright @ 2015 Atlassian Pty Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Distributable under LGPL license.
+ * See terms of license at gnu.org.
  */
 package net.java.sip.communicator.plugin.otr;
 
@@ -206,7 +197,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -238,7 +229,7 @@ public class ScOtrEngineImpl
                     progressDialogMap.get(otrContact);
                 if (progressDialog == null)
                 {
-                    progressDialog = new SmpProgressDialog(contact);
+                    progressDialog = new SmpProgressDialog(contact.getDisplayName());
                     progressDialogMap.put(otrContact, progressDialog);
                 }
 
@@ -308,18 +299,15 @@ public class ScOtrEngineImpl
 
             Contact contact = otrContact.contact;
             SmpAuthenticateBuddyDialog dialog =
-                new SmpAuthenticateBuddyDialog(
-                    otrContact, receiverTag, question);
+                new SmpAuthenticateBuddyDialog(question, new OtrContactAuthDialogBackend(otrContact, receiverTag));
             dialog.setVisible(true);
 
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
-
-            progressDialog.init();
             progressDialog.setVisible(true);
         }
 
@@ -337,7 +325,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -358,7 +346,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(contact);
+                progressDialog = new SmpProgressDialog(contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -623,14 +611,14 @@ public class ScOtrEngineImpl
 
                     List<String> allFingerprintsOfContact =
                         OtrActivator.scOtrKeyManager.
-                            getAllRemoteFingerprints(contact);
+                            getAllRemoteFingerprints();
                     if (allFingerprintsOfContact != null)
                     {
                         if (!allFingerprintsOfContact.contains(
                                 remoteFingerprint))
                         {
                             OtrActivator.scOtrKeyManager.saveFingerprint(
-                                contact, remoteFingerprint);
+                                contact.getDisplayName(), remoteFingerprint);
                         }
                     }
 
@@ -674,7 +662,7 @@ public class ScOtrEngineImpl
                     // show info whether history is on or off
                     String otrAndHistoryMessage;
                     if(!OtrActivator.getMessageHistoryService()
-                        .isHistoryLoggingEnabled() || 
+                        .isHistoryLoggingEnabled() ||
                         !isHistoryLoggingEnabled(contact))
                     {
                         otrAndHistoryMessage =
@@ -908,7 +896,7 @@ public class ScOtrEngineImpl
     /**
      * Manages the scheduling of TimerTasks that are used to set Contact's
      * ScSessionStatus after a period of time.
-     * 
+     *
      * @author Marin Dzhigarov
      */
     private class ScSessionStatusScheduler
@@ -952,14 +940,14 @@ public class ScOtrEngineImpl
 
             if (!(service instanceof ProtocolProviderService))
                 return;
-    
+
             if (ev.getType() == ServiceEvent.UNREGISTERING)
             {
                 ProtocolProviderService provider
                     = (ProtocolProviderService) service;
-    
+
                 Iterator<OtrContact> i = tasks.keySet().iterator();
-    
+
                 while (i.hasNext())
                 {
                     OtrContact otrContact = i.next();
@@ -1157,6 +1145,7 @@ public class ScOtrEngineImpl
     @Override
     public void startSession(OtrContact otrContact)
     {
+        logger.info(String.format("starting for %s", otrContact));
         SessionID sessionID = getSessionID(otrContact);
 
         ScSessionStatus scSessionStatus = getSessionStatus(otrContact);
@@ -1230,11 +1219,10 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(otrContact.contact);
+                progressDialog = new SmpProgressDialog(otrContact.contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
-            progressDialog.init();
             progressDialog.setVisible(true);
         }
         catch (OtrException e)
@@ -1259,7 +1247,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(otrContact.contact);
+                progressDialog = new SmpProgressDialog(otrContact.contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 
@@ -1286,7 +1274,7 @@ public class ScOtrEngineImpl
             SmpProgressDialog progressDialog = progressDialogMap.get(otrContact);
             if (progressDialog == null)
             {
-                progressDialog = new SmpProgressDialog(otrContact.contact);
+                progressDialog = new SmpProgressDialog(otrContact.contact.getDisplayName());
                 progressDialogMap.put(otrContact, progressDialog);
             }
 

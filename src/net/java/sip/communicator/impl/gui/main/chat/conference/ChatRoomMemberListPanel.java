@@ -17,19 +17,24 @@
  */
 package net.java.sip.communicator.impl.gui.main.chat.conference;
 
-import java.awt.*;
-import java.awt.event.*;
+import net.java.sip.communicator.impl.gui.GuiActivator;
+import net.java.sip.communicator.impl.gui.main.chat.ChatContact;
+import net.java.sip.communicator.impl.gui.main.chat.ChatContactRightButtonMenu;
+import net.java.sip.communicator.impl.gui.main.chat.ChatPanel;
+import net.java.sip.communicator.impl.gui.main.chat.ChatWindowManager;
+import net.java.sip.communicator.impl.gui.main.contactlist.CListKeySearchListener;
+import net.java.sip.communicator.impl.gui.main.contactlist.DefaultContactList;
+import net.java.sip.communicator.plugin.desktoputil.SIPCommScrollPane;
+import net.java.sip.communicator.service.muc.ChatRoomWrapper;
+import net.java.sip.communicator.service.protocol.ChatRoom;
+import net.java.sip.communicator.service.protocol.OperationSetMultiUserChat;
+import net.java.sip.communicator.util.ConfigurationUtils;
+import net.java.sip.communicator.util.skin.Skinnable;
 
 import javax.swing.*;
-
-import net.java.sip.communicator.impl.gui.*;
-import net.java.sip.communicator.impl.gui.main.chat.*;
-import net.java.sip.communicator.impl.gui.main.contactlist.*;
-import net.java.sip.communicator.plugin.desktoputil.*;
-import net.java.sip.communicator.service.muc.*;
-import net.java.sip.communicator.service.protocol.*;
-import net.java.sip.communicator.util.*;
-import net.java.sip.communicator.util.skin.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * The <tt>ChatContactListPanel</tt> is the panel added on the right of the

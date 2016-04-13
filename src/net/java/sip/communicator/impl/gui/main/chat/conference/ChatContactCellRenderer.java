@@ -22,14 +22,21 @@ import java.awt.*;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.border.*;
 
 import net.java.sip.communicator.impl.gui.*;
 import net.java.sip.communicator.impl.gui.main.chat.*;
 import net.java.sip.communicator.impl.gui.main.contactlist.*;
 import net.java.sip.communicator.plugin.desktoputil.*;
+import net.java.sip.communicator.plugin.otr.gui.*;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.ServerStoredDetails.BinaryDetail;
 import net.java.sip.communicator.service.protocol.ServerStoredDetails.GenericDetail;
+
+
+
+import net.java.sip.communicator.util.*;
+import org.osgi.framework.*;
 
 /**
  * The <tt>ChatContactCellRenderer</tt> is the renderer for the chat room
@@ -42,6 +49,14 @@ import net.java.sip.communicator.service.protocol.ServerStoredDetails.GenericDet
 public class ChatContactCellRenderer
     extends ContactListCellRenderer
 {
+
+    public ChatContactCellRenderer()
+    {
+        super();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.X_AXIS));
+        this.nameLabel.setBorder(new EmptyBorder(0, 0, 0, 5));
+    }
+
     /**
      * Color constant for contacts that are at least available.
      */
@@ -231,12 +246,33 @@ public class ChatContactCellRenderer
             }
         }
 
+
+
+        //Add the GOTR component
+        this.centerPanel.removeAll();
+        this.centerPanel.add(nameLabel);
+        if(member != null)
+        {
+            GotrComponentService gotrComponentService = ServiceUtils
+                    .getService(GuiActivator.bundleContext,
+                            GotrComponentService.class);
+
+            if(gotrComponentService != null)
+            {
+                Component gotrComponent = gotrComponentService
+                        .getChatRoomMemberRendererComponent(list,
+                                member.getChatRoom(), member);
+                gotrComponent.setFont(this.getFont().deriveFont(Font.PLAIN));
+                gotrComponent.setForeground(contactForegroundColor);
+                centerPanel.add(gotrComponent);
+            }
+        }
+
         // We should set the bounds of the cell explicitly in order to make
         // getComponentAt work properly.
         int listWidth = list.getWidth();
-
         this.setBounds(0, 0, listWidth - 2, 30);
-        this.nameLabel.setBounds(0, 0, listWidth - 28, 17);
+        this.centerPanel.setBounds(0, 0, listWidth - 28, 17);
         this.rightLabel.setBounds(listWidth - 28, 0, 25, 30);
 
         this.isLeaf = true;

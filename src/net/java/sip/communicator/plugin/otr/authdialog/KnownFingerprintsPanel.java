@@ -55,7 +55,7 @@ public class KnownFingerprintsPanel
 
         this.setPreferredSize(new Dimension(400, 200));
 
-        openContact(getSelectedContact(), getSelectedFingerprint());
+        openContact(getSelectedFingerprint());
     }
 
     /**
@@ -85,7 +85,7 @@ public class KnownFingerprintsPanel
                     if (e.getValueIsAdjusting())
                         return;
 
-                    openContact(getSelectedContact(), getSelectedFingerprint());
+                    openContact(getSelectedFingerprint());
 
                 }
             });
@@ -105,10 +105,9 @@ public class KnownFingerprintsPanel
         {
             public void actionPerformed(ActionEvent arg0)
             {
-                OtrActivator.scOtrKeyManager
-                    .verify(OtrContactManager.getOtrContact(
-                        getSelectedContact(), null), getSelectedFingerprint());
-                openContact(getSelectedContact(), getSelectedFingerprint());
+                OtrActivator.scOtrKeyManager.verify(getSelectedPetname(),
+                        getSelectedFingerprint());
+                openContact(getSelectedFingerprint());
                 contactsTable.updateUI();
             }
         });
@@ -125,9 +124,8 @@ public class KnownFingerprintsPanel
             public void actionPerformed(ActionEvent arg0)
             {
                 OtrActivator.scOtrKeyManager
-                    .unverify(OtrContactManager.getOtrContact(
-                        getSelectedContact(), null), getSelectedFingerprint());
-                openContact(getSelectedContact(), getSelectedFingerprint());
+                    .unverify(getSelectedPetname(), getSelectedFingerprint());
+                openContact(getSelectedFingerprint());
                 contactsTable.updateUI();
             }
         });
@@ -140,7 +138,7 @@ public class KnownFingerprintsPanel
      *
      * @return the selected {@link Contact}
      */
-    private Contact getSelectedContact()
+    private String getSelectedPetname()
     {
         KnownFingerprintsTableModel model =
             (KnownFingerprintsTableModel) contactsTable.getModel();
@@ -148,7 +146,7 @@ public class KnownFingerprintsPanel
         if (index < 0 || index > model.getRowCount())
             return null;
 
-        return model.getContactFromRow(index);
+        return model.getPetnameFromRow(index);
     }
 
     /**
@@ -172,12 +170,11 @@ public class KnownFingerprintsPanel
      * Sets up the {@link KnownFingerprintsTableModel} components so that they
      * reflect the {@link Contact} param.
      *
-     * @param contact the {@link Contact} to setup the components for.
      * @param fingerprint the fingerprint to setup the components for.
      */
-    private void openContact(Contact contact, String fingerprint)
+    private void openContact(String fingerprint)
     {
-        if (contact == null || fingerprint == null)
+        if (fingerprint == null)
         {
             btnForgetFingerprint.setEnabled(false);
             btnVerifyFingerprint.setEnabled(false);
@@ -186,7 +183,7 @@ public class KnownFingerprintsPanel
         {
             boolean verified
                 = OtrActivator.scOtrKeyManager
-                    .isVerified(contact, fingerprint);
+                    .isVerified(fingerprint);
 
             btnForgetFingerprint.setEnabled(verified);
             btnVerifyFingerprint.setEnabled(!verified);

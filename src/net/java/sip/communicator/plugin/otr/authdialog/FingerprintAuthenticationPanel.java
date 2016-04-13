@@ -37,10 +37,12 @@ public class FingerprintAuthenticationPanel
     implements DocumentListener
 {
 
-    /**
-     * The Contact that we are authenticating.
-     */
-    private final OtrContact otrContact;
+    private final JTextField petname = new JTextField();
+
+    private final String accountName;
+    private final String localFingerprint;
+    private final String remoteFingerprint;
+    private final String defaultPetname;
 
     private SIPCommTextField txtRemoteFingerprintComparison;
 
@@ -69,12 +71,17 @@ public class FingerprintAuthenticationPanel
 
     /**
      * Creates an instance FingerprintAuthenticationPanel
-     * 
-     * @param contact The contact that this panel refers to.
+     * @param accountName
+     * @param localFingerprint
+     * @param remoteFingerprint
+     * @param defaultPetname
      */
-    FingerprintAuthenticationPanel(OtrContact contact)
+    FingerprintAuthenticationPanel(String accountName, String localFingerprint, String remoteFingerprint, String defaultPetname)
     {
-        this.otrContact = contact;
+        this.accountName = accountName;
+        this.localFingerprint = localFingerprint;
+        this.remoteFingerprint = remoteFingerprint;
+        this.defaultPetname = defaultPetname;
         initComponents();
         loadContact();
         
@@ -114,37 +121,49 @@ public class FingerprintAuthenticationPanel
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(5, 5, 5, 5);
+        c.gridy = 0;
+        c.gridx = 0;
+        c.weightx = 1;
+
+        JLabel petnameLabel =
+                new JLabel(
+                        OtrActivator.resourceService
+                                .getI18NString(
+                                        "plugin.otr.authbuddydialog.PETNAME"));
+        pnlAction.add(petnameLabel, c);
+        c.gridy = 1;
+        c.insets = new Insets(0, 5, 5, 5);
+        petname.setText(defaultPetname);
+        pnlAction.add(petname, c);
+
+
         c.weightx = 0.0;
+        c.gridy = 2;
 
         cbAction = new JComboBox();
         cbAction.addItem(actionIHave);
         cbAction.addItem(actionIHaveNot);
 
-        PublicKey pubKey = OtrActivator.scOtrEngine.getRemotePublicKey(otrContact);
-        String remoteFingerprint =
-            OtrActivator.scOtrKeyManager.getFingerprintFromPublicKey(pubKey);
         cbAction.setSelectedItem(OtrActivator.scOtrKeyManager
-            .isVerified(otrContact.contact, remoteFingerprint)
+            .isVerified(remoteFingerprint)
                 ? actionIHave : actionIHaveNot);
 
         pnlAction.add(cbAction, c);
 
         txtAction = new CustomTextArea();
         c.weightx = 1.0;
+        c.gridx = 1;
         pnlAction.add(txtAction, c);
 
-        String resourceName = otrContact.resource != null ?
-            "/" + otrContact.resource.getResourceName() : "";
-
-            txtRemoteFingerprintComparison = new SIPCommTextField(
-            OtrActivator.resourceService
-            .getI18NString("plugin.otr.authbuddydialog.FINGERPRINT_CHECK",
-                new String[]
-                    {otrContact.contact.getDisplayName() + resourceName}));
+        txtRemoteFingerprintComparison = new SIPCommTextField(
+        OtrActivator.resourceService
+        .getI18NString("plugin.otr.authbuddydialog.FINGERPRINT_CHECK",
+                new String[]{defaultPetname}));
         txtRemoteFingerprintComparison.getDocument().addDocumentListener(this);
 
         c.gridwidth = 2;
-        c.gridy = 1;
+        c.gridx = 0;
+        c.gridy = 3;
         pnlAction.add(txtRemoteFingerprintComparison, c);
         c.gridwidth = 1;
         c.gridy = 0;
@@ -157,34 +176,23 @@ public class FingerprintAuthenticationPanel
 
     /**
      * Sets up the {@link OtrBuddyAuthenticationDialog} components so that they
-     * reflect the {@link OtrBuddyAuthenticationDialog#otrContact}
+     * reflect the remote contact.
      */
     private void loadContact()
     {
-        // Local fingerprint.
-        String account =
-            otrContact.contact.getProtocolProvider().getAccountID().getDisplayName();
-        String localFingerprint =
-            OtrActivator.scOtrKeyManager.getLocalFingerprint(otrContact.contact
-                .getProtocolProvider().getAccountID());
         txtLocalFingerprint.setText(OtrActivator.resourceService.getI18NString(
             "plugin.otr.authbuddydialog.LOCAL_FINGERPRINT", new String[]
-            { account, localFingerprint }));
+            { accountName, localFingerprint }));
 
-        // Remote fingerprint.
-        String user = otrContact.contact.getDisplayName();
-        PublicKey pubKey = OtrActivator.scOtrEngine.getRemotePublicKey(otrContact);
-        String remoteFingerprint =
-            OtrActivator.scOtrKeyManager.getFingerprintFromPublicKey(pubKey);
         txtRemoteFingerprint.setText(OtrActivator.resourceService
             .getI18NString("plugin.otr.authbuddydialog.REMOTE_FINGERPRINT",
                 new String[]
-                { user, remoteFingerprint }));
+                { defaultPetname, remoteFingerprint }));
 
         // Action
         txtAction.setText(OtrActivator.resourceService.getI18NString(
             "plugin.otr.authbuddydialog.VERIFY_ACTION", new String[]
-            { user }));
+            { defaultPetname }));
     }
 
     public void removeUpdate(DocumentEvent e)
@@ -204,10 +212,6 @@ public class FingerprintAuthenticationPanel
 
     public void compareFingerprints()
     {
-        PublicKey pubKey = OtrActivator.scOtrEngine.getRemotePublicKey(otrContact);
-        String remoteFingerprint =
-            OtrActivator.scOtrKeyManager.getFingerprintFromPublicKey(pubKey);
-
         if(txtRemoteFingerprintComparison.getText() == null
             || txtRemoteFingerprintComparison.getText().length() == 0)
         {
@@ -228,6 +232,11 @@ public class FingerprintAuthenticationPanel
         }
     }
 
+    public String getPetname()
+    {
+        return petname.getText();
+    }
+
     /**
      * A simple enumeration that is meant to be used with
      * {@link ActionComboBoxItem} to distinguish them (like an ID).
@@ -240,8 +249,7 @@ public class FingerprintAuthenticationPanel
     }
 
     /**
-     * A special {@link JComboBox} that is hosted in
-     * {@link OtrBuddyAuthenticationDialog#cbAction}.
+     * A special {@link JComboBox}.
      *
      * @author George Politis
      */

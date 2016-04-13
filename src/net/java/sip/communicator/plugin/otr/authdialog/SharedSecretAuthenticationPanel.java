@@ -32,16 +32,22 @@ import net.java.sip.communicator.plugin.otr.*;
 public class SharedSecretAuthenticationPanel
     extends TransparentPanel
 {
+
+    private final JTextField petname = new JTextField();
+
     /**
      * The text field where the authentication initiator will type his answer.
      */
     private final JTextField secret = new JTextField();
+    private final String defaultPetname;
 
     /**
      * Creates an instance SecretQuestionAuthenticationPanel.
+     * @param defaultPetname
      */
-    SharedSecretAuthenticationPanel()
+    SharedSecretAuthenticationPanel(String defaultPetname)
     {
+        this.defaultPetname = defaultPetname;
         initComponents();
     }
 
@@ -71,6 +77,19 @@ public class SharedSecretAuthenticationPanel
         c.insets = new Insets(5, 5, 0, 5);
         c.weightx = 1;
 
+        JLabel petnameLabel =
+                new JLabel(
+                        OtrActivator.resourceService
+                                .getI18NString(
+                                        "plugin.otr.authbuddydialog.PETNAME"));
+        questionAnswerPanel.add(petnameLabel, c);
+        c.gridy = 1;
+        c.insets = new Insets(0, 5, 5, 5);
+        petname.setText(defaultPetname);
+        questionAnswerPanel.add(petname, c);
+
+        c.gridy = 2;
+        c.insets = new Insets(5, 5, 0, 5);
         JLabel questionLabel =
             new JLabel(
                 OtrActivator.resourceService
@@ -78,7 +97,7 @@ public class SharedSecretAuthenticationPanel
                         "plugin.otr.authbuddydialog.SHARED_SECRET"));
         questionAnswerPanel.add(questionLabel, c);
 
-        c.gridy = 1;
+        c.gridy = 3;
         c.insets = new Insets(0, 5, 5, 5);
         questionAnswerPanel.add(secret, c);
 
@@ -97,5 +116,10 @@ public class SharedSecretAuthenticationPanel
     String getSecret()
     {
         return secret.getText();
+    }
+
+    public String getPetname()
+    {
+        return petname.getText();
     }
 }

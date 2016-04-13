@@ -468,6 +468,11 @@ public class MainToolBar
             for (PluginComponent c : pluginContainer.getPluginComponents())
                 c.setCurrentContact(contact, currentTransport.getResourceName());
         }
+        else if(currentDescriptor instanceof ChatRoom){
+            ChatRoom chatRoom = (ChatRoom) currentDescriptor;
+            for (PluginComponent c : pluginContainer.getPluginComponents())
+                c.setCurrentChatRoom(chatRoom);
+        }
     }
 
     /**

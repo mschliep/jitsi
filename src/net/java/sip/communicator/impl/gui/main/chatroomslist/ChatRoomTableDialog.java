@@ -123,6 +123,17 @@ public class ChatRoomTableDialog
      */
     private ServerChatRoomsChoiceDialog serverChatRoomsChoiceDialog = null;
 
+
+    /**
+     * Displaying a secure chat room setup.
+     */
+    private boolean secure;
+
+    /**
+     * Panel to set the name of the chat room.
+     */
+    private JTextArea gotrInfoTextArea;
+
     /**
      * The <tt>ChatRoomList.ChatRoomProviderWrapperListener</tt> instance which
      * has been registered with {@link #chatRoomList} and which is to be
@@ -150,31 +161,30 @@ public class ChatRoomTableDialog
      * Shows a <code>ChatRoomTableDialog</code> creating it first if necessary.
      * The shown instance is shared in order to prevent displaying multiple
      * instances of one and the same <code>ChatRoomTableDialog</code>.
+     *
+     * @param secure show the chat room dialog to start a GOTR chat room
      */
-    public static void showChatRoomTableDialog()
-    {
-        if (chatRoomTableDialog == null)
-        {
+    public static void showChatRoomTableDialog(boolean secure) {
+        if (chatRoomTableDialog == null) {
             chatRoomTableDialog
-                = new ChatRoomTableDialog(
-                        GuiActivator.getUIService().getMainFrame());
+                    = new ChatRoomTableDialog(
+                    GuiActivator.getUIService().getMainFrame());
 
             /*
              * When the global/shared ChatRoomTableDialog closes, don't keep a
              * reference to it and let it be garbage-collected.
              */
-            chatRoomTableDialog.addWindowListener(new WindowAdapter()
-            {
+            chatRoomTableDialog.addWindowListener(new WindowAdapter() {
                 @Override
-                public void windowClosed(WindowEvent e)
-                {
+                public void windowClosed(WindowEvent e) {
                     if (chatRoomTableDialog == e.getWindow())
                         chatRoomTableDialog = null;
                 }
             });
         }
-        chatRoomTableDialog.setVisible(true);
+        chatRoomTableDialog.setSecure(secure);
         chatRoomTableDialog.pack();
+        chatRoomTableDialog.setVisible(true);
     }
 
     /**
@@ -202,28 +212,49 @@ public class ChatRoomTableDialog
     {
         this.getContentPane().setLayout(new BorderLayout(5,5));
 
-        JPanel northPanel = new TransparentPanel(new BorderLayout(5, 5));
-        northPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
+        JPanel northPanel = new TransparentPanel(new GridBagLayout());
+        GridBagConstraints gbCon = new GridBagConstraints();
 
-        JPanel labels = new TransparentPanel(new GridLayout(2, 2, 5, 5));
+        gbCon.gridy = 0;
+        gbCon.gridx = 0;
+        gbCon.weightx = 0;
+        gbCon.weighty = 0;
+        gbCon.fill = GridBagConstraints.HORIZONTAL;
+        gbCon.insets = new Insets(5,5,5,5);
 
-        labels.add(new JLabel(GuiActivator.getResources()
-            .getI18NString("service.gui.ACCOUNT")));
-        labels.add(new JLabel(GuiActivator.getResources()
-            .getI18NString("service.gui.ROOM_NAME")));
+        northPanel.add(new JLabel(GuiActivator.getResources()
+            .getI18NString("service.gui.ACCOUNT")), gbCon);
 
-
-        JPanel valuesPanel = new TransparentPanel(new GridLayout(2, 2, 5, 5));
         providersCombo = createProvidersCombobox();
 
         chatRoomNameField = new JTextField();
 
-        valuesPanel.add(providersCombo);
-        valuesPanel.add(chatRoomNameField);
+        gbCon.gridx = 1;
+        gbCon.weightx = 1;
+        northPanel.add(providersCombo, gbCon);
 
-        northPanel.add(labels, BorderLayout.WEST);
-        northPanel.add(valuesPanel, BorderLayout.CENTER);
-        northPanel.setPreferredSize(new Dimension(600, 80));
+        gbCon.gridx = 0;
+        gbCon.gridy = 1;
+        gbCon.weightx = 0;
+        northPanel.add(new JLabel(GuiActivator.getResources()
+                .getI18NString("service.gui.ROOM_NAME")), gbCon);
+
+        gbCon.gridx = 1;
+        gbCon.weightx = 1;
+        northPanel.add(chatRoomNameField, gbCon);
+
+        gotrInfoTextArea = new JTextArea();
+        gotrInfoTextArea.setBackground(new Color(0, 0, 0, 0));
+        gotrInfoTextArea.setOpaque(true);
+        gotrInfoTextArea.setEditable(false);
+        gotrInfoTextArea.setLineWrap(true);
+        gotrInfoTextArea.setWrapStyleWord(true);
+        gotrInfoTextArea.setText(GuiActivator.getResources()
+                .getI18NString("plugin.otr.menu.SECURE_REQUIRED_INFO"));
+
+        gbCon.gridy = 2;
+        northPanel.add(gotrInfoTextArea, gbCon);
+
         JPanel buttonPanel = new TransparentPanel(new BorderLayout(5, 5));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
         JPanel eastButtonPanel = new TransparentPanel();
@@ -404,9 +435,15 @@ public class ChatRoomTableDialog
                 && (nicknameField.getText() != null
                     && nicknameField.getText().trim().length() > 0))
             {
+                String chatroomName = chatRoomNameField.getText().trim();
+
+                if(secure){
+                    chatroomName = String.format("%s_gotr", chatroomName);
+                }
+
                 final ChatRoomWrapper chatRoomWrapper =
                     GuiActivator.getMUCService().createChatRoom(
-                        chatRoomNameField.getText().trim(),
+                        chatroomName,
                         getSelectedProvider().getProtocolProvider(),
                         new ArrayList<String>(),
                         "",
@@ -565,6 +602,24 @@ public class ChatRoomTableDialog
         {
             chatRoomTableDialog.setChatRoomNameField(chatRoom);
         }
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+        if(secure){
+            gotrInfoTextArea.setVisible(true);
+            this.setTitle(GuiActivator.getResources()
+                    .getI18NString("service.gui.ADD_SECURE_ROOM_TITLE"));
+        }
+        else{
+            gotrInfoTextArea.setVisible(false);
+            this.setTitle(GuiActivator.getResources()
+                    .getI18NString("service.gui.MY_CHAT_ROOMS_TITLE"));
+        }
+    }
+
+    public boolean isSecure() {
+        return secure;
     }
 
     /**

@@ -562,7 +562,8 @@ public class ChatConversationPanel
                 formatMessageAsHTML(message, contentType, keyword),
                 ChatHtmlUtils.HTML_CONTENT_TYPE,
                 false,
-                isSimpleTheme);
+                isSimpleTheme,
+                    chatMessage.isEncrypted(), chatMessage.isAuthenticated());
         }
         else if (messageType.equals(Chat.OUTGOING_MESSAGE))
         {
@@ -588,7 +589,7 @@ public class ChatConversationPanel
                 formatMessageAsHTML(message, contentType, keyword),
                 ChatHtmlUtils.HTML_CONTENT_TYPE,
                 true,
-                isSimpleTheme);
+                isSimpleTheme, chatMessage.isEncrypted(), chatMessage.isAuthenticated());
         }
         else if (messageType.equals(Chat.HISTORY_OUTGOING_MESSAGE))
         {
@@ -616,7 +617,7 @@ public class ChatConversationPanel
                     : formatMessageAsHTML("SMS: " + message, contentType, keyword),
                 ChatHtmlUtils.HTML_CONTENT_TYPE,
                 false,
-                isSimpleTheme);
+                isSimpleTheme, chatMessage.isEncrypted(), chatMessage.isAuthenticated());
         }
         else if (messageType.equals(Chat.STATUS_MESSAGE))
         {
@@ -945,7 +946,6 @@ public class ChatConversationPanel
      * message to the document.
      *
      * @param message the message string
-     * @param contentType
      */
     private void finishMessageAdd(final String message)
     {
@@ -1072,7 +1072,7 @@ public class ChatConversationPanel
      * links. This method expects <u>only</u> the message's <u>body</u> to be
      * provided.
      *
-     * @param message the message to be formatted
+     * @param original the message to be formatted
      * @param contentType the content type of the message to be formatted
      * @param keyword the word to be highlighted
      * @return the formatted message

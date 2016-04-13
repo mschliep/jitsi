@@ -17,24 +17,35 @@
  */
 package net.java.sip.communicator.impl.protocol.jabber;
 
-import java.beans.*;
-import java.util.*;
-
-import net.java.sip.communicator.impl.protocol.jabber.extensions.*;
+import net.java.sip.communicator.impl.protocol.jabber.extensions.ConferenceDescriptionPacketExtension;
 import net.java.sip.communicator.service.protocol.*;
-import net.java.sip.communicator.service.protocol.Message;
 import net.java.sip.communicator.service.protocol.event.*;
-import net.java.sip.communicator.service.protocol.jabberconstants.*;
-import net.java.sip.communicator.util.*;
-
-import org.apache.commons.lang3.*;
-import org.jivesoftware.smack.*;
-import org.jivesoftware.smack.filter.*;
-import org.jivesoftware.smack.packet.*;
+import net.java.sip.communicator.service.protocol.jabberconstants.JabberStatusEnum;
+import net.java.sip.communicator.util.ConfigurationUtils;
+import net.java.sip.communicator.util.Logger;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.jivesoftware.smack.PacketInterceptor;
+import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.AndFilter;
+import org.jivesoftware.smack.filter.FromMatchesFilter;
+import org.jivesoftware.smack.filter.PacketTypeFilter;
+import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.PacketExtension;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smack.util.StringUtils;
-import org.jivesoftware.smackx.*;
+import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.MessageEventManager;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.muc.*;
-import org.jivesoftware.smackx.packet.*;
+import org.jivesoftware.smackx.packet.DelayInformation;
+import org.jivesoftware.smackx.packet.DiscoverInfo;
+import org.jivesoftware.smackx.packet.MUCUser;
+
+import java.beans.PropertyChangeEvent;
+import java.util.*;
 
 /**
  * Implements chat rooms for jabber. The class encapsulates instances of the
@@ -114,6 +125,11 @@ public class ChatRoomJabberImpl
      * The operation set that created us.
      */
     private final OperationSetMultiUserChatJabberImpl opSetMuc;
+
+    /**
+     * The operation set for message tranforms.
+     */
+    private final OperationSetMessageTransform opSetTransform;
 
     /**
      * The list of members of this chat room.
@@ -198,6 +214,8 @@ public class ChatRoomJabberImpl
         this.provider = provider;
         this.opSetMuc = (OperationSetMultiUserChatJabberImpl)provider
             .getOperationSet(OperationSetMultiUserChat.class);
+
+        this.opSetTransform = provider.getOperationSet(OperationSetMessageTransform.class);
 
         this.oldSubject = multiUserChat.getSubject();
 
@@ -932,18 +950,27 @@ public class ChatRoomJabberImpl
          {
              assertConnected();
 
-             org.jivesoftware.smack.packet.Message msg =
-                new org.jivesoftware.smack.packet.Message();
+             ChatRoomMessageDeliveryPendingEvent event =
+                     new ChatRoomMessageDeliveryPendingEvent(this, message);
 
-             msg.setBody(message.getContent());
-             //msg.addExtension(new Version());
+             ChatRoomMessageEvent[] transformed =
+                     opSetTransform.transformChatRoomMessage(event);
 
-             MessageEventManager.
-                 addNotificationsRequests(msg, true, false, false, true);
+             for(int i=0; i<transformed.length; i++)
+             {
+                 org.jivesoftware.smack.packet.Message msg =
+                         new org.jivesoftware.smack.packet.Message();
 
-             // We send only the content because it doesn't work if we send the
-             // Message object.
-             multiUserChat.sendMessage(message.getContent());
+                 msg.setBody(transformed[i].getMessage().getContent());
+                 //msg.addExtension(new Version());
+
+                 MessageEventManager.
+                         addNotificationsRequests(msg, true, false, false, true);
+
+                 // We send only the content because it doesn't work if we send the
+                 // Message object.
+                 multiUserChat.sendMessage(message.getContent());
+             }
          }
          catch (XMPPException ex)
          {
@@ -1728,38 +1755,52 @@ public class ChatRoomJabberImpl
      * @param evt the <tt>EventObject</tt> that we'd like delivered to all
      * registered message listeners.
      */
-    void fireMessageEvent(EventObject evt)
+    public void fireMessageEvent(final ChatRoomMessageEvent evt)
     {
+
         Iterable<ChatRoomMessageListener> listeners;
         synchronized (messageListeners)
         {
             listeners
-                = new ArrayList<ChatRoomMessageListener>(messageListeners);
+                    = new ArrayList<ChatRoomMessageListener>(messageListeners);
         }
 
-        for (ChatRoomMessageListener listener : listeners)
+        ChatRoomMessageEvent[] transformed =
+                opSetTransform.transformChatRoomMessage(evt);
+
+        for (int i = 0; i < transformed.length; i++)
         {
-            try
+            final ChatRoomMessageEvent transformedEvent = transformed[i];
+            for (ChatRoomMessageListener listener : listeners)
             {
-                if (evt instanceof ChatRoomMessageDeliveredEvent)
+                try
                 {
-                    listener.messageDelivered(
-                        (ChatRoomMessageDeliveredEvent)evt);
-                }
-                else if (evt instanceof ChatRoomMessageReceivedEvent)
+                    if (transformedEvent instanceof
+                            ChatRoomMessageDeliveredEvent)
+                    {
+                        listener.messageDelivered(
+                                (ChatRoomMessageDeliveredEvent)
+                                        transformedEvent);
+
+                    } else if (transformedEvent instanceof
+                            ChatRoomMessageReceivedEvent)
+                    {
+                        listener.messageReceived(
+                                (ChatRoomMessageReceivedEvent)
+                                        transformedEvent);
+
+                    } else if (transformedEvent instanceof
+                            ChatRoomMessageDeliveryFailedEvent)
+                    {
+                        listener.messageDeliveryFailed(
+                                (ChatRoomMessageDeliveryFailedEvent)
+                                        transformedEvent);
+                    }
+                } catch (Throwable e)
                 {
-                    listener.messageReceived(
-                        (ChatRoomMessageReceivedEvent)evt);
+                    logger.error("Error delivering multi chat message for " +
+                            listener, e);
                 }
-                else if (evt instanceof ChatRoomMessageDeliveryFailedEvent)
-                {
-                    listener.messageDeliveryFailed(
-                        (ChatRoomMessageDeliveryFailedEvent)evt);
-                }
-            } catch (Throwable e)
-            {
-                logger.error("Error delivering multi chat message for " +
-                    listener, e);
             }
         }
     }

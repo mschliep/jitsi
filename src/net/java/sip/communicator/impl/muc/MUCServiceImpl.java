@@ -872,9 +872,9 @@ public class MUCServiceImpl
     public ChatRoomWrapper findChatRoomWrapperFromSourceContact(
         SourceContact contact)
     {
-        if(!(contact instanceof ChatRoomSourceContact))
+        if(!(contact instanceof ChatRoomSourceContactImpl))
             return null;
-        ChatRoomSourceContact chatRoomContact = (ChatRoomSourceContact) contact;
+        ChatRoomSourceContactImpl chatRoomContact = (ChatRoomSourceContactImpl) contact;
         return chatRoomList.findChatRoomWrapperFromChatRoomID(
                 chatRoomContact.getChatRoomID(), chatRoomContact.getProvider());
     }

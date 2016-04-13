@@ -525,7 +525,7 @@ public class MUCCustomContactActionService
         @Override
         public boolean isVisible(SourceContact actionSource)
         {
-            if(actionSource instanceof ChatRoomSourceContact)
+            if(actionSource instanceof ChatRoomSourceContactImpl)
             {
                 if(name.equals("leave"))
                 {
@@ -537,8 +537,8 @@ public class MUCCustomContactActionService
                 }
                 else if(name.equals("destroy_chatroom"))
                 {
-                    ChatRoomSourceContact contact
-                        = (ChatRoomSourceContact) actionSource;
+                    ChatRoomSourceContactImpl contact
+                        = (ChatRoomSourceContactImpl) actionSource;
                     ChatRoomWrapper room = MUCActivator.getMUCService()
                         .findChatRoomWrapperFromSourceContact(contact);
                     if(room == null || room.getChatRoom() == null)
@@ -549,8 +549,8 @@ public class MUCCustomContactActionService
                 }
                 else
                 {
-                    ChatRoomSourceContact contact
-                        = (ChatRoomSourceContact) actionSource;
+                    ChatRoomSourceContactImpl contact
+                        = (ChatRoomSourceContactImpl) actionSource;
                     ChatRoomWrapper room = MUCActivator.getMUCService()
                         .findChatRoomWrapperFromSourceContact(contact);
                     if(room == null)
@@ -651,8 +651,8 @@ public class MUCCustomContactActionService
 
             String openAutomaticallyValue
                 = MUCService.getChatRoomAutoOpenOption(
-                    ((ChatRoomSourceContact)actionSource).getProvider(),
-                    ((ChatRoomSourceContact)actionSource).getChatRoomID());
+                    ((ChatRoomSourceContactImpl)actionSource).getProvider(),
+                    ((ChatRoomSourceContactImpl)actionSource).getChatRoomID());
             if(openAutomaticallyValue == null)
                 openAutomaticallyValue = MUCService.DEFAULT_AUTO_OPEN_BEHAVIOUR;
             String openAutomaticallyKey = MUCService.autoOpenConfigValuesTexts
@@ -668,8 +668,8 @@ public class MUCCustomContactActionService
             if(!(actionSource instanceof ChatRoomSourceContact))
                 return false;
 
-            ChatRoomSourceContact contact
-                = (ChatRoomSourceContact) actionSource;
+            ChatRoomSourceContactImpl contact
+                = (ChatRoomSourceContactImpl) actionSource;
             ChatRoomWrapper room = MUCActivator.getMUCService()
                 .findChatRoomWrapperFromSourceContact(contact);
             if(name.equals("autojoin") || name.equals("autojoin_pressed"))

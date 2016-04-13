@@ -17,13 +17,15 @@
  */
 package net.java.sip.communicator.service.protocol.event;
 
+import net.java.sip.communicator.service.protocol.ProtocolProviderService;
+
 import java.util.*;
 
 /**
  * Represents an event pertaining to message delivery, reception or failure.
  * @author Emil Ivov
  */
-public class MessageEvent
+public abstract class MessageEvent
     extends EventObject
 {
     /**
@@ -40,4 +42,6 @@ public class MessageEvent
     {
         super(source);
     }
+
+    public abstract  ProtocolProviderService getProtocolProvider();
 }

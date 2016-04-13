@@ -111,8 +111,8 @@ public class OperationSetBasicInstantMessagingIrcImpl
         // and there were no other obvious problems so we decided to implement
         // IRC command support for IM infrastructure too.
 
-        final MessageDeliveredEvent[] msgDeliveryPendingEvts =
-            messageDeliveryPendingTransform(new MessageDeliveredEvent(original,
+        final MessageDeliveryPendingEvent[] msgDeliveryPendingEvts =
+            messageDeliveryPendingTransform(new MessageDeliveryPendingEvent(original,
                 to));
 
         if (msgDeliveryPendingEvts.length == 0)
@@ -124,7 +124,7 @@ public class OperationSetBasicInstantMessagingIrcImpl
 
         try
         {
-            for (MessageDeliveredEvent event : msgDeliveryPendingEvts)
+            for (MessageDeliveryPendingEvent event : msgDeliveryPendingEvts)
             {
                 if (event == null)
                 {

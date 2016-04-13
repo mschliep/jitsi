@@ -1681,8 +1681,8 @@ public class ProtocolProviderServiceJabberImpl
                 new OperationSetFileTransferJabberImpl(this));
 
             addSupportedOperationSet(
-                OperationSetInstantMessageTransform.class,
-                new OperationSetInstantMessageTransformImpl());
+                OperationSetMessageTransform.class,
+                new OperationSetMessageTransformImpl());
 
             // Include features we're supporting in addition to the four
             // included by smack itself:

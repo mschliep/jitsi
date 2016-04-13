@@ -1,29 +1,24 @@
 /*
  * Jitsi, the OpenSource Java VoIP and Instant Messaging client.
  *
- * Copyright @ 2015 Atlassian Pty Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Distributable under LGPL license.
+ * See terms of license at gnu.org.
  */
 package net.java.sip.communicator.plugin.otr;
 
-import java.security.*;
-import java.security.spec.*;
-import java.util.*;
-
-import net.java.otr4j.crypto.*;
+import net.java.otr4j.crypto.OtrCryptoEngineImpl;
+import net.java.otr4j.crypto.OtrCryptoException;
 import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
-import net.java.sip.communicator.service.protocol.*;
+import net.java.sip.communicator.service.protocol.AccountID;
+import net.java.sip.communicator.service.protocol.Contact;
+import net.java.sip.communicator.util.Logger;
+
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.List;
+import java.util.Vector;
 
 /**
  *
@@ -33,6 +28,8 @@ import net.java.sip.communicator.service.protocol.*;
 public class ScOtrKeyManagerImpl
     implements ScOtrKeyManager
 {
+    private static final Logger logger = Logger.getLogger(ScOtrKeyManagerImpl.class);
+
     private final OtrConfigurator configurator = new OtrConfigurator();
 
     private final List<ScOtrKeyManagerListener> listeners =
@@ -79,11 +76,9 @@ public class ScOtrKeyManagerImpl
         if ((fingerprint == null) || otrContact == null)
             return;
 
-        this.configurator.setProperty(otrContact.contact.getAddress() + fingerprint
-            + ".fingerprint.verified", true);
+        String petname = otrContact.contact.getDisplayName();
 
-        for (ScOtrKeyManagerListener l : getListeners())
-            l.contactVerificationStatusChanged(otrContact);
+        configurator.setVerified(petname, fingerprint, true);
     }
 
     public void unverify(OtrContact otrContact, String fingerprint)
@@ -91,11 +86,9 @@ public class ScOtrKeyManagerImpl
         if ((fingerprint == null) || otrContact == null)
             return;
 
-        this.configurator.setProperty(otrContact.contact.getAddress() + fingerprint
-            + ".fingerprint.verified", false);
+        String petname = otrContact.contact.getDisplayName();
 
-        for (ScOtrKeyManagerListener l : getListeners())
-            l.contactVerificationStatusChanged(otrContact);
+        configurator.setVerified(petname, fingerprint, false);
     }
 
     public boolean isVerified(Contact contact, String fingerprint)
@@ -103,77 +96,29 @@ public class ScOtrKeyManagerImpl
         if (fingerprint == null || contact == null)
             return false;
 
-        return this.configurator.getPropertyBoolean(
+        boolean old =  this.configurator.getPropertyBoolean(
             contact.getAddress() + fingerprint
                 + ".fingerprint.verified", false);
+
+        if(old)
+        {
+            configurator.removeProperty(contact.getAddress() + fingerprint
+                    + ".fingerprint.verified");
+
+
+            String petname = contact.getDisplayName();
+            configurator.setVerified(petname, fingerprint, true);
+            return true;
+        }
+        else
+        {
+            return configurator.isVerified(null, fingerprint);
+        }
     }
 
-    public List<String> getAllRemoteFingerprints(Contact contact)
+    public List<String> getAllRemoteFingerprints()
     {
-        if (contact == null)
-            return null;
-
-        /*
-         * The following lines are needed for backward compatibility with old
-         * versions of the otr plugin. Instead of lists of fingerprints the otr
-         * plugin used to store one public key for every contact in the form of
-         * "userID.publicKey=..." and one boolean property in the form of
-         * "userID.publicKey.verified=...". In order not to loose these old
-         * properties we have to convert them to match the new format.
-         */
-        String userID = contact.getAddress();
-
-        byte[] b64PubKey =
-            this.configurator.getPropertyBytes(userID + ".publicKey");
-        if (b64PubKey != null)
-        {
-            // We delete the old format property because we are going to convert
-            // it in the new format
-            this.configurator.removeProperty(userID + ".publicKey");
-
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(b64PubKey);
-
-            KeyFactory keyFactory;
-            try
-            {
-                keyFactory = KeyFactory.getInstance("DSA");
-                PublicKey pubKey = keyFactory.generatePublic(publicKeySpec);
-
-                boolean isVerified =
-                    this.configurator.getPropertyBoolean(userID
-                        + ".publicKey.verified", false);
-
-                // We also make sure to delete this old format property if it
-                // exists.
-                this.configurator.removeProperty(userID + ".publicKey.verified");
-
-                String fingerprint = getFingerprintFromPublicKey(pubKey);
-
-                // Now we can store the old properties in the new format.
-                if (isVerified)
-                    verify(OtrContactManager.getOtrContact(contact, null), fingerprint);
-                else
-                    unverify(OtrContactManager.getOtrContact(contact, null), fingerprint);
-
-                // Finally we append the new fingerprint to out stored list of
-                // fingerprints.
-                this.configurator.appendProperty(
-                    userID + ".fingerprints", fingerprint);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                e.printStackTrace();
-            }
-            catch (InvalidKeySpecException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        // Now we can safely return our list of fingerprints for this contact
-        // without worrying that we missed an old format property.
-        return this.configurator.getAppendedProperties(
-            contact.getAddress() + ".fingerprints");
+        return configurator.getAllRemoteFingerprints();
     }
 
     public String getFingerprintFromPublicKey(PublicKey pubKey)
@@ -229,20 +174,32 @@ public class ScOtrKeyManagerImpl
         }
     }
 
-    public void saveFingerprint(Contact contact, String fingerprint)
+    public void saveFingerprint(String petname, String fingerprint)
     {
-        if (contact == null)
+        if (petname == null)
             return;
 
-        this.configurator.appendProperty(contact.getAddress() + ".fingerprints",
-            fingerprint);
-
-        this.configurator.setProperty(contact.getAddress() + fingerprint
-            + ".fingerprint.verified", false);
+        configurator.setVerified(petname, fingerprint, false);
     }
 
     public KeyPair loadKeyPair(AccountID account)
     {
+        KeyPair result = configurator.getKeyPair(account);
+
+        if(result == null)
+        {
+            return loadAndUpdateKeyPair(account);
+        }
+        else
+        {
+            logger.debug(String.format("%s was not null?", account.getAccountAddress()));
+            return result;
+        }
+    }
+
+    private KeyPair loadAndUpdateKeyPair(AccountID account)
+    {
+        logger.debug(String.format("Migrating %s.", account.getAccountAddress()));
         if (account == null)
             return null;
 
@@ -286,7 +243,14 @@ public class ScOtrKeyManagerImpl
             return null;
         }
 
-        return new KeyPair(publicKey, privateKey);
+        KeyPair keyPair = new KeyPair(publicKey, privateKey);
+
+        configurator.removeProperty(accountID + ".privateKey");
+        configurator.getPropertyBytes(accountID + ".publicKey");
+
+        configurator.setKeyPair(account, keyPair);
+
+        return keyPair;
     }
 
     public void generateKeyPair(AccountID account)
@@ -294,32 +258,51 @@ public class ScOtrKeyManagerImpl
         if (account == null)
             return;
 
-        String accountID = account.getAccountUniqueID();
         KeyPair keyPair;
         try
         {
             keyPair = KeyPairGenerator.getInstance("DSA").genKeyPair();
+            configurator.setKeyPair(account, keyPair);
         }
         catch (NoSuchAlgorithmException e)
         {
-            e.printStackTrace();
-            return;
+            logger.error("Failed to create KeyPair.", e);
         }
+    }
 
-        // Store Public Key.
-        PublicKey pubKey = keyPair.getPublic();
-        X509EncodedKeySpec x509EncodedKeySpec =
-            new X509EncodedKeySpec(pubKey.getEncoded());
+    @Override
+    public String getPetname(String fingerprint)
+    {
+        return configurator.getPetname(fingerprint);
+    }
 
-        this.configurator.setProperty(accountID + ".publicKey",
-            x509EncodedKeySpec.getEncoded());
+    @Override
+    public boolean isVerified(String fingerprint)
+    {
+        return configurator.isVerified(null, fingerprint);
+    }
 
-        // Store Private Key.
-        PrivateKey privKey = keyPair.getPrivate();
-        PKCS8EncodedKeySpec pkcs8EncodedKeySpec =
-            new PKCS8EncodedKeySpec(privKey.getEncoded());
+    @Override
+    public void verify(String petname, String fingerprint)
+    {
+        boolean old = configurator.isVerified(petname, fingerprint);
+        configurator.setVerified(petname, fingerprint, true);
 
-        this.configurator.setProperty(accountID + ".privateKey",
-            pkcs8EncodedKeySpec.getEncoded());
+        if(!old) {
+            for (ScOtrKeyManagerListener l : getListeners())
+                l.verificationStatusChanged(fingerprint);
+        }
+    }
+
+    @Override
+    public void unverify(String petname, String fingerprint)
+    {
+        boolean old = configurator.isVerified(petname, fingerprint);
+        configurator.setVerified(petname, fingerprint, false);
+
+        if(old) {
+            for (ScOtrKeyManagerListener l : getListeners())
+                l.verificationStatusChanged(fingerprint);
+        }
     }
 }

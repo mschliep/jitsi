@@ -17,6 +17,12 @@
  */
 package net.java.sip.communicator.service.protocol;
 
+import net.java.sip.communicator.service.protocol.event.ChatRoomMessageDeliveryPendingEvent;
+import net.java.sip.communicator.service.protocol.event.ChatRoomMessageEvent;
+import net.java.sip.communicator.service.protocol.event.MessageEvent;
+
+import java.util.EventObject;
+
 /**
  * The Instant Message Transform operation set allows, when \
  * supported to insert message transform layers that could change incoming
@@ -33,7 +39,7 @@ package net.java.sip.communicator.service.protocol;
  * @author Emil Ivov
  *
  */
-public interface OperationSetInstantMessageTransform
+public interface OperationSetMessageTransform
     extends OperationSet
 {
     /**
@@ -75,4 +81,13 @@ public interface OperationSetInstantMessageTransform
      * provider and <tt>false</tt> otherwise.
      */
     public boolean containsLayer(TransformLayer layer);
+
+    /**
+     * Transform the given {@link java.util.EventObject}.
+     * @param event <tt>EventObject</tt> to transform
+     * @return transformed <tt>EventObject</tt>s
+     */
+    public MessageEvent[] transform(MessageEvent event);
+
+    public ChatRoomMessageEvent[] transformChatRoomMessage(ChatRoomMessageEvent event);
 }

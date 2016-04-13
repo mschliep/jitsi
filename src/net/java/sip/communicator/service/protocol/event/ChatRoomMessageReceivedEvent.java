@@ -28,7 +28,7 @@ import net.java.sip.communicator.service.protocol.*;
  * @author Lubomir Marinov
  */
 public class ChatRoomMessageReceivedEvent
-    extends EventObject
+    extends ChatRoomMessageEvent
 {
     /**
      * Serial version UID.
@@ -70,11 +70,6 @@ public class ChatRoomMessageReceivedEvent
     private final Date timestamp;
 
     /**
-     * The received <tt>Message</tt>.
-     */
-    private final Message message;
-
-    /**
      * The type of message event that this instance represents.
      */
     private final int eventType;
@@ -88,6 +83,10 @@ public class ChatRoomMessageReceivedEvent
      * Indicates whether the message is important or not.
      */
     private boolean isImportantMessage = false;
+
+    private boolean isEncrypted = false;
+
+    private boolean isAuthenticated = false;
 
     /**
      * Creates a <tt>MessageReceivedEvent</tt> representing reception of the
@@ -107,11 +106,10 @@ public class ChatRoomMessageReceivedEvent
                                         Message         message,
                                         int             eventType)
     {
-        super(source);
+        super(source, message);
 
         this.from = from;
         this.timestamp = timestamp;
-        this.message = message;
         this.eventType = eventType;
     }
 
@@ -125,15 +123,6 @@ public class ChatRoomMessageReceivedEvent
     public ChatRoomMember getSourceChatRoomMember()
     {
         return from;
-    }
-
-    /**
-     * Returns the received message.
-     * @return the <tt>Message</tt> that triggered this event.
-     */
-    public Message getMessage()
-    {
-        return message;
     }
 
     /**
@@ -200,5 +189,21 @@ public class ChatRoomMessageReceivedEvent
     public boolean isImportantMessage()
     {
         return isImportantMessage;
+    }
+
+    public boolean isEncrypted() {
+        return isEncrypted;
+    }
+
+    public void setEncrypted(boolean isEncrypted) {
+        this.isEncrypted = isEncrypted;
+    }
+
+    public boolean isAuthenticated() {
+        return isAuthenticated;
+    }
+
+    public void setAuthenticated(boolean isAuthenticated) {
+        this.isAuthenticated = isAuthenticated;
     }
 }

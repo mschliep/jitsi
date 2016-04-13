@@ -17,19 +17,27 @@
  */
 package net.java.sip.communicator.impl.gui.main.chat.conference;
 
-import java.awt.event.*;
-import java.util.*;
+import net.java.sip.communicator.impl.gui.GuiActivator;
+import net.java.sip.communicator.impl.gui.main.contactlist.InviteUIContact;
+import net.java.sip.communicator.impl.gui.main.contactlist.contactsource.ProtocolContactSourceServiceImpl;
+import net.java.sip.communicator.impl.gui.main.contactlist.contactsource.StringContactSourceServiceImpl;
+import net.java.sip.communicator.impl.gui.utils.InviteDialog;
+import net.java.sip.communicator.service.contactsource.ContactSourceService;
+import net.java.sip.communicator.service.contactsource.SourceContact;
+import net.java.sip.communicator.service.gui.UIContact;
+import net.java.sip.communicator.service.gui.UIContactDetail;
+import net.java.sip.communicator.service.gui.UIContactSource;
+import net.java.sip.communicator.service.muc.ChatRoomWrapper;
+import net.java.sip.communicator.service.protocol.OperationSetMultiUserChat;
+import net.java.sip.communicator.service.protocol.ProtocolProviderService;
 
 import javax.swing.*;
-
-import net.java.sip.communicator.impl.gui.*;
-import net.java.sip.communicator.impl.gui.main.contactlist.*;
-import net.java.sip.communicator.impl.gui.main.contactlist.contactsource.*;
-import net.java.sip.communicator.impl.gui.utils.*;
-import net.java.sip.communicator.service.contactsource.*;
-import net.java.sip.communicator.service.gui.*;
-import net.java.sip.communicator.service.muc.*;
-import net.java.sip.communicator.service.protocol.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A dialog with room provider's contacts on the left and contacts

@@ -29,7 +29,7 @@ import net.java.sip.communicator.service.protocol.*;
  * @author Yana Stamcheva
  */
 public class ChatRoomMessageDeliveryFailedEvent
-    extends EventObject
+    extends ChatRoomMessageEvent
 {
     /**
      * Serial version UID.
@@ -99,11 +99,6 @@ public class ChatRoomMessageDeliveryFailedEvent
      private Date timestamp = null;
 
      /**
-      * The received <tt>Message</tt>.
-      */
-     private Message message = null;
-
-     /**
       * Creates a <tt>ChatRoomMessageDeliveryFailedEvent</tt> indicating failure
       * of delivery of a message to the specified <tt>ChatRoomMember</tt> in the
       * specified <tt>ChatRoom</tt>.
@@ -123,12 +118,11 @@ public class ChatRoomMessageDeliveryFailedEvent
                                                Date timestamp,
                                                Message message)
      {
-         super(source);
+         super(source, message);
 
          this.to = to;
          this.errorCode = errorCode;
          this.timestamp = timestamp;
-         this.message = message;
          this.reason = reason;
      }
 
@@ -142,15 +136,6 @@ public class ChatRoomMessageDeliveryFailedEvent
      public ChatRoomMember getDestinationChatRoomMember()
      {
          return to;
-     }
-
-     /**
-      * Returns the received message.
-      * @return the <tt>Message</tt> that triggered this event.
-      */
-     public Message getMessage()
-     {
-         return message;
      }
 
      /**

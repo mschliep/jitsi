@@ -401,8 +401,8 @@ public class ProtocolProviderServiceYahooImpl
             this.accountID = accountID;
 
             addSupportedOperationSet(
-                OperationSetInstantMessageTransform.class,
-                new OperationSetInstantMessageTransformImpl());
+                OperationSetMessageTransform.class,
+                new OperationSetMessageTransformImpl());
 
             //initialize the presence operationset
             persistentPresence

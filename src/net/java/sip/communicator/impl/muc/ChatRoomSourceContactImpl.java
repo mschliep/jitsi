@@ -25,9 +25,12 @@ import net.java.sip.communicator.service.protocol.*;
  *
  * @author Hristo Terezov
  */
-public class ChatRoomSourceContact
-    extends BaseChatRoomSourceContact
+public class ChatRoomSourceContactImpl
+    extends BaseChatRoomSourceContact implements ChatRoomSourceContact
 {
+
+    private static final String GOTR_ROOM_SUFFIX = "_gotr";
+
     /**
      * The protocol provider of the chat room associated with the contact.
      */
@@ -42,9 +45,9 @@ public class ChatRoomSourceContact
      * @param pps the protocol provider of the contact.
      * @param isAutoJoin the auto join state.
      */
-    public ChatRoomSourceContact(String chatRoomName,
-        String chatRoomID, ChatRoomQuery query, ProtocolProviderService pps,
-        boolean isAutoJoin)
+    public ChatRoomSourceContactImpl(String chatRoomName,
+                                     String chatRoomID, ChatRoomQuery query, ProtocolProviderService pps,
+                                     boolean isAutoJoin)
     {
         super(chatRoomName, chatRoomID, query, pps);
 
@@ -60,8 +63,8 @@ public class ChatRoomSourceContact
      * @param query the query associated with the contact.
      * @param isAutoJoin the auto join state
      */
-    public ChatRoomSourceContact(ChatRoom chatRoom, ChatRoomQuery query,
-        boolean isAutoJoin)
+    public ChatRoomSourceContactImpl(ChatRoom chatRoom, ChatRoomQuery query,
+                                     boolean isAutoJoin)
     {
         super(chatRoom.getName(), chatRoom.getIdentifier(), query,
             chatRoom.getParentProvider());
@@ -123,5 +126,10 @@ public class ChatRoomSourceContact
     public void setAutoJoin(boolean isAutoJoin)
     {
         this.isAutoJoin = isAutoJoin;
+    }
+
+    @Override
+    public boolean isGOTR() {
+        return getChatRoomName().contains(GOTR_ROOM_SUFFIX);
     }
 }
