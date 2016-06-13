@@ -35,7 +35,7 @@ public class OtrConfigurator
 
     private static final String ACCOUNT_PREFIX = CONFIG_PREFIX + ".account";
 
-    private static final String OTR_INFIX = "gotr";
+    private static final String OTR_INFIX = "otr";
     private static final String GOTR_INFIX = "gotr";
 
     private static final String UID_SUFFIX = "uid";
@@ -429,7 +429,23 @@ public class OtrConfigurator
     }
 
     public List<String> getAllRemoteFingerprints() {
-        return null;
+
+        List<String> fpUIDs = OtrActivator.configService
+                .getPropertyNamesByPrefix(FINGERPRINT_PREFIX, true);
+
+        List<String> results = new ArrayList<>(fpUIDs.size());
+
+
+        for(String fpUID: fpUIDs)
+        {
+            String key = String.format("%s.%s", fpUID, FP_SUFFIX);
+
+            String value = OtrActivator.configService.getString(key);
+            if(value != null){
+                results.add(value);
+            }
+        }
+        return results;
     }
 
     public void setGotrKeyPair(AccountID account, KeyPair keyPair) {

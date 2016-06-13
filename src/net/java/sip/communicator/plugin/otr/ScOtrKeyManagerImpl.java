@@ -16,6 +16,7 @@ import net.java.sip.communicator.service.protocol.Contact;
 import net.java.sip.communicator.util.Logger;
 
 import java.security.*;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -136,6 +137,10 @@ public class ScOtrKeyManagerImpl
 
     public String getFingerprintFromPublicKey(PublicKey pubKey)
     {
+        try {
+            return gotrCryptoEngine.getFingerprint(pubKey);
+        } catch (NoSuchAlgorithmException e) {
+        }
         try
         {
             return new OtrCryptoEngineImpl().getFingerprint(pubKey);
