@@ -151,7 +151,7 @@ public class OtrConfigurationPanel
 
                 String fingerprint =
                     OtrActivator.scOtrKeyManager
-                        .getLocalFingerprint(account);
+                        .getLocalOtrFingerprint(account);
 
                 if (fingerprint == null || fingerprint.length() < 1)
                 {
@@ -219,7 +219,7 @@ public class OtrConfigurationPanel
                     if (account == null)
                         return;
                     OtrActivator.scOtrKeyManager
-                        .generateKeyPair(account);
+                        .generateOtrKeyPair(account);
                     openAccount(account);
                 }
             });

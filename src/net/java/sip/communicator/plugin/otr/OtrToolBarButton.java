@@ -465,35 +465,31 @@ public class OtrToolBarButton
 
     private void setButtonState(ScGotrSessionHost host, GotrSessionState state)
     {
-        Image image;
-        String tipKey;
-        switch (state)
-        {
-            case PLAINTEXT:
-                image = unlockedPadlockImage;
-                tipKey = "plugin.otr.menu.START_OTR";
-                break;
-            case AWAITING_USERS:
-            case SETUP:
-            case NEGOTIATING_KEYS:
-                image = animatedPadlockImage;
-                animatedPadlockImage.start();
-                tipKey = "plugin.otr.menu.LOADING_OTR";
-                break;
-            case SECURE:
-                if(host.areAllAuthenticated())
-                {
-                    image = verifiedLockedPadlockImage;
-                    tipKey = "plugin.otr.menu.VERIFIED";
-                }
-                else
-                {
-                    image = unverifiedLockedPadlockImage;
-                    tipKey = "plugin.otr.menu.UNVERIFIED";
-                }
-                break;
-            default:
-                return;
+        Image image = unlockedPadlockImage;
+        String tipKey = "plugin.otr.menu.START_OTR";;
+        if(state != null) {
+            switch (state) {
+                case PLAINTEXT:
+                    image = unlockedPadlockImage;
+                    tipKey = "plugin.otr.menu.START_OTR";
+                    break;
+                case SETUP:
+                    image = animatedPadlockImage;
+                    animatedPadlockImage.start();
+                    tipKey = "plugin.otr.menu.LOADING_OTR";
+                    break;
+                case SECURE:
+                    if (host.areAllAuthenticated()) {
+                        image = verifiedLockedPadlockImage;
+                        tipKey = "plugin.otr.menu.VERIFIED";
+                    } else {
+                        image = unverifiedLockedPadlockImage;
+                        tipKey = "plugin.otr.menu.UNVERIFIED";
+                    }
+                    break;
+                default:
+                    return;
+            }
         }
 
         SIPCommButton button = getButton();

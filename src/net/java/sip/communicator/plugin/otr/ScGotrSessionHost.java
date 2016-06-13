@@ -1,6 +1,7 @@
 package net.java.sip.communicator.plugin.otr;
 
 import net.java.gotr4j.*;
+import net.java.gotr4j.crypto.GotrCrypto;
 import net.java.gotr4j.crypto.GotrException;
 import net.java.hsm.HSMException;
 import net.java.sip.communicator.plugin.otr.authdialog.GotrMemberAuthDialogBackend;
@@ -17,11 +18,10 @@ import net.java.sip.communicator.util.Logger;
 import javax.swing.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScGotrSessionHost
         implements GotrSessionHost,
@@ -87,6 +87,12 @@ public class ScGotrSessionHost
                 logger.debug(String.format("%s adding %s in construct.", chatRoom.getUserNickname(), member.getName()));
                 memberAdded(member);
             }
+        }
+
+        try {
+            gotrSession.startStateMachie();
+        } catch (Exception e) {
+            logger.error("Unable to start GOTR state machine.", e);
         }
 
         registerChatLinkListener();
@@ -178,11 +184,11 @@ public class ScGotrSessionHost
     public KeyPair getLocalKeyPair() {
         AccountID accountID = protocolProvider.getAccountID();
         KeyPair keyPair =
-                OtrActivator.scOtrKeyManager.loadKeyPair(accountID);
+                OtrActivator.scOtrKeyManager.loadGotrKeyPair(accountID);
         if (keyPair == null)
-            OtrActivator.scOtrKeyManager.generateKeyPair(accountID);
+            OtrActivator.scOtrKeyManager.generateGotrKeyPair(accountID);
 
-        return OtrActivator.scOtrKeyManager.loadKeyPair(accountID);
+        return OtrActivator.scOtrKeyManager.loadGotrKeyPair(accountID);
     }
 
     @Override
@@ -229,11 +235,6 @@ public class ScGotrSessionHost
 
         if (state == GotrSessionState.PLAINTEXT) {
             return;
-        } else if (state == GotrSessionState.AWAITING_USERS) {
-            displaySecure = true;
-            message = OtrActivator.resourceService
-                    .getI18NString("plugin.otr.gotr.AWAITING_USERS_STATE", new String[]{});
-            messageType = Chat.SYSTEM_MESSAGE;
         } else if (state == GotrSessionState.SETUP) {
             displaySecure = true;
             message = OtrActivator.resourceService
@@ -322,8 +323,9 @@ public class ScGotrSessionHost
     public void smpAborted(GotrUser user) {
 
         logger.debug("Found an smp abort.");
+        ChatRoomMember member = userToMemberMap.get(user);
         String message = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
+                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{member.getName()});
 
         final Chat chat = OtrActivator.uiService.getChat(chatRoom);
 
@@ -337,8 +339,9 @@ public class ScGotrSessionHost
     @Override
     public void smpError(GotrUser user) {
         logger.debug("Found an smp error.");
+        ChatRoomMember member = userToMemberMap.get(user);
         String message = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
+                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{member.getName()});
 
         final Chat chat = OtrActivator.uiService.getChat(chatRoom);
 
@@ -355,8 +358,9 @@ public class ScGotrSessionHost
         OtrActivator.scOtrKeyManager.unverify("", fingerprint);
         OtrActivator.gotrComponentService.update(chatRoom);
 
+        ChatRoomMember member = userToMemberMap.get(user);
         String message = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{user.getUsername()});
+                .getI18NString("plugin.otr.gotr.AUTH_FAILED", new String[]{member.getName()});
 
         final Chat chat = OtrActivator.uiService.getChat(chatRoom);
 
@@ -378,6 +382,7 @@ public class ScGotrSessionHost
 
     @Override
     public void unrecoverableError(GotrUser user) {
+
         String finished = OtrActivator.resourceService
                 .getI18NString("plugin.otr.gotr.UNRECOVERABLE_ERROR", new String[]{getName(user)});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
@@ -404,8 +409,9 @@ public class ScGotrSessionHost
 
     @Override
     public void receivedUnsentMessage(GotrUser source) {
+        ChatRoomMember member = userToMemberMap.get(source);
         String finished = OtrActivator.resourceService
-                .getI18NString("plugin.otr.gotr.INCONSISTENT_DIGEST", new String[]{});
+                .getI18NString("plugin.otr.gotr.INCONSISTENT_DIGEST", new String[]{member.getName()});
         OtrActivator.uiService.getChat(chatRoom).addMessage(chatRoom.getName(), new Date(),
                 Chat.ERROR_MESSAGE, finished,
                 OperationSetBasicInstantMessaging.DEFAULT_MIME_TYPE);
@@ -487,7 +493,7 @@ public class ScGotrSessionHost
      * Should be called when the user leaves the chat room.
      */
     public void close() {
-        gotrSession.shutdown();
+        gotrSession.shutdownStateMachine();
         chatRoom.removeMemberPresenceListener(this);
         OtrActivator.scOtrKeyManager.removeListener(this);
     }
@@ -495,10 +501,20 @@ public class ScGotrSessionHost
     @Override
     public void memberPresenceChanged(ChatRoomMemberPresenceChangeEvent evt) {
         if (evt.getEventType().equals(
-                ChatRoomMemberPresenceChangeEvent.MEMBER_JOINED)
-                && !evt.getChatRoomMember().getName()
+                ChatRoomMemberPresenceChangeEvent.MEMBER_JOINED)){
+            if (!evt.getChatRoomMember().getName()
                 .equals(chatRoom.getUserNickname())) {
-            memberAdded(evt.getChatRoomMember());
+                logger.debug(String.format("Adding user to state machine %s, %s.", evt.getChatRoomMember().getName(), chatRoom.getUserNickname()));
+                memberAdded(evt.getChatRoomMember());
+            }
+            else {
+                try {
+                    logger.debug("Starting state machine.");
+                    this.gotrSession.startStateMachie();
+                } catch (Exception e) {
+                    logger.error("Failed to start GOTR state machine.", e);
+                }
+            }
         } else if ((evt.getEventType().equals(
                 ChatRoomMemberPresenceChangeEvent.MEMBER_KICKED)
                 || evt.getEventType().equals(
@@ -579,8 +595,8 @@ public class ScGotrSessionHost
             if (remoteKey == null) {
                 return null;
             }
-            return OtrActivator.scOtrKeyManager.getFingerprintFromPublicKey(remoteKey);
-        } catch (GotrException e) {
+            return new GotrCrypto().getFingerprint(remoteKey);
+        } catch (Exception e) {
             logger.error("Unable to get remote users public key", e);
             return null;
         }

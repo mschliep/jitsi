@@ -12,6 +12,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
+import net.java.gotr4j.crypto.GotrCrypto;
 import net.java.sip.communicator.service.protocol.AccountID;
 import net.java.sip.communicator.util.Logger;
 import org.bouncycastle.util.encoders.Base64; // disambiguation
@@ -33,6 +34,9 @@ public class OtrConfigurator
             "net.java.sip.communicator.plugin.otr";
 
     private static final String ACCOUNT_PREFIX = CONFIG_PREFIX + ".account";
+
+    private static final String OTR_INFIX = "gotr";
+    private static final String GOTR_INFIX = "gotr";
 
     private static final String UID_SUFFIX = "uid";
     private static final String PRIV_KEY_SUFFIX = "private";
@@ -326,7 +330,7 @@ public class OtrConfigurator
         return null;
     }
 
-    public KeyPair getKeyPair(AccountID accountID)
+    public KeyPair getOtrKeyPair(AccountID accountID)
     {
         String uid = getAccountUID(accountID);
         if(uid == null)
@@ -334,9 +338,9 @@ public class OtrConfigurator
             return null;
         }
 
-        String privateKeyKey = String.format("%s.%s.%s", ACCOUNT_PREFIX, uid,
+        String privateKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, OTR_INFIX,
                 PRIV_KEY_SUFFIX);
-        String publicKeyKey = String.format("%s.%s.%s", ACCOUNT_PREFIX, uid,
+        String publicKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, OTR_INFIX,
                 PUB_KEY_SUFFIX);
 
         String publicKeyEncoded = OtrActivator.configService.getString(publicKeyKey);
@@ -367,7 +371,7 @@ public class OtrConfigurator
 
     }
 
-    public void setKeyPair(AccountID accountID, KeyPair keyPair)
+    public void setOtrKeyPair(AccountID accountID, KeyPair keyPair)
     {
         String uid = getAccountUID(accountID);
         if(uid == null)
@@ -375,9 +379,9 @@ public class OtrConfigurator
             uid = addAccount(accountID);
         }
 
-        String privateKeyKey = String.format("%s.%s.%s", ACCOUNT_PREFIX, uid,
+        String privateKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, OTR_INFIX,
                 PRIV_KEY_SUFFIX);
-        String publicKeyKey = String.format("%s.%s.%s", ACCOUNT_PREFIX, uid,
+        String publicKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, OTR_INFIX,
                 PUB_KEY_SUFFIX);
 
         byte[] publicKeyEncoded = Base64.encode(keyPair.getPublic().getEncoded());
@@ -424,22 +428,66 @@ public class OtrConfigurator
         return null;
     }
 
-    public List<String> getAllRemoteFingerprints()
-    {
-        List<String> fpUIDs = OtrActivator.configService
-                .getPropertyNamesByPrefix(FINGERPRINT_PREFIX, true);
-        List<String> results = new ArrayList<String>(fpUIDs.size());
+    public List<String> getAllRemoteFingerprints() {
+        return null;
+    }
 
-        for(String fpUID: fpUIDs)
+    public void setGotrKeyPair(AccountID account, KeyPair keyPair) {
+        String uid = getAccountUID(account);
+        if(uid == null)
         {
-            String fpKey = String.format("%s.%s", fpUID, FP_SUFFIX);
-            String value = OtrActivator.configService.getString(fpKey);
-            if(fpKey != null)
-            {
-                results.add(value);
-            }
+            uid = addAccount(account);
         }
 
-        return results;
+        String privateKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, GOTR_INFIX,
+                PRIV_KEY_SUFFIX);
+        String publicKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, GOTR_INFIX,
+                PUB_KEY_SUFFIX);
+
+        byte[] publicKeyEncoded = Base64.encode(keyPair.getPublic().getEncoded());
+
+        byte[] privateKeyEncoded = Base64.encode(keyPair.getPrivate().getEncoded());
+
+        OtrActivator.configService.setProperty(privateKeyKey, new String(privateKeyEncoded));
+        OtrActivator.configService.setProperty(publicKeyKey, new String(publicKeyEncoded));
+    }
+
+    public KeyPair getGotrKeyPair(AccountID accountID) {
+        String uid = getAccountUID(accountID);
+        if(uid == null)
+        {
+            return null;
+        }
+
+        String privateKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, GOTR_INFIX,
+                PRIV_KEY_SUFFIX);
+        String publicKeyKey = String.format("%s.%s.%s.%s", ACCOUNT_PREFIX, uid, GOTR_INFIX,
+                PUB_KEY_SUFFIX);
+
+        String publicKeyEncoded = OtrActivator.configService.getString(publicKeyKey);
+        String privateKeyEncoded = OtrActivator.configService.getString(privateKeyKey);
+        if(publicKeyEncoded == null || privateKeyEncoded == null)
+        {
+            return null;
+        }
+
+        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base64.decode(publicKeyEncoded));
+        PKCS8EncodedKeySpec privKeySpec = new PKCS8EncodedKeySpec(Base64.decode(privateKeyEncoded));
+
+        try
+        {
+            KeyFactory keyFactory = KeyFactory.getInstance(GotrCrypto.KEY_PAIR_ALGORITHM);
+            PrivateKey privateKey = keyFactory.generatePrivate(privKeySpec);
+            PublicKey publicKey = keyFactory.generatePublic(pubKeySpec);
+            return new KeyPair(publicKey, privateKey);
+        } catch (NoSuchAlgorithmException e)
+        {
+            logger.error("KEY_ALGORITHM not found.", e);
+            return null;
+        } catch (InvalidKeySpecException e)
+        {
+            logger.error("Stored keys were invalid.", e);
+            return null;
+        }
     }
 }

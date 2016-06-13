@@ -48,11 +48,11 @@ public class ScOtrEngineImpl
             AccountID accountID =
                 OtrActivator.getAccountIDByUID(sessionID.getAccountID());
             KeyPair keyPair =
-                OtrActivator.scOtrKeyManager.loadKeyPair(accountID);
+                OtrActivator.scOtrKeyManager.loadOtrKeyPair(accountID);
             if (keyPair == null)
-                OtrActivator.scOtrKeyManager.generateKeyPair(accountID);
+                OtrActivator.scOtrKeyManager.generateOtrKeyPair(accountID);
 
-            return OtrActivator.scOtrKeyManager.loadKeyPair(accountID);
+            return OtrActivator.scOtrKeyManager.loadOtrKeyPair(accountID);
         }
 
         @Override
@@ -286,7 +286,7 @@ public class ScOtrEngineImpl
             AccountID accountID =
                 OtrActivator.getAccountIDByUID(sessionID.getAccountID());
             return
-                OtrActivator.scOtrKeyManager.getLocalFingerprintRaw(accountID);
+                OtrActivator.scOtrKeyManager.getLocalOtrFingerprintRaw(accountID);
         }
 
         @Override

@@ -303,6 +303,10 @@ public class OtrMetaContactMenu
         final JMenu menu = getMenu();
         menu.removeAll();
 
+        if(currentChatRoomSession.getSession().getState() == null){
+            return;
+        }
+
         if(currentChatRoomSession.getSession().getState()
                 .equals(GotrSessionState.PLAINTEXT))
         {

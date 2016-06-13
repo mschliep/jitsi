@@ -2,11 +2,8 @@ package net.java.sip.communicator.plugin.otr.authdialog;
 
 import net.java.gotr4j.GotrUser;
 import net.java.sip.communicator.plugin.otr.OtrActivator;
-import net.java.sip.communicator.plugin.otr.OtrContactManager;
 import net.java.sip.communicator.plugin.otr.ScGotrSessionHost;
 import net.java.sip.communicator.service.protocol.ChatRoomMember;
-
-import java.security.PublicKey;
 
 public class GotrMemberAuthDialogBackend
     implements AuthenticationDialogBackend
@@ -41,7 +38,7 @@ public class GotrMemberAuthDialogBackend
     public String getLocalFingerprint()
     {
         String localFingerprint = OtrActivator.scOtrKeyManager
-                .getLocalFingerprint(host.getProtocolProvider().getAccountID());
+                .getLocalGotrFingerprint(host.getProtocolProvider().getAccountID());
 
         return localFingerprint;
     }

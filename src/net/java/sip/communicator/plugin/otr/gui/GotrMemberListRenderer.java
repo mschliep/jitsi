@@ -26,6 +26,7 @@ public class GotrMemberListRenderer extends JLabel
 
         if(member.getName().equals(room.getUserNickname())
             || sessionHost == null
+            || sessionHost.getSession().getState() == null
             || sessionHost.getSession().getState().equals(GotrSessionState.PLAINTEXT))
         {
             setVisible(false);

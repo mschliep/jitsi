@@ -38,7 +38,7 @@ public class OtrContactAuthDialogBackend
     public String getLocalFingerprint()
     {
         String localFingerprint =
-                OtrActivator.scOtrKeyManager.getLocalFingerprint(contact.contact
+                OtrActivator.scOtrKeyManager.getLocalOtrFingerprint(contact.contact
                         .getProtocolProvider().getAccountID());
 
         return localFingerprint;

@@ -6,6 +6,8 @@
  */
 package net.java.sip.communicator.plugin.otr;
 
+import net.java.gotr4j.crypto.GotrCrypto;
+import net.java.gotr4j.crypto.GotrException;
 import net.java.otr4j.crypto.OtrCryptoEngineImpl;
 import net.java.otr4j.crypto.OtrCryptoException;
 import net.java.sip.communicator.plugin.otr.OtrContactManager.OtrContact;
@@ -34,6 +36,17 @@ public class ScOtrKeyManagerImpl
 
     private final List<ScOtrKeyManagerListener> listeners =
         new Vector<ScOtrKeyManagerListener>();
+
+    private GotrCrypto gotrCryptoEngine;
+
+    public ScOtrKeyManagerImpl(){
+        try {
+            gotrCryptoEngine = new GotrCrypto();
+        } catch (GotrException e) {
+            logger.error("Unable to build Gotr crypto engine", e);
+            gotrCryptoEngine = null;
+        }
+    }
 
     public void addListener(ScOtrKeyManagerListener l)
     {
@@ -134,9 +147,9 @@ public class ScOtrKeyManagerImpl
         }
     }
 
-    public String getLocalFingerprint(AccountID account)
+    public String getLocalOtrFingerprint(AccountID account)
     {
-        KeyPair keyPair = loadKeyPair(account);
+        KeyPair keyPair = loadOtrKeyPair(account);
 
         if (keyPair == null)
             return null;
@@ -154,9 +167,9 @@ public class ScOtrKeyManagerImpl
         }
     }
 
-    public byte[] getLocalFingerprintRaw(AccountID account)
+    public byte[] getLocalOtrFingerprintRaw(AccountID account)
     {
-        KeyPair keyPair = loadKeyPair(account);
+        KeyPair keyPair = loadOtrKeyPair(account);
 
         if (keyPair == null)
             return null;
@@ -182,9 +195,9 @@ public class ScOtrKeyManagerImpl
         configurator.setVerified(petname, fingerprint, false);
     }
 
-    public KeyPair loadKeyPair(AccountID account)
+    public KeyPair loadOtrKeyPair(AccountID account)
     {
-        KeyPair result = configurator.getKeyPair(account);
+        KeyPair result = configurator.getOtrKeyPair(account);
 
         if(result == null)
         {
@@ -246,14 +259,14 @@ public class ScOtrKeyManagerImpl
         KeyPair keyPair = new KeyPair(publicKey, privateKey);
 
         configurator.removeProperty(accountID + ".privateKey");
-        configurator.getPropertyBytes(accountID + ".publicKey");
+        configurator.removeProperty(accountID + ".publicKey");
 
-        configurator.setKeyPair(account, keyPair);
+        configurator.setOtrKeyPair(account, keyPair);
 
         return keyPair;
     }
 
-    public void generateKeyPair(AccountID account)
+    public void generateOtrKeyPair(AccountID account)
     {
         if (account == null)
             return;
@@ -262,12 +275,27 @@ public class ScOtrKeyManagerImpl
         try
         {
             keyPair = KeyPairGenerator.getInstance("DSA").genKeyPair();
-            configurator.setKeyPair(account, keyPair);
+            configurator.setOtrKeyPair(account, keyPair);
         }
         catch (NoSuchAlgorithmException e)
         {
             logger.error("Failed to create KeyPair.", e);
         }
+    }
+
+    @Override
+    public KeyPair loadGotrKeyPair(AccountID accountID) {
+        return configurator.getGotrKeyPair(accountID);
+    }
+
+    @Override
+    public void generateGotrKeyPair(AccountID account) {
+        if (account == null)
+            return;
+
+        KeyPair keyPair;
+        keyPair = gotrCryptoEngine.generateKeyPair();
+        configurator.setGotrKeyPair(account, keyPair);
     }
 
     @Override
@@ -303,6 +331,23 @@ public class ScOtrKeyManagerImpl
         if(old) {
             for (ScOtrKeyManagerListener l : getListeners())
                 l.verificationStatusChanged(fingerprint);
+        }
+    }
+
+    @Override
+    public String getLocalGotrFingerprint(AccountID accountID) {
+        KeyPair keyPair = loadGotrKeyPair(accountID);
+
+        if (keyPair == null)
+            return null;
+
+        PublicKey pubKey = keyPair.getPublic();
+
+        try {
+            return gotrCryptoEngine.getFingerprint(pubKey);
+        } catch (NoSuchAlgorithmException e) {
+            logger.error(e);
+            return null;
         }
     }
 }

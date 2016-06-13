@@ -34,15 +34,19 @@ public interface ScOtrKeyManager
 
     public abstract List<String> getAllRemoteFingerprints();
 
-    public abstract String getLocalFingerprint(AccountID account);
+    public abstract String getLocalOtrFingerprint(AccountID account);
 
-    public abstract byte[] getLocalFingerprintRaw(AccountID account);
+    public abstract byte[] getLocalOtrFingerprintRaw(AccountID account);
 
     public abstract void saveFingerprint(String petname, String fingerprint);
 
-    public abstract KeyPair loadKeyPair(AccountID accountID);
+    public abstract KeyPair loadOtrKeyPair(AccountID accountID);
 
-    public abstract void generateKeyPair(AccountID accountID);
+    public abstract void generateOtrKeyPair(AccountID accountID);
+
+    public abstract KeyPair loadGotrKeyPair(AccountID accountID);
+
+    public abstract void generateGotrKeyPair(AccountID accountID);
 
     public String getPetname(String fingerprint);
 
@@ -51,4 +55,6 @@ public interface ScOtrKeyManager
     public void verify(String petname, String fingerprint);
 
     public void unverify(String petname, String fingerprint);
+
+    public String getLocalGotrFingerprint(AccountID accountID);
 }
