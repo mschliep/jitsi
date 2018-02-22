@@ -73,7 +73,7 @@ public class ScGotrSessionHost
         this.localUser = new GotrUser(chatRoom.getPrivateContactByNickname(
                 chatRoom.getUserNickname()).getAddress());
         try {
-            this.gotrSession = new GotrSessionManager(this, localUser, chatRoom.getName(), true);
+            this.gotrSession = new GotrSessionManager(this, localUser, chatRoom.getName());
         } catch (GotrException e) {
             this.gotrSession = null;
             logger.error(e);
@@ -149,11 +149,6 @@ public class ScGotrSessionHost
             logger.debug(String.format("size %s: %d", localUser, gotrSession.getSize()));
         }
 
-        if(broadcast.equals("JUST A MAGIC STRING")){
-            receivedUnsentMessage(source);
-            return;
-        }
-
         ChatRoomMessageEvent event;
         final Message message = chatRoom.createMessage(broadcast);
         receivedBroadcasts.add(message.getMessageUID());
@@ -178,6 +173,11 @@ public class ScGotrSessionHost
                     ChatRoomMessageReceivedEvent.CONVERSATION_MESSAGE_RECEIVED);
         }
         chatRoom.fireMessageEvent(event);
+    }
+
+    @Override
+    public void broadcastConfirmed(GotrUser gotrUser, String s) {
+
     }
 
     @Override
